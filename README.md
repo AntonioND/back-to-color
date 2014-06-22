@@ -43,7 +43,7 @@ I hope you like it! :)
 
 [GitHub repository](https://github.com/AntonioND/back-to-color)
 
-[YouTube video](https://www.youtube.com/watch?v=MzfG4sGib_0)
+[YouTube video](https://www.google.com/)
 
 Credits
 -------
