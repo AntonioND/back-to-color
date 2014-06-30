@@ -473,7 +473,7 @@ fake3d_vertices_list_pentagon:
 	DB	63,256*4/5
 	DB	63,0
 
-fake3d_norm_list_pentagon
+fake3d_norm_list_pentagon:
 	DB	( 0 + (256/10) )
 	DB	( (256*1/5) + (256/10) )
 	DB	( (256*2/5) + (256/10) )
