@@ -815,14 +815,15 @@ O_QUESTION		EQU	191
 O_ZERO			EQU	194
 O_A_UPPERCASE	EQU	204
 O_A_LOWERCASE	EQU	230
-O_NTILDE		EQU	193 ; La eñe, coño XD - Mapped to "~"
+O_NTILDE		EQU	193 ; La eñe, leches XD - Mapped to "~"
 O_NONE			EQU	O_QUESTION
 
 ;-----------------------------------
 
 credits_ascii_to_tiles_table:
 
-	;   /---Space is here!
+	;   .--Space is here!
+	;   v
 	; ##  ! " # $ % & ' ( ) * + , - . / 0 1 2 3 4 5 6 7 8 9 : ; < = > ?##
 	; ##@ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z [ \ ] ^ _##
 	; ##` a b c d e f g h i j k l m n o p q r s t u v w x y z { | } ~  ##

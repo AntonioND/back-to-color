@@ -998,7 +998,7 @@ plasma_lines_font_get_ascii: ; a = ascii character
 	ld	a,29
 	ret
 .__4:
-	cp	a,"Ñ"
+	cp	a,"*" ; ntilde
 	jr	nz,.__5
 	ld	a,30
 	ret
