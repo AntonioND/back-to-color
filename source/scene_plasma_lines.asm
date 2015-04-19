@@ -1178,7 +1178,7 @@ plasma_lines_lcd_handler:
 	call	wait_screen_blank
 	
 	ld	a,[rLCDC]
-	and	a,~(LCDCF_BG9C00|LCDCF_BG8000) ; Change to 'main' map
+	and	a,$FF&(~(LCDCF_BG9C00|LCDCF_BG8000)) ; Change to 'main' map
 	ld	[rLCDC],a
 	
 	pop	de

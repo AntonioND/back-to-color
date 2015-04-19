@@ -1005,11 +1005,11 @@ tunnel_map_handle:
 	; Update temp scroll values
 	
 	ld	a,[tunnel_x_increment]
-	and	a,~3
+	and	a,$FF&(~3)
 	ld	[tunnel_temp_rSCX],a
 	
 	ld	a,[tunnel_y_increment]
-	and	a,~3
+	and	a,$FF&(~3)
 	ld	[tunnel_temp_rSCY],a
 	
 	; X scroll
