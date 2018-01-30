@@ -1,17 +1,17 @@
-; 
-; Copyright (c) 2014, Antonio Niño Díaz (AntonioND)
+;
+; Copyright (c) 2014-2018, Antonio Niño Díaz (AntonioND)
 ; All rights reserved.
-; 
+;
 ; Redistribution and use in source and binary forms, with or without
 ; modification, are permitted provided that the following conditions are met:
-; 
+;
 ; * Redistributions of source code must retain the above copyright notice, this
 ;   list of conditions and the following disclaimer.
-; 
+;
 ; * Redistributions in binary form must reproduce the above copyright notice,
 ;   this list of conditions and the following disclaimer in the documentation
 ;   and/or other materials provided with the distribution.
-; 
+;
 ; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,14 +22,14 @@
 ; CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-; 
+;
 
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "PENTAGON_DATA", CODE[$4000], BANK[5]
+	SECTION "PENTAGON_DATA", ROMX[$4000], BANK[5]
 
 pentagon_tiles: ; 256 tiles - alligned to 16
 DB $00,$00,$00,$00,$00,$00,$00,$00
@@ -592,7 +592,7 @@ DB $3B,$3B,$3D,$3D,$3F,$3F
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION	"Pentagon_Vars",BSS
+	SECTION	"Pentagon_Vars", WRAM0
 
 ; ---------------------------
 
@@ -614,7 +614,7 @@ pentagon_sprite_base_y:	DS	1
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "Pentagon", CODE, BANK[5]
+	SECTION "Pentagon", ROMX, BANK[5]
 
 ;----------------------------------------------
 
@@ -622,22 +622,22 @@ pentagon_init_variables:
 
 	ld	a,0
 	ld	[pentagon_exit_demo],a
-	
+
 	ld	a,PENTAGON_FRAMES_WAIT
 	ld	[pentagon_wait_rotation],a
-	
+
 	ld	a,0
 	ld	[pentagon_angle],a
-	
+
 	ld	a,(160-64)/2
 	ld	[pentagon_sprite_base_x],a
 	ld	a,144
-	ld	[pentagon_sprite_base_y],a	
-	
+	ld	[pentagon_sprite_base_y],a
+
 	ld	a,0
 	ld	[pentagon_event_count],a
 	ld	[pentagon_event_count+1],a
-	
+
 	ld	hl,_event_table_pentagon
 	ld	a,h
 	ld	[pentagon_current_event],a
@@ -646,18 +646,18 @@ pentagon_init_variables:
 
 	ld	de,pentagon_sprite_move_fn_move_up
 	call	pentagon_set_sprite_move_function
-	
+
 	ret
 
 ;---------------------------------------------------------------------
 
 pentagon_set_sprite_move_function: ; de = function
-	
+
 	ld	hl,pentagon_sprite_move_function
 	ld	[hl],d
 	inc hl
 	ld	[hl],e
-	
+
 	ret
 
 ;---------------------------------------------------------------------
@@ -667,7 +667,7 @@ pentagon_sprite_move_fn_stop:
 	ret
 
 pentagon_sprite_move_fn_move_up:
-	
+
 	ld	a,[pentagon_sprite_base_y]
 	dec	a
 	dec	a
@@ -676,7 +676,7 @@ pentagon_sprite_move_fn_move_up:
 	ret
 
 pentagon_sprite_move_fn_move_down:
-	
+
 	ld	a,[pentagon_sprite_base_y]
 	inc	a
 	inc	a
@@ -685,7 +685,7 @@ pentagon_sprite_move_fn_move_down:
 	ret
 
 pentagon_sprite_move_fn_move_right:
-	
+
 	ld	a,[pentagon_sprite_base_x]
 	inc	a
 	inc	a
@@ -694,7 +694,7 @@ pentagon_sprite_move_fn_move_right:
 	ret
 
 pentagon_sprite_move_fn_move_left:
-	
+
 	ld	a,[pentagon_sprite_base_x]
 	dec	a
 	dec	a
@@ -733,7 +733,7 @@ _event_set_pentagon_sprite_move_fn_move_left:
 	ld	de,pentagon_sprite_move_fn_move_left
 	call	pentagon_set_sprite_move_function
 	ret
-	
+
 _event_set_sprite_priority_reverse:
 	ld	a,[rLCDC]
 	or	a,1
@@ -749,7 +749,7 @@ EVENT_COUNT	SET	(144-((144-64)/2)) / 2
 
 EVENT_COUNT	SET	EVENT_COUNT+10
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_move_up
-	
+
 EVENT_COUNT	SET	EVENT_COUNT+10
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_move_right
 
@@ -758,7 +758,7 @@ EVENT_COUNT	SET	EVENT_COUNT+10
 
 EVENT_COUNT	SET	EVENT_COUNT+20
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_move_right
-	
+
 EVENT_COUNT	SET	EVENT_COUNT+10
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_move_up
 
@@ -788,22 +788,22 @@ EVENT_COUNT	SET	EVENT_COUNT+24+24
 ;----------------------------------------------
 
 pentagon_handle_events:
-	
+
 	; Handle events
 	; -------------
-	
+
 	ld	a,[pentagon_event_count]
 	ld	e,a
 	ld	a,[pentagon_event_count+1]
 	ld	d,a
-	
+
 	; Start of checking
-	
+
 	ld	a,[pentagon_current_event]
 	ld	h,a
 	ld	a,[pentagon_current_event+1]
 	ld	l,a
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = event counter trigger
@@ -811,194 +811,194 @@ pentagon_handle_events:
 	and	a,b
 	cp	a,$FF ; if both are $FF, exit checking
 	jr	z,._exit_check_events
-	
+
 	ld	a,d
 	cp	a,b
 	jr	nz,._exit_check_events
-	
+
 	ld	a,e
 	cp	a,c
 	jr	nz,._exit_check_events
-	
+
 	inc	hl
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = ptr to function
 	inc	hl ; hl = ptr to next event
-	
+
 	ld	a,h
 	ld	[pentagon_current_event],a
 	ld	a,l
 	ld	[pentagon_current_event+1],a ; save pointer to next event
-	
+
 	ld	h,b
 	ld	l,c ; hl = ptr to function
-	
+
 	CALL_HL
 ._exit_check_events:
 
 	; Now, handle functions...
 	; ------------------------
-	
+
 	; More checks here
-	
+
 	; ...
-	
+
 	; Increase counter
 	; ----------------
-	
+
 	ld	a,[pentagon_event_count]
 	ld	l,a
 	ld	a,[pentagon_event_count+1]
 	ld	h,a
-	
+
 	ld	de,$0001 ; to avoid OAM bug (It shouldn't reach such high values, but do it anyway...)
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[pentagon_event_count],a
 	ld	a,h
 	ld	[pentagon_event_count+1],a
-	
+
 	ret
 
 ;----------------------------------------------
 
 pentagon_palette_load:
-	
+
 	ld	b,$90
 	call	wait_ly ; destroys register A
-	
+
 	ld	hl,pentagon_bg_palettes
 	ld	a,0
 	call	bg_set_palette
-	
+
 	ld	hl,pentagon_spr_palettes
 	ld	a,0
 	call	spr_set_palette
-	
+
 	ret
 
 ;----------------------------------------------
 
 pentagon_load_maps:
-	
+
 	; Clear attributes
-	
+
 	ld	a,1
 	ld	[rVBK],a
-	
+
 	ld	bc,32*32 ; map at $9800 uses palette 0
 	ld	d,0
 	ld	hl,$9800
-	call	vram_memset ; bc = size    d = value    hl = dest address 
-	
+	call	vram_memset ; bc = size    d = value    hl = dest address
+
 	; Load tile data
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,64
 	ld	hl,pentagon_tiles
 	ld	de,0 ;  de = start index
 	call	vram_copy_tiles
-	
+
 	; Clear maps
-	
+
 	ld	bc,32*32
 	ld	d,0
 	ld	hl,$9800
-	call	vram_memset ; bc = size    d = value    hl = dest address 
+	call	vram_memset ; bc = size    d = value    hl = dest address
 
 	; Load maps
-	
+
 	ld	hl,pentagon_big_map
 	ld	de,$9800
 	ld	a,16
 .loop_tiles1:
 	push	af
-	
+
 	ld	bc,16
 	call	vram_copy
 
 	push	hl
-	
+
 	ld	hl,16
 	add	hl,de ; now increase dst by 16 to align columns
-	
+
 	ld	d,h
 	ld	e,l
-	
+
 	pop	hl
-	
+
 	pop	af
 	dec	a
 	jr	nz,.loop_tiles1
-	
+
 	; Done
-	
+
 	ret
 
 ;----------------------------------------------
 
 pentagon_sprites_configure:
-	
+
 	ld	c,0 ; c = y
 .loopy
 	ld	b,0 ; b = x
 .loopx
 	push	bc
-	
+
 	;----
-	
+
 	ld	a,c
 	sla	a
 	sla	a
 	sla	a
 	or	a,b
 	ld	l,a ; l = y * 8 + x
-	
+
 	sla	a ; a = l * 2
-	
+
 	push	hl
 	call	sprite_set_tile ; a = tile    l = sprite number
 	pop	hl
-	
+
 	ld	a,OAMF_PRI ; does nothing unless BIT 0 of rLCDC is 1
 	call	sprite_set_params ; a = params    l = sprite number
-	
+
 	;----
-	
+
 	pop	bc
-	
+
 	inc	b
 	ld	a,8
 	cp	a,b
 	jr	nz,.loopx
-	
+
 	inc	c
 	ld	a,4
 	cp	a,c
 	jr	nz,.loopy
-	
+
 	call	pentagon_set_sprite_position
-	
+
 	ret
 
 ;----------------------------------------------
 
 pentagon_move_sprites_auto:
-	
+
 	ld	hl,pentagon_sprite_move_function
 	ld	a,[hl+]
 	ld	l,[hl]
 	ld	h,a
-	
+
 	CALL_HL
-	
+
 	call	pentagon_set_sprite_position
-	
+
 	ret
 
 ;----------------------------------------------
@@ -1010,99 +1010,99 @@ pentagon_set_sprite_position:
 	ld	b,0 ; b = x
 .loopx
 	push	bc
-	
+
 	;----
-	
+
 	ld	a,c
 	sla	a
 	sla	a
 	sla	a
 	or	a,b
 	ld	l,a ; l = y * 8 + x
-	
+
 	pop	bc
 	push	bc
-	
+
 	sla	b
 	sla	b
 	sla	b
-	
+
 	ld	a,[pentagon_sprite_base_x]
 	add	a,b
 	add	a,8
 	ld	b,a
-	
+
 	;sla	c
 	;sla	c
 	;sla	c
 	;sla	c
 	swap	c
-	
+
 	ld	a,[pentagon_sprite_base_y]
 	add	a,c
 	add	a,16
 	ld	c,a
 
 	call	sprite_set_xy ; b = x    c = y    l = sprite number
-	
+
 	;----
-	
+
 	pop	bc
-	
+
 	inc	b
 	ld	a,8
 	cp	a,b
 	jr	nz,.loopx
-	
+
 	inc	c
 	ld	a,4
 	cp	a,c
 	jr	nz,.loopy
-	
+
 	ret
 
 ;----------------------------------------------
 
 pentagon_vbl_handle_rotation:
-	
+
 	ld	a,[pentagon_wait_rotation]
 	dec	a
 	ld	[pentagon_wait_rotation],a
 	ret	nz
-	
+
 	ld	a,PENTAGON_FRAMES_WAIT
 	ld	[pentagon_wait_rotation],a
-	
+
 	; Get angle
-	
+
 	ld	a,[pentagon_angle]
 	inc	a
 	and	a,3
 	ld	[pentagon_angle],a
-	
+
 	; a *= 64 * 16 = 1024
 	ld	h,a
 	ld	l,0 ; hl = a * 256
-	
+
 	add	hl,hl
 	add	hl,hl ; hl = a * 1024
-	
+
 	ld	de,pentagon_tiles
 	add	hl,de
-	
+
 	ld	a,h
 	ld	[rHDMA1],a
 	ld	a,l ; Lower 4 bits ignored
 	ld	[rHDMA2],a
-	
+
 	ld	a, ( ($8000 + (16 * 0)) >> 8 )& $1F ; Upper 3 bits ignored
 	ld	[rHDMA3],a
 	ld	a, ($8000 + (16 * 0)) & $F0 ; Lower 4 bits ignored
 	ld	[rHDMA4],a
-	
+
 	ld	a, ( ( (64*16) >> 4 ) - 1 ) ; ( Size / $10 ) - 1
 	ld	[rHDMA5],a
-	
+
 	ret
 
 ;-------------------------------------------------------------------
@@ -1110,74 +1110,73 @@ pentagon_vbl_handle_rotation:
 ;-------------------------------------------------------------------
 
 pentagon_vbl_handler:
-	
+
 	call	refresh_OAM
-	
+
 	call	pentagon_vbl_handle_rotation
-	
+
 	LONG_CALL	gbt_update
-	
+
 	call	pentagon_move_sprites_auto
-	
+
 	call	pentagon_handle_events
-	
+
 	ret
 
 ;----------------------------------------------
-	
+
 	GLOBAL Pentagon
-	
+
 Pentagon:
 
 	ld	a,LCDCF_ON ; configuration
 	ld	[rLCDC],a
-	
+
 	ld	b,$90
 	call	wait_ly
-	
+
 	call	pentagon_load_maps
 
 	call	pentagon_init_variables
-	
+
 	call	pentagon_sprites_configure
-	
+
 	; Load palette and configure IRQs
-	
+
 	ld	a,-(160-128)/2
 	ld	[rSCX],a
 	ld	a,-(144-128)/2
 	ld	[rSCY],a
-	
+
 	ld	b,$90
 	call	wait_ly
-	
+
 	call	pentagon_palette_load
-	
+
 	ld	a,LCDCF_ON|LCDCF_BG8000|LCDCF_BG9800|LCDCF_OBJON|LCDCF_OBJ16 ; configuration
 	ld	[rLCDC],a
-	
+
 	ld	a,$01
 	ld	[rIE],a
-	
+
 	ld	bc,pentagon_vbl_handler
 	call	irq_set_VBL
-	
-	; START	
-	
+
+	; START
+
 .loop: ; Main loop
-	
+
 	call	wait_vbl
-	
+
 	ld	a,[pentagon_exit_demo]
 	and	a,a
 	jr	z,.loop
 
 	; Exit...
 	; -------
-	
+
 	call	demo_config_default
-	
+
 	ret
 
 ;-------------------------------------------------------------------
-

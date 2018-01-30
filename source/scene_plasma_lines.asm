@@ -1,17 +1,17 @@
-; 
-; Copyright (c) 2014, Antonio Niño Díaz (AntonioND)
+;
+; Copyright (c) 2014-2018, Antonio Niño Díaz (AntonioND)
 ; All rights reserved.
-; 
+;
 ; Redistribution and use in source and binary forms, with or without
 ; modification, are permitted provided that the following conditions are met:
-; 
+;
 ; * Redistributions of source code must retain the above copyright notice, this
 ;   list of conditions and the following disclaimer.
-; 
+;
 ; * Redistributions in binary form must reproduce the above copyright notice,
 ;   this list of conditions and the following disclaimer in the documentation
 ;   and/or other materials provided with the distribution.
-; 
+;
 ; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,7 +22,7 @@
 ; CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-; 
+;
 
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
@@ -34,7 +34,7 @@ TEXT_BAR_HEIGHT		EQU	16
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "PLASMA_LINES_DATA", DATA, BANK[1]
+	SECTION "PLASMA_LINES_DATA", ROMX, BANK[1]
 
 plasma_lines_tiles:
 	DB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
@@ -51,13 +51,13 @@ plasma_lines_tiles:
 plasma_lines_function_pointers_array:
 	DW	angle_0,angle_1,angle_2,angle_3,angle_4,angle_5,angle_6,angle_7
 	DW	angle_8,angle_9,angle_10,angle_11,angle_12,angle_13,angle_14,angle_15
-	
+
 plasma_lines_scroll_x_speed_array:
 	DB	-8,-8,-8,-8,0,8,8,8,8,8,8,8,0,-8,-8,-8
 
 plasma_lines_scroll_y_speed_array:
 	DB	0,-8,-8,-8,-8,-8,-8,-8,0,8,8,8,8,8,8,8
-	
+
 plasma_lines_scroll_x_time_array:
 	DB	6,9,12,15,0,15,12,9,6,9,12,15,0,15,12,9
 
@@ -71,20 +71,20 @@ plasma_lines_handler_start_speeds:
 	DB	0,2,1
 	DB	2,1,0
 	DB	1,1,1
-	
+
 plasma_lines_handler_start_values:
 	DB	31,0,0
 	DB	0,15,0
 	DB	31,15,0
 	DB	15,31,0
-	
+
 plasma_lines_text_bar_tiles:
 	DB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 	DB $00,$00,$FF,$00,$00,$FF,$FF,$FF
-	
+
 	DB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 	DB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-	
+
 	DB $FF,$FF,$00,$FF,$FF,$00,$00,$00
 	DB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 
@@ -188,15 +188,15 @@ DB $FF,$FF,$01,$83,$7D,$7D,$7D,$7D
 DB $01,$83,$7D,$7D,$7D,$7D,$01,$83
 DB $FF,$FF,$01,$83,$7D,$7D,$7D,$7D
 DB $01,$81,$FD,$FD,$7D,$7D,$01,$83
-	
+
 plasma_lines_text_message: ; Mustn't be longer than 256 characters. If shorter than that, put a '123' at the end like here:
 	;DB	"  -----------------------------------------------------------------------                    "
 	DB	"    DEMO SPECIALLY MADE FOR THE GBDEV 2014 GAMEBOY CODING COMPO!                             "
 	DB	123 ; end character
-	
+
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION	"Plasma_Lines_Vars",BSS
+	SECTION	"Plasma_Lines_Vars", WRAM0
 
 plasma_lines_function_ptr:	DS	2 ; for the angle
 plasma_lines_curr_angle:		DS	1
@@ -244,23 +244,23 @@ plasma_lines_exit_flag:		DS	1
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "Plasma_Lines", CODE, BANK[1]
+	SECTION "Plasma_Lines", ROMX, BANK[1]
 
 ;-------------------------------------------------------------------
 ;-                           MAP CONTROL                           -
 ;-------------------------------------------------------------------
 
 plasma_lines_get_value_from_position: ; b = x, c = y
-	
+
 	ld	a,[plasma_lines_function_ptr]
 	ld	l,a
 	ld	a,[plasma_lines_function_ptr+1]
 	ld	h,a
-	
+
 	xor	a,a
-	
-	jp	[hl]
-	
+
+	jp	hl
+
 angle_0:
 	add	a,b
 	ret
@@ -341,12 +341,12 @@ angle_15:
 ;----------------------------------------------
 
 plasma_lines_set_function_ptr: ; hl = ptr
-	
+
 	ld	a,l
 	ld	[plasma_lines_function_ptr],a
 	ld	a,h
 	ld	[plasma_lines_function_ptr+1],a
-	
+
 	ret
 
 ;----------------------------------------------
@@ -355,34 +355,34 @@ plasma_lines_set_tile: ; b = x, c = y
 
 	ld	d,MAP_TEMP >> 8
 	ld	e,b ; de = base + x
-	
+
 	ld	l,c
 	ld	h,$00 ; hl = y
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl ; hl = y *  32
-	
+
 	add	hl,de ; hl = base + x + (y * 32)
-	
+
 	ld	[hl],a
-	
+
 	ret
 
 ;----------------------------------------------
 
 plasma_lines_create_temp_map:
-	
+
 	ld	c,0
-	
+
 ._outer_loop:
 
 	ld	b,0
-	
+
 ._inner_loop:
-	
+
 	push	bc
 	call	plasma_lines_get_value_from_position
 	and	a,3
@@ -390,17 +390,17 @@ plasma_lines_create_temp_map:
 	push	bc
 	call	plasma_lines_set_tile
 	pop	bc
-	
+
 	inc	b
 	ld	a,b
 	cp	a,32
 	jr	nz,._inner_loop
-	
+
 	inc	c
 	ld	a,c
 	cp	a,32
 	jr	nz,._outer_loop
-	
+
 	ret
 
 ;----------------------------------------------
@@ -409,34 +409,34 @@ plasma_lines_set_attr: ; b = x, c = y
 
 	ld	d,ATTR_MAP_TEMP >> 8
 	ld	e,b ; de = base + x
-	
+
 	ld	l,c
 	ld	h,$00 ; hl = y
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl ; hl = y *  32
-	
+
 	add	hl,de ; hl = base + x + (y * 32)
-	
+
 	ld	[hl],a
-	
+
 	ret
 
 ;----------------------------------------------
 
 plasma_lines_create_temp_attr_map:
-	
+
 	ld	c,0
-	
+
 ._outer_loop:
 
 	ld	b,0
-	
+
 ._inner_loop:
-	
+
 	push	bc
 	call	plasma_lines_get_value_from_position
 	srl	a
@@ -446,86 +446,86 @@ plasma_lines_create_temp_attr_map:
 	push	bc
 	call	plasma_lines_set_attr
 	pop	bc
-	
+
 	inc	b
 	ld	a,b
 	cp	a,32
 	jr	nz,._inner_loop
-	
+
 	inc	c
 	ld	a,c
 	cp	a,32
 	jr	nz,._outer_loop
-	
+
 	ret
-	
+
 ;----------------------------------------------
 
 plasma_lines_set_scroll_speeds: ; b = scx, c = scy, d = wait x, e = wait y
-	
+
 	ld	hl,plasma_lines_scroll_x_speed
 	ld	[hl],b
-	
+
 	ld	hl,plasma_lines_scroll_y_speed
 	ld	[hl],c
-	
+
 	ld	hl,plasma_lines_wait_x
 	ld	[hl],d
-	
+
 	ld	hl,plasma_lines_wait_y
 	ld	[hl],e
-	
+
 	ret
-	
+
 ;----------------------------------------------
 
 plasma_lines_reset_angle_handler:
-	
+
 	ld	a,5
 	ld	[plasma_lines_default_time_to_change],a
 	ld	[plasma_lines_next_angle_time],a
-	
+
 	ld	a,1
 	ld	[plasma_lines_angle_inc_speed],a
-	
+
 	ld	a,0
 	ld	[plasma_lines_ready_dma_copy],a
-	
+
 	ld	a,0
 	call	plasma_lines_set_map_angle
-	
+
 	ret
-	
+
 ;----------------------------------------------
 
 plasma_lines_handle_angle:
-	
+
 	ld	hl,plasma_lines_next_angle_time
 	dec	[hl]
 	ret	nz
-	
+
 	ld	a,[plasma_lines_ready_dma_copy]
 	and	a,a
 	jr	z,.continue
-	
+
 	inc	[hl] ; wait...
 	ret
 
 .continue:
-	
+
 	; Change angle
-	
+
 ;	call	GetRandom
 ;	cp	a,32
 ;	jr	c,._invert
-	
+
 ._increment_angle:
 	ld	hl,plasma_lines_curr_angle
 	ld	a,[hl]
 	ld	hl,plasma_lines_angle_inc_speed
 	add	a,[hl]
 	jr	._set_angle
-	
+
 ;._invert:
 ;	ld	hl,plasma_lines_angle_inc_speed ; invert speed
 ;	ld	a,[hl]
@@ -535,19 +535,19 @@ plasma_lines_handle_angle:
 ;	ld	a,[plasma_lines_curr_angle] ; invert angle
 ;	add	a,8
 ;	jr	._set_angle
-	
+
 ._set_angle:
 	and	a,$0F
 	ld	hl,plasma_lines_curr_angle
 	ld	[hl],a
 	call	plasma_lines_set_map_angle
-	
+
 	ld	hl,plasma_lines_next_angle_time
 	ld	a,[plasma_lines_default_time_to_change]
 	ld	[hl],a
-	
+
 	ret
-	
+
 ;----------------------------------------------
 
 plasma_lines_update_map_attr_dma:
@@ -555,7 +555,7 @@ plasma_lines_update_map_attr_dma:
 	ld	a,[plasma_lines_ready_dma_copy]
 	and	a,a
 	ret	z
-	
+
 	ld	a,0
 	ld	[plasma_lines_ready_dma_copy],a
 
@@ -566,17 +566,17 @@ plasma_lines_update_map_attr_dma:
 	ld	a,1
 	ld	[rVBK],a
 	DMA_COPY ATTR_MAP_TEMP,$9800,(32*32),0
-	
+
 	ret
 
 ;----------------------------------------------
 
 plasma_lines_set_map_angle: ; a = angle
-	
+
 	and	a,$0F
-	
+
 	ld	[plasma_lines_curr_angle],a
-	
+
 	ld	hl,plasma_lines_function_pointers_array
 	sla	a
 	ld	e,a
@@ -585,30 +585,30 @@ plasma_lines_set_map_angle: ; a = angle
 	ld	e,[hl]
 	inc	hl
 	ld	d,[hl]
-	
+
 	ld	h,d
 	ld	l,e
-	
+
 	call	plasma_lines_set_function_ptr
-	
+
 	; Create tile maps...
-	
+
 	call	plasma_lines_create_temp_map
 	call	plasma_lines_create_temp_attr_map
-	
+
 	; Copy them...
-	
+
 ;	ld	a,0
 ;	ld	[rVBK],a
-	
+
 ;	ld	bc,32*32
 ;	ld	hl,MAP_TEMP
 ;	ld	de,$9800
 ;	call	vram_copy
-	
+
 ;	ld	a,1
 ;	ld	[rVBK],a
-	
+
 ;	ld	bc,32*32
 ;	ld	hl,ATTR_MAP_TEMP
 ;	ld	de,$9800
@@ -621,48 +621,48 @@ plasma_lines_set_map_angle: ; a = angle
 ;	DMA_COPY MAP_TEMP,$9800,(32*32),1
 
 ;	ld	hl,rHDMA5
-;._not_finished:	
+;._not_finished:
 ;	bit	7,[hl]
 ;	jr	z,._not_finished
 
 ;	ld	a,1
 ;	ld	[rVBK],a
 ;	DMA_COPY ATTR_MAP_TEMP,$9800,(32*32),1
-	
+
 	ld	a,1
 	ld	[plasma_lines_ready_dma_copy],a
-	
+
 	; Handle new scroll speeds and these things...
-	
+
 	ld	a,[plasma_lines_curr_angle]
-	
+
 	ld	e,a
 	ld	d,0
-	
+
 	ld	hl,plasma_lines_scroll_x_speed_array
 	add	hl,de
 	ld	b,[hl] ; b = scx
-	
+
 	ld	hl,plasma_lines_scroll_y_speed_array
 	add	hl,de
 	ld	c,[hl] ; c = scy
-	
+
 	push	bc
-	
+
 	ld	hl,plasma_lines_scroll_x_time_array
 	add	hl,de
 	ld	b,[hl] ; b = time x
-	
+
 	ld	hl,plasma_lines_scroll_y_time_array
 	add	hl,de
 	ld	e,[hl] ; e = time y
-	
+
 	ld	d,b ; d = time x
-	
+
 	pop	bc
-	
+
 	call	plasma_lines_set_scroll_speeds
-	
+
 	ret
 
 ;-------------------------------------------------------------------
@@ -670,171 +670,171 @@ plasma_lines_set_map_angle: ; a = angle
 ;-------------------------------------------------------------------
 
 plasma_lines_palette_set_fading:  ; b = red, c = green, l = blue
-	
+
 	push	bc
 	push	hl
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,l
 	or	a,c
 	ld	l,a
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,l
 	or	a,b
 	ld	e,a
 	ld	d,h ; de = rgb
-	
+
 	ld	hl,plasma_lines_palette
 	ld	[hl],e
 	inc	hl
 	ld	[hl],d ; set first color...
-	
+
 	pop	hl
 	pop	bc
-	
+
 	ld	a,l
 	sub	a,8
 	jr	nc,._001
 	xor	a,a
 ._001:
 	ld	l,a
-	
+
 	ld	a,c
 	sub	a,8
 	jr	nc,._002
 	xor	a,a
 ._002:
 	ld	c,a
-	
+
 	ld	a,b
 	sub	a,8
 	jr	nc,._003
 	xor	a,a
 ._003:
 	ld	b,a
-	
+
 	push	bc
 	push	hl
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,l
 	or	a,c
 	ld	l,a
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,l
 	or	a,b
 	ld	e,a
 	ld	d,h ; de = rgb
-	
+
 	ld	hl,plasma_lines_palette + 2
 	ld	[hl],e
 	inc	hl
 	ld	[hl],d ; set second color...
-	
+
 	pop	hl
 	pop	bc
-	
+
 	ld	a,l
 	sub	a,8
 	jr	nc,._004
 	xor	a,a
 ._004:
 	ld	l,a
-	
+
 	ld	a,c
 	sub	a,8
 	jr	nc,._005
 	xor	a,a
 ._005:
 	ld	c,a
-	
+
 	ld	a,b
 	sub	a,8
 	jr	nc,._006
 	xor	a,a
 ._006:
 	ld	b,a
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,l
 	or	a,c
 	ld	l,a
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,l
 	or	a,b
 	ld	e,a
 	ld	d,h ; de = rgb
-	
+
 	ld	hl,plasma_lines_palette + 4
 	ld	[hl],e
 	inc	hl
 	ld	[hl],d ; set third color...
-	
+
 	ret
-	
+
 ;----------------------------------------------
 
 plasma_lines_palette_load: ; a =  palette number
-	
+
 	ld	b,a
 	call	wait_screen_blank
 	ld	a,b
-	
+
 	ld	hl,plasma_lines_palette
 	call	bg_set_palette
 
 	ret
-	
+
 ;----------------------------------------------
 
 plasma_lines_handle_values:  ; e = array index   a = returned value
-	
+
 	ld	d,0 ; de = array index
-	
+
 	ld	hl,plasma_lines_pal_speed
 	add	hl,de
 	ld	b,[hl] ; b = speed
-	
+
 	ld	hl,plasma_lines_pal_value
 	add	hl,de
 	ld	c,[hl] ; c = base
-	
+
 	ld	a,c
 	add	a,b
-	
+
 	ld	c,a ; save new value
 	; check if lower than 0...
 	bit	7,a
@@ -855,30 +855,30 @@ plasma_lines_handle_values:  ; e = array index   a = returned value
 	inc	a
 	ld	b,a	; speed = -speed
 ._save_values
-	
+
 	ld	hl,plasma_lines_pal_speed
 	add	hl,de
 	ld	[hl],b ; b = speed
-	
+
 	ld	hl,plasma_lines_pal_value
 	add	hl,de
 	ld	[hl],c ; c = base
-	
+
 	ld	a,c
-	
+
 	ret
-	
+
 ;----------------------------------------------
 
 plasma_lines_update_palettes:
-	
+
 	ld	e,0
 	ld	a,0
-	
+
 ._repeat:
-	
+
 	push	af
-	
+
 	call	plasma_lines_handle_values
 	ld	[plasma_lines_pal_red],a
 	inc	e
@@ -888,30 +888,30 @@ plasma_lines_update_palettes:
 	call	plasma_lines_handle_values
 	ld	[plasma_lines_pal_blue],a
 	inc	e
-	
+
 	ld	a,[plasma_lines_pal_red]
 	ld	b,a
 	ld	a,[plasma_lines_pal_green]
 	ld	c,a
 	ld	a,[plasma_lines_pal_blue]
 	ld	l,a
-	
+
 	push	de
 	call	plasma_lines_palette_set_fading
 	pop	de
-	
+
 	pop	af
 	push	af
 	push	de
 	call	plasma_lines_palette_load
 	pop	de
 	pop	af
-	
+
 	inc	a
 	cp	a,4
-	
+
 	jr	nz,._repeat
-	
+
 	ret
 
 ;----------------------------------------------
@@ -922,12 +922,12 @@ plasma_lines_reset_palettes:
 	ld	de,plasma_lines_pal_speed
 	ld	hl,plasma_lines_handler_start_speeds
 	call	memcopy ; set initial speeds
-	
+
 	ld	bc,(4 * 3)
 	ld	de,plasma_lines_pal_value
 	ld	hl,plasma_lines_handler_start_values
 	call	memcopy ; set initial values
-	
+
 	ret
 
 ;-------------------------------------------------------------------
@@ -937,33 +937,33 @@ plasma_lines_reset_palettes:
 plasma_lines_reset_bar:
 	xor	a,a
 	ld	[plasma_lines_ly_sine_index],a
-	ld	[plasma_lines_text_scroll_x],a 
+	ld	[plasma_lines_text_scroll_x],a
 	ld	[plasma_lines_text_array_index],a
-	
+
 	ld	a,20
 	ld	[plasma_lines_text_next_position],a
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,44
 	ld	de,$0000
 	ld	hl,plasma_lines_text_bar_font
 	call	vram_copy_tiles
-	
+
 	ld	bc,3
 	ld	de,$0070 ; 128 - 16
 	ld	hl,plasma_lines_text_bar_tiles
 	call	vram_copy_tiles
-	
+
 	ld	bc,32*3
 	ld	de,$9C00 + (32*29)
 	ld	hl,plasma_lines_text_bar_map
 	call	vram_copy
-	
+
 	ld	a,1
 	ld	[rVBK],a
-	
+
 	ld	bc,32*3
 	ld	d,$07
 	ld	hl,$9C00 + (32*29)
@@ -971,13 +971,13 @@ plasma_lines_reset_bar:
 
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ret
 
 ;----------------------------------------------
 
 plasma_lines_font_get_ascii: ; a = ascii character
-	
+
 	cp	a,"!"
 	jr	nz,.__1
 	ld	a,26
@@ -1022,49 +1022,49 @@ plasma_lines_font_get_ascii: ; a = ascii character
 	jr	c,.__9
 	cp	a,"9"+1
 	jr	nc,.__9
-	
+
 	sub	a,"0"
 	add	a,34
 	ret
 .__9:
 
 	; We could check if it is actually a normal character, but we aren't going to write anything strange...
-	
+
 	; Characters A to Z
 	sub	a,"A"
-	
+
 	ret
 
 ;----------------------------------------------
 
 plasma_lines_update_bar:
-	
+
 	; change position
-	
+
 	ld	hl,plasma_lines_ly_sine_index
 	ld	a,[hl]
 	inc	[hl]
 	inc	[hl]
-	
+
 	ld	h,Sine >> 8
 	ld	l,a
-	
+
 	ld	a,[hl]
 	sra	a
 	sra	a
 	add	a,(144-TEXT_BAR_HEIGHT)/2
 	dec	a
-	
+
 	ld	[rLYC],a
-	
+
 	; text...
-	
+
 	ld	hl,plasma_lines_text_scroll_x
 	ld	a,[hl]
 	inc	[hl]
-	
+
 	and	a,7
-	
+
 	ret	nz ; only put a char every 8 steps
 
 ._get_char:
@@ -1074,119 +1074,119 @@ plasma_lines_update_bar:
 	ld	d,0
 	ld	hl,plasma_lines_text_message
 	add	hl,de
-	
+
 	ld	a,[hl]
-	
+
 	cp	a,123
 	jr	nz,._not_end
-	
+
 	ld	a,1
 	ld	[plasma_lines_exit_flag],a ; Exit
 	ld	a," " ; output space
 	;xor	a,a
 	;ld	[text_array_index],a ; Repeat from the begining
 	;jr	._get_char ; get another character
-	
+
 ._not_end:
 	call	plasma_lines_font_get_ascii
-	
+
 	push	af
-	
+
 	ld	hl,plasma_lines_text_next_position
 	ld	a,[hl]
 	ld	b,a
 	inc	a
 	and	a,31
 	ld	[hl],a
-	
+
 	ld	d,0
 	ld	e,b ; de = x
 	ld	hl,$9C00 + (30*32)  ; hl = base + (y*32)
 	add	hl,de ; hl = base + x + (y * 32)
-	
+
 	ld	a,[rVBK]
 	ld	e,a ; push value
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	call	wait_screen_blank
-	
+
 	pop	af
-	
+
 	ld	[hl],a
-	
+
 	ld	a,e ; pop value
 	ld	[rVBK],a
-	
+
 	ret
-	
+
 ;----------------------------------------------
 
 plasma_lines_lcd_handler:
-	
+
 	ld	a,[rSCX]
 	ld	e,a
 	ld	a,[rSCY]
 	ld	d,a
 	push	de
-	
+
 	;Change bg for bar
-	
+
 	call	wait_screen_blank
-	
+
 	ld	a,[rLCDC]
 	or	a,LCDCF_BG9C00|LCDCF_BG8000  ; Change to other map
 	ld	[rLCDC],a
 
 	;change scrolls
-	
+
 	ld	a,[rLY]
 	inc	a ; get first line affected by change
-	
+
 	cpl ; change sign
 	inc	a
-	
+
 	add	a,256-24+4
 	ld	[rSCY],a
-	
+
 	ld	a,[plasma_lines_text_scroll_x]
 	ld	[rSCX],a
-	
+
 	;Show bar for a few lines...
-	
+
 	ld	a,[rLY]
 	add	a,TEXT_BAR_HEIGHT
-	
+
 	cp	a,$90
 	jr	c,._not_end_in_vblank
-	
+
 	; End in vblank, so force it before
-	
+
 	ld	a,$90
-	
+
 ._not_end_in_vblank:
 	ld	b,a
-	
+
 ._not_yet:
 	ld	a,[rLY]
 	cp	a,b
 	jr	nz,._not_yet
-	
+
 	;Restore bg
-	
+
 	call	wait_screen_blank
-	
+
 	ld	a,[rLCDC]
 	and	a,$FF&(~(LCDCF_BG9C00|LCDCF_BG8000)) ; Change to 'main' map
 	ld	[rLCDC],a
-	
+
 	pop	de
 	ld	a,d
 	ld	[rSCY],a
 	ld	a,e
 	ld	[rSCX],a
-	
+
 	ret
 
 ;-------------------------------------------------------------------
@@ -1194,40 +1194,40 @@ plasma_lines_lcd_handler:
 ;-------------------------------------------------------------------
 
 plasma_lines_vbl_handler:
-	
+
 	call	plasma_lines_update_map_attr_dma
-	
+
 	call	plasma_lines_update_palettes
-	
+
 	call	plasma_lines_update_bar
 
 	ld	hl,plasma_lines_elapsed_x
 	inc	[hl]
 	ld	b,[hl]
-	
+
 	ld	a,[plasma_lines_wait_x]
 	cp	a,b
 	jr	nc,._check_y
-	
+
 	ld	[hl],0
-	
+
 	ld	a,[plasma_lines_scroll_x_speed]
 	ld	hl,rSCX
 	add	a,[hl]
 	ld	[hl],a
-	
+
 ._check_y:
-	
+
 	ld	hl,plasma_lines_elapsed_y
 	inc	[hl]
 	ld	b,[hl]
-	
+
 	ld	a,[plasma_lines_wait_y]
 	cp	a,b
 	jr	nc,._exit_checks
-	
+
 	ld	[hl],0
-	
+
 	ld	a,[plasma_lines_scroll_y_speed]
 	ld	hl,rSCY
 	add	a,[hl]
@@ -1236,27 +1236,27 @@ plasma_lines_vbl_handler:
 ._exit_checks:
 
 	LONG_CALL	gbt_update
-	
+
 	ret
 
 ;----------------------------------------------
-	
+
 	GLOBAL Plasma_Lines
-	
+
 Plasma_Lines:
-	
+
 	xor	a,a
 	ld	[rWX],a
 	ld	[rWY],a
 	ld	[rSCY],a
 	ld	[rSCX],a
-	
+
 	ld	a,LCDCF_ON|LCDCF_WINON|LCDCF_WIN9C00
 	ld	[rLCDC],a
-	
+
 	ld	a,1
 	ld	[rVBK],a
-	
+
 	ld	bc,$1000
 	ld	d,0
 	ld	hl,$9000 ; clear map attributes
@@ -1264,68 +1264,68 @@ Plasma_Lines:
 
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,$1000
 	ld	d,0
 	ld	hl,$9000 ; clear maps
 	call	vram_memset ; bc = size    d = value    hl = dest address
-	
+
 	ld	bc,4
 	ld	hl,plasma_lines_tiles
 	ld	de,$0100 ;  de = start index
 	call	vram_copy_tiles
-	
+
 	ld	b,$90
 	call	wait_ly
-	
+
 	call	plasma_lines_reset_palettes
-	
+
 	call	plasma_lines_reset_angle_handler
 
 	call	plasma_lines_handle_angle
-	
+
 	call	plasma_lines_reset_bar
 	call	plasma_lines_update_bar
-	
+
 	ld	b,$90
 	call	wait_ly
-	
+
 	ld	a,7 ; this loads bar palette
 	ld	hl,plasma_lines_text_bar_pal
 	call	bg_set_palette
-	
+
 	ld	a,255
 	ld	[rWY],a
 	ld	[rWX],a
-	
+
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800
 	ld	[rLCDC],a
-	
+
 	ld	a,0
 	ld	[rIF],a ; clear interrupt flags before enabling them
-	
+
 	ld	a,STATF_LYC
 	ld	[rSTAT],a
-	
+
 	ld	bc,plasma_lines_vbl_handler
 	call	irq_set_VBL
-	
+
 	ld	bc,plasma_lines_lcd_handler
 	call	irq_set_LCD
-	
+
 	ld	a,$03
 	ld	[rIE],a
-	
+
 	; Start loop
-	
+
 	ld	a,0
 	ld	[plasma_lines_exit_flag],a
-	
+
 .loop:
 	call	plasma_lines_handle_angle
-	
+
 	call	wait_vbl
-	
+
 	ld	a,[plasma_lines_exit_flag]
 	and	a,a
 	jr	z,.loop
@@ -1333,8 +1333,7 @@ Plasma_Lines:
 
 	; Exit...
 	; -------
-	
-	call	demo_config_default
-	
-	ret
 
+	call	demo_config_default
+
+	ret

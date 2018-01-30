@@ -1,17 +1,17 @@
-; 
-; Copyright (c) 2014, Antonio Niño Díaz (AntonioND)
+;
+; Copyright (c) 2014-2018, Antonio Niño Díaz (AntonioND)
 ; All rights reserved.
-; 
+;
 ; Redistribution and use in source and binary forms, with or without
 ; modification, are permitted provided that the following conditions are met:
-; 
+;
 ; * Redistributions of source code must retain the above copyright notice, this
 ;   list of conditions and the following disclaimer.
-; 
+;
 ; * Redistributions in binary form must reproduce the above copyright notice,
 ;   this list of conditions and the following disclaimer in the documentation
 ;   and/or other materials provided with the distribution.
-; 
+;
 ; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,7 +22,7 @@
 ; CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-; 
+;
 
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
@@ -33,14 +33,14 @@ COMBINED_MAP_TEMP	EQU	$D600 ;($D300 + 32*18) aligned to $100
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "SINE_PLASMA_DATA", DATA, BANK[1]
+	SECTION "SINE_PLASMA_DATA", ROMX, BANK[1]
 
 sine_plasma_background_palettes:
 	DW	$001F,$0014,$000A,$0000
 	DW	$03FF,$0294,$014A,$0000
 	DW	$03E0,$0280,$0140,$0000
 	DW	$7C00,$5000,$2800,$0000
-	
+
 ;	DW	$001F,$0014,$000A,$0000
 ;	DW	(15<<5)|(31),(10<<5)|(20),(5<<5)|(10),$0000
 ;	DW	$03FF,$0294,$014A,$0000
@@ -115,7 +115,7 @@ sine_plasma_sprite_tiles: ; 14
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION	"Sine_Plasma_Vars",BSS
+	SECTION	"Sine_Plasma_Vars", WRAM0
 
 ; ---------------------------
 
@@ -143,7 +143,7 @@ sine_plasma_value_increment_4:	DS	1
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "Sine_Plasma", CODE, BANK[1]
+	SECTION "Sine_Plasma", ROMX, BANK[1]
 
 ;----------------------------------------------
 
@@ -154,7 +154,7 @@ sine_plasma_values_init:
 	ld	[sine_plasma_value_2],a
 	ld	[sine_plasma_value_3],a
 	ld	[sine_plasma_value_4],a
-	
+
 	ld	a,1
 	ld	[sine_plasma_value_increment_1],a
 	ld	a,2
@@ -163,23 +163,23 @@ sine_plasma_values_init:
 	ld	[sine_plasma_value_increment_3],a
 	ld	a,-2
 	ld	[sine_plasma_value_increment_4],a
-	
+
 	ld	a,0
 	ld	[sine_plasma_dma_copy_ready],a
-	
+
 	ld	a,0
 	ld	[sine_plasma_event_count],a
 	ld	[sine_plasma_event_count+1],a
-	
+
 	ld	a,0
 	ld	[sine_plasma_exit_demo],a
-	
+
 	ld	hl,_event_table_sine_plasma
 	ld	a,h
 	ld	[sine_plasma_current_event],a
 	ld	a,l
 	ld	[sine_plasma_current_event+1],a
-	
+
 	ret
 
 ;----------------------------------------------
@@ -223,7 +223,7 @@ _event_table_sine_plasma:
 ;	DW	150,_event_sine_plasma_change_increments_3
 ;	DW	200,_event_sine_plasma_change_increments_4
 ;	DW	250,_event_sine_plasma_change_increments_5
-	
+
 	DW	560,_event_exit_sine_plasma_demo
 
 	DW	$FFFF,$0000 ; No more events! Don't remove this line!
@@ -231,22 +231,22 @@ _event_table_sine_plasma:
 ;----------------------------------------------
 
 sine_plasma_handle_events:
-	
+
 	; Handle events
 	; -------------
-	
+
 	ld	a,[sine_plasma_event_count]
 	ld	e,a
 	ld	a,[sine_plasma_event_count+1]
 	ld	d,a
-	
+
 	; Start of checking
-	
+
 	ld	a,[sine_plasma_current_event]
 	ld	h,a
 	ld	a,[sine_plasma_current_event+1]
 	ld	l,a
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = event counter trigger
@@ -254,30 +254,30 @@ sine_plasma_handle_events:
 	and	a,b
 	cp	a,$FF ; if both are $FF, exit checking
 	jr	z,._exit_check_events
-	
+
 	ld	a,d
 	cp	a,b
 	jr	nz,._exit_check_events
-	
+
 	ld	a,e
 	cp	a,c
 	jr	nz,._exit_check_events
-	
+
 	inc	hl
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = ptr to function
 	inc	hl ; hl = ptr to next event
-	
+
 	ld	a,h
 	ld	[sine_plasma_current_event],a
 	ld	a,l
 	ld	[sine_plasma_current_event+1],a ; save pointer to next event
-	
+
 	ld	h,b
 	ld	l,c ; hl = ptr to function
-	
+
 	CALL_HL
 ._exit_check_events:
 
@@ -285,28 +285,28 @@ sine_plasma_handle_events:
 	; ------------------------
 
 	; More checks here
-	
+
 	; ...
-	
+
 	; Increase counter
 	; ----------------
-	
+
 	ld	a,[sine_plasma_event_count]
 	ld	l,a
 	ld	a,[sine_plasma_event_count+1]
 	ld	h,a
-	
+
 	inc	hl
-	
+
 	ld	a,l
 	ld	[sine_plasma_event_count],a
 	ld	a,h
 	ld	[sine_plasma_event_count+1],a
-	
+
 	ret
 
 ;----------------------------------------------
-	
+
 sine_plasma_map_draw:
 
 	; Update
@@ -317,25 +317,25 @@ sine_plasma_map_draw:
 	ld	a,[sine_plasma_value_increment_1]
 	add	a,b
 	ld	[sine_plasma_value_1],a
-	
+
 	ld	a,[sine_plasma_value_2]
 	ld	b,a
 	ld	a,[sine_plasma_value_increment_2]
 	add	a,b
 	ld	[sine_plasma_value_2],a
-	
+
 	ld	a,[sine_plasma_value_3]
 	ld	b,a
 	ld	a,[sine_plasma_value_increment_3]
 	add	a,b
 	ld	[sine_plasma_value_3],a
-	
+
 	ld	a,[sine_plasma_value_4]
 	ld	b,a
 	ld	a,[sine_plasma_value_increment_4]
 	add	a,b
 	ld	[sine_plasma_value_4],a
-	
+
 	; Then, draw combined map ...
 	; ---------------------------
 
@@ -343,7 +343,7 @@ sine_plasma_map_draw:
 	ld	hl,COMBINED_MAP_TEMP
 .loopy
 	ld e,0
-	
+
 .loopx
 	push	hl
 
@@ -369,7 +369,7 @@ sine_plasma_map_draw:
 	sla	l
 	sla	l
 	ldh	a,[sine_plasma_value_2]
-	add	a,l	
+	add	a,l
 	ld	c,d
 	sla	c
 	sla	c
@@ -378,11 +378,11 @@ sine_plasma_map_draw:
 	ld	a,[hl]
 	sra a
 	add a,b
-	
+
 	sra	a ; a = a/2 (we are going to add 2 values more)
-	
+
 	ld	c,a ; save a
-	
+
 	ld	a,e
 	srl	a
 	srl	a
@@ -391,7 +391,7 @@ sine_plasma_map_draw:
 	sub	a,e
 	sra	a
 	ld	l,a
-	
+
 	ld	h,Sine>>8
 	sla	l
 	sla	l
@@ -403,13 +403,13 @@ sine_plasma_map_draw:
 	ld	b,[hl]
 	sra b
 	sra	b
-	
+
 	ld	a,c ; recover a
-	
+
 	add a,b ; add 2 values more (one remaining)
-	
+
 	ld	c,a ; save a
-	
+
 	ld	a,e
 	srl	a
 	srl	a
@@ -418,7 +418,7 @@ sine_plasma_map_draw:
 	add	a,e
 	sra	a
 	ld	l,a
-	
+
 	ld	h,Sine>>8
 	sla	l
 	sla	l
@@ -430,29 +430,29 @@ sine_plasma_map_draw:
 	ld	b,[hl]
 	sra b
 	sra	b
-	
+
 	ld	a,c ; recover a
-	
+
 	add a,b	; add last value
-	
+
 	add a,$80 ; added everything! offset to central value
-	
+
 	srl	a
 	srl	a ; only 6 bits used (2 pal + 4 tile)
-	
+
 	pop	hl
-	
+
 	ld	[hl],a
 	inc	hl
-	
+
 	inc e
 	ld	a,e
 	cp	a,20
 	jp nz,.loopx
-	
+
 	ld	bc,12 ; increase to next row
 	add	hl,bc
-	
+
 	inc d
 	ld	a,d
 	cp	a,18
@@ -460,7 +460,7 @@ sine_plasma_map_draw:
 
 	; Separate in bg and attr
 	; -----------------------
-	
+
 	; Wait until maps are copied to VRAM
 
 .wait:
@@ -468,57 +468,57 @@ sine_plasma_map_draw:
 	ld	a,[sine_plasma_dma_copy_ready]
 	and	a,a
 	jr	z,.update
-	
+
 	halt
 	jr	.wait
-	
+
 .update:
-	
+
 	; Continue
-	
+
 	ld	de,0 ; array index
 .loop
-	
+
 	; Load combined tile
-	
+
 	ld	hl,COMBINED_MAP_TEMP
-	
+
 	add	hl,de
 	ld	a,[hl]
-	
+
 	; Split tile and attr
-	
+
 	ld	b,a
 	swap	a
 	and	a,3
 	ld	c,a
-	
+
 	ld	a,b
 	and	a,$F ; a = tile, c = attr
-	
+
 	; Save tile
-	
+
 	ld	hl,MAP_TEMP
 	add	hl,de
 	ld	[hl],a
-	
+
 	; Save attr
-	
+
 	ld	hl,ATTR_MAP_TEMP
 	add	hl,de
 	ld	[hl],c
-	
+
 	; Next tile
 	inc	de
-	
+
 	; If not column 20, loop
 	ld	a,e
 	and	a,$1F
 	cp	a,20
 	jr	nz,.loop
-	
+
 	; If column 20, add 12 and check if 32 * 20 = $280 is reached
-	
+
 	ld	hl,12
 	add	hl,de
 	ld	d,h
@@ -530,19 +530,19 @@ sine_plasma_map_draw:
 	ld	a,$02
 	cp	d
 	jr	nz,.loop ; if de == $280 exit
-	
+
 	; Let the VBL handler know that the new frame can be copied
 	; ---------------------------------------------------------
-	
+
 	ld	a,1
 	ld	[sine_plasma_dma_copy_ready],a
-	
+
 	ret
 
 ;----------------------------------------------
 
 sine_plasma_setup_sprites:
-	
+
 	ld	bc,((8+2)<<8)|(16+128-2)
 	ld	l,0
 	call	sprite_set_xy
@@ -564,7 +564,7 @@ sine_plasma_setup_sprites:
 	ld	bc,((56+2)<<8)|(16+128-2)
 	ld	l,6
 	call	sprite_set_xy
-	
+
 	ld	a,0
 	ld	l,0
 	call	sprite_set_tile
@@ -586,14 +586,14 @@ sine_plasma_setup_sprites:
 	ld	a,12
 	ld	l,6
 	call	sprite_set_tile
-	
+
 	; Load data
-	
+
 	ld	b,$90
 	call	wait_ly
-	
+
 	call	refresh_OAM
-	
+
 	ret
 
 ;-------------------------------------------------------------------
@@ -601,24 +601,24 @@ sine_plasma_setup_sprites:
 ;-------------------------------------------------------------------
 
 SINE_PLASMA_MAP_UPDATE_BG_ATTR: MACRO
-	
+
 	ld	a,[sine_plasma_dma_copy_ready]
 	and	a,a
 	jr	z,.skip
-	
+
 	ld	a,0
 	ld	[sine_plasma_dma_copy_ready],a
-	
+
 	ld	a,0
 	ld	[rVBK],a
 
 	DMA_COPY	MAP_TEMP,$9800,32*18,0 ; src, dst, size, is_hdma
-	
+
 	ld	a,1
 	ld	[rVBK],a
 
 	DMA_COPY	ATTR_MAP_TEMP,$9800,32*18,0 ; src, dst, size, is_hdma
-	
+
 	ld	a,0
 	ld	[rVBK],a
 .skip:
@@ -628,30 +628,30 @@ ENDM
 ;----------------------------------------------
 
 sine_plasma_vbl_handler:
-	
+
 	SINE_PLASMA_MAP_UPDATE_BG_ATTR
-	
+
 	LONG_CALL	gbt_update
-	
+
 	ret
 
 ;----------------------------------------------
-	
+
 	GLOBAL Sine_Plasma
-	
+
 Sine_Plasma:
 
 	ld	a,LCDCF_ON|LCDCF_WINON|LCDCF_WIN9C00 ; use window to hide things
 	ld	[rLCDC],a
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,16
 	ld	hl,sine_plasma_tiles
 	ld	de,$0100 ;  de = start index
 	call	vram_copy_tiles
-	
+
 	ld	bc,14
 	ld	hl,sine_plasma_sprite_tiles
 	ld	de,$0000 ;  de = start index
@@ -659,26 +659,26 @@ Sine_Plasma:
 
 	call	sine_plasma_setup_sprites
 
-	call	sine_plasma_values_init	
-	
+	call	sine_plasma_values_init
+
 	ld	b,$90
 	call	wait_ly
 
 	call	sine_plasma_map_draw
-	
+
 	ld	a,$01
 	ld	[rIE],a
-	
+
 	ld	bc,sine_plasma_vbl_handler
 	call	irq_set_VBL
-	
+
 	call	wait_vbl
-	
+
 	; Load palettes and configure IRQs
-	
+
 	ld	b,$90
 	call	wait_ly
-	
+
 	ld	a,0
 	ld	hl,sine_plasma_background_palettes
 	call	bg_set_palette
@@ -688,31 +688,30 @@ Sine_Plasma:
 	call	bg_set_palette
 	ld	a,3
 	call	bg_set_palette
-	
+
 	ld	a,0
 	ld	hl,sine_plasma_sprites_palette
 	call	spr_set_palette
-	
+
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800|LCDCF_OBJON|LCDCF_OBJ16 ; configuration
 	ld	[rLCDC],a
-	
-	; START	
-	
+
+	; START
+
 .loop: ; Main loop
-	
+
 	call	sine_plasma_map_draw
 	call	sine_plasma_handle_events
-	
+
 	;call	wait_vbl
-	
+
 	ld	a,[sine_plasma_exit_demo]
 	and	a,a
 	jr	z,.loop
-	
+
 	; Exit...
 	; -------
-	
-	call	demo_config_default
-	
-	ret
 
+	call	demo_config_default
+
+	ret

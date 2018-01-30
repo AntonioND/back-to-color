@@ -1,17 +1,17 @@
-; 
-; Copyright (c) 2014, Antonio Niño Díaz (AntonioND)
+;
+; Copyright (c) 2014-2018, Antonio Niño Díaz (AntonioND)
 ; All rights reserved.
-; 
+;
 ; Redistribution and use in source and binary forms, with or without
 ; modification, are permitted provided that the following conditions are met:
-; 
+;
 ; * Redistributions of source code must retain the above copyright notice, this
 ;   list of conditions and the following disclaimer.
-; 
+;
 ; * Redistributions in binary form must reproduce the above copyright notice,
 ;   this list of conditions and the following disclaimer in the documentation
 ;   and/or other materials provided with the distribution.
-; 
+;
 ; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,7 +22,7 @@
 ; CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-; 
+;
 
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
@@ -33,7 +33,7 @@ COMBINED_MAP_TEMP	EQU	$D800 ;($D500 + 32*18) aligned to $100
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "MATRIX_DATA", DATA, BANK[7]
+	SECTION "MATRIX_DATA", ROMX, BANK[7]
 
 matrix_palettes:
 	DW $0000,$0000,$0000,$0000
@@ -463,7 +463,7 @@ matrix_rain_code_init_values: ; speed,ticks to change,x,y
 	DB	 6, 6, 7,2
 	DB	 9, 9, 8,5
 	DB	18,18, 9,3
-	
+
 	DB	22,22,10,3
 	DB	14,14,11,1
 	DB	 6, 6,12,2
@@ -499,7 +499,7 @@ matrix_rain_code_init_values: ; speed,ticks to change,x,y
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION	"Matrix_Vars",BSS
+	SECTION	"Matrix_Vars", WRAM0
 
 ; ---------------------------
 
@@ -521,7 +521,7 @@ matrix_current_number_of_rain_code:	DS	1
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "Matrix", CODE, BANK[7]
+	SECTION "Matrix", ROMX, BANK[7]
 
 ;----------------------------------------------
 
@@ -530,20 +530,20 @@ matrix_init_variables:
 	ld	a,0
 	ld	[matrix_exit_demo],a
 	ld	[matrix_bg_copy_dma_ready],a
-	
+
 	ld	a,MATRIX_NUMBER_OF_RAIN_CODE
 	ld	[matrix_current_number_of_rain_code],a
-	
+
 	ld	a,0
 	ld	[matrix_event_count],a
 	ld	[matrix_event_count+1],a
-	
+
 	ld	hl,_event_table_matrix
 	ld	a,h
 	ld	[matrix_current_event],a
 	ld	a,l
 	ld	[matrix_current_event+1],a
-	
+
 	ld	b,4*MATRIX_NUMBER_OF_RAIN_CODE
 	ld	hl,matrix_rain_code_init_values
 	ld	de,matrix_rain_code
@@ -582,13 +582,13 @@ _event_matrix_turn_on_rain_half:
 ;-------------------
 
 _event_table_matrix:
-	
+
 	DW	535,_event_matrix_turn_off_rain
 	DW	535+64,_event_matrix_clear_sprites
-	
+
 	DW	697,_event_matrix_turn_on_rain_half
 	DW	715,_event_matrix_turn_off_rain
-	
+
 	DW	715+64+16,_event_exit_matrix_demo ; it takes 64 frames to fade black. 16 extra black frames
 
 	DW	$FFFF,$0000 ; No more events! Don't remove this line!
@@ -596,22 +596,22 @@ _event_table_matrix:
 ;----------------------------------------------
 
 matrix_handle_events:
-	
+
 	; Handle events
 	; -------------
-	
+
 	ld	a,[matrix_event_count]
 	ld	e,a
 	ld	a,[matrix_event_count+1]
 	ld	d,a
-	
+
 	; Start of checking
-	
+
 	ld	a,[matrix_current_event]
 	ld	h,a
 	ld	a,[matrix_current_event+1]
 	ld	l,a
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = event counter trigger
@@ -619,30 +619,30 @@ matrix_handle_events:
 	and	a,b
 	cp	a,$FF ; if both are $FF, exit checking
 	jr	z,._exit_check_events
-	
+
 	ld	a,d
 	cp	a,b
 	jr	nz,._exit_check_events
-	
+
 	ld	a,e
 	cp	a,c
 	jr	nz,._exit_check_events
-	
+
 	inc	hl
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = ptr to function
 	inc	hl ; hl = ptr to next event
-	
+
 	ld	a,h
 	ld	[matrix_current_event],a
 	ld	a,l
 	ld	[matrix_current_event+1],a ; save pointer to next event
-	
+
 	ld	h,b
 	ld	l,c ; hl = ptr to function
-	
+
 	CALL_HL
 ._exit_check_events:
 
@@ -650,24 +650,24 @@ matrix_handle_events:
 	; -----------------------------
 
 	; More checks here
-	
+
 	; ...
-	
+
 	; Increase counter
 	; ----------------
-	
+
 	ld	a,[matrix_event_count]
 	ld	l,a
 	ld	a,[matrix_event_count+1]
 	ld	h,a
-	
+
 	inc	hl
-	
+
 	ld	a,l
 	ld	[matrix_event_count],a
 	ld	a,h
 	ld	[matrix_event_count+1],a
-	
+
 	ret
 
 ;-------------------------------------------------------------------------------------
@@ -676,20 +676,20 @@ MATRIX_SET_TILE: MACRO ; b = x, c = y
 
 	ld	d,MAP_TEMP >> 8
 	ld	e,b ; de = base + x
-	
+
 	ld	l,c
 	ld	h,$00 ; hl = y
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl ; hl = y *  32
-	
+
 	add	hl,de ; hl = base + x + (y * 32)
-	
+
 	ld	[hl],a
-	
+
 ENDM
 
 ;----------------------------------------------
@@ -698,20 +698,20 @@ MATRIX_SET_COMBINED_TILE: MACRO ; b = x, c = y
 
 	ld	d,COMBINED_MAP_TEMP >> 8
 	ld	e,b ; de = base + x
-	
+
 	ld	l,c
 	ld	h,$00 ; hl = y
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl ; hl = y *  32
-	
+
 	add	hl,de ; hl = base + x + (y * 32)
-	
+
 	ld	[hl],a
-	
+
 ENDM
 
 ;----------------------------------------------
@@ -719,70 +719,70 @@ ENDM
 matrix_map_handle:
 
 	; Wait until maps are copied to VRAM
-	
+
 	ld	a,[matrix_bg_copy_dma_ready]
 	and	a,a
 	jr	z,.update
-	
+
 	halt
 	jr	matrix_map_handle
-	
+
 .update:
 
 	; Randomize new symbols
 	; ---------------------
-	
+
 	ld	a,MATRIX_CHARACTERS_CHANGED_PER_FRAME
 .loop_new_chars:
 	push	af
-	
+
 	call	GetRandom
 	and	31
 	ld	b,a ; b = x
 	call	GetRandom
 	and	31
 	ld	c,a ; c = y
-	
+
 	call	GetRandom
-	
-	MATRIX_SET_TILE	
-	
+
+	MATRIX_SET_TILE
+
 	pop	af
 	dec	a
 	jr	nz,.loop_new_chars
-	
+
 	; Falling code
 	; ------------
-	
+
 	ld	hl,matrix_rain_code
 	ld	a,[matrix_current_number_of_rain_code]
 	and	a,a
 	jr	z,.no_rain
-	
+
 .loop_rain:
 	push	af
-	
+
 	ld	a,[hl+]
 	ld	b,[hl]
 	; a = speed | b = ticks to change
 	dec	b
 	jr	nz,.dont_change_rain
-	
+
 	ld	[hl+],a ; set countdown again (ticks left = speed)
-	
+
 	; hl = ptr to x
-	
+
 	ld	b,[hl]
 	inc	hl
 	ld	c,[hl]
-	
+
 	; b = x, c = y, hl = ptr to y
-	
+
 	inc	c
 	ld	a,c
 	cp	a,18
 	jr	nz,.no_screen_limit
-	
+
 	push	hl
 .another_rand:
 	call	GetRandom
@@ -791,17 +791,17 @@ matrix_map_handle:
 	jr	nc,.another_rand
 	ld	b,a
 	pop	hl
-	
+
 	ld	c,0 ; y = 0
-	
+
 	ld	[hl],c
 	dec	hl
 	ld	[hl],b
 	inc	hl
 	inc	hl
-	
+
 	ld	a,63
-	
+
 	push	hl
 	push	bc
 	MATRIX_SET_COMBINED_TILE
@@ -809,16 +809,16 @@ matrix_map_handle:
 	call	GetRandom
 	MATRIX_SET_TILE
 	pop	hl
-	
+
 	jr	.rain_changed
-	
+
 .no_screen_limit:
 
 	ld	[hl],c
 	inc	hl
-	
+
 	ld	a,63
-	
+
 	push	hl
 	push	bc
 	MATRIX_SET_COMBINED_TILE
@@ -839,7 +839,7 @@ matrix_map_handle:
 	inc	hl
 
 .rain_changed:
-	
+
 	pop	af
 	dec	a
 	jr	nz,.loop_rain
@@ -848,24 +848,24 @@ matrix_map_handle:
 
 	; Handle palettes
 	; ---------------
-	
-	
+
+
 	ld	de,0 ; array index
 .loop
-	
+
 	; Load combined tile
-	
+
 	ld	hl,COMBINED_MAP_TEMP
-	
+
 	add	hl,de
 	ld	a,[hl]
-	
+
 	and	a,a
-	jr	z,.skip_dec	
+	jr	z,.skip_dec
 	dec	a
 
 	ld	[hl],a
-	
+
 	sra	a
 	sra	a
 	sra	a
@@ -873,22 +873,22 @@ matrix_map_handle:
 .skip_dec:
 
 	; Save attr
-	
+
 	ld	hl,ATTR_MAP_TEMP
 	add	hl,de
 	ld	[hl],a
 
 	; Next tile
 	inc	de
-	
+
 	; If not column 20, loop
 	ld	a,e
 	and	a,$1F
 	cp	a,20
 	jr	nz,.loop
-	
+
 	; If column 20, add 12 and check if 32 * 20 = $280 is reached
-	
+
 	ld	hl,12
 	add	hl,de
 	ld	d,h
@@ -900,72 +900,72 @@ matrix_map_handle:
 	ld	a,$02
 	cp	d
 	jr	nz,.loop ; if de == $280 exit
-	
+
 	; Tell the VBL handler to copy
 	; ----------------------------
-	
+
 	ld	a,1
 	ld	[matrix_bg_copy_dma_ready],a
-	
+
 	ret
-	
+
 ;----------------------------------------------
 
 matrix_map_clear:
-	
+
 	ld	bc,32*18
 	ld	hl,MAP_TEMP
 	call	memset_rand ; start with random characters
-	
+
 	ld	bc,32*18
 	ld	d,0
 	ld	hl,ATTR_MAP_TEMP
 	call	memset
-	
+
 	ld	bc,32*18
 	ld	d,0
 	ld	hl,COMBINED_MAP_TEMP
 	call	memset
 
 	ret
-	
+
 ;----------------------------------------------
 
 matrix_map_update_bg_attr:
-	
+
 	ld	a,[matrix_bg_copy_dma_ready]
 	and	a,a
 	ret	z
-	
+
 	ld	a,0
 	ld	[matrix_bg_copy_dma_ready],a
-	
+
 	ld	a,1
 	ld	[rVBK],a
 	DMA_COPY	ATTR_MAP_TEMP,$9800,32*18,0 ; src, dst, size, is_hdma
-	
+
 	ld	a,0
 	ld	[rVBK],a
 	DMA_COPY	MAP_TEMP,$9800,32*18,0 ; src, dst, size, is_hdma
-	
+
 	ret
 
 ;----------------------------------------------
 
 matrix_bg_load_palettes_sprites:
-	
+
 	ld	a,[matrix_has_to_load_palettes_oam]
 	and	a,a
 	ret	z
-	
+
 	xor	a,a
 	ld	[matrix_has_to_load_palettes_oam],a
-	
+
 	ld	hl,matrix_palettes
-	
+
 	ld	a,$80 ; auto increment
 	ld	[rBCPS],a
-	
+
 	ld	b,8
 .loop:
 
@@ -973,39 +973,39 @@ matrix_bg_load_palettes_sprites:
 	ld	[rBCPD],a
 	ld	a,[hl+]
 	ld	[rBCPD],a
-	
+
 	ld	a,[hl+]
 	ld	[rBCPD],a
 	ld	a,[hl+]
 	ld	[rBCPD],a
-	
+
 	ld	a,[hl+]
 	ld	[rBCPD],a
 	ld	a,[hl+]
 	ld	[rBCPD],a
-	
+
 	ld	a,[hl+]
 	ld	[rBCPD],a
 	ld	a,[hl+]
 	ld	[rBCPD],a
-	
+
 	dec	b
 	jr	nz,.loop
-	
+
 	ld	a,0
 	ld	hl,matrix_sprites_palette
 	call	spr_set_palette
-	
+
 	call	refresh_OAM
-	
+
 	ret
 
 ;----------------------------------------------
 
 matrix_setup_sprites:
-	
+
 	; THE
-	
+
 	ld	bc,((8+2)<<8)|(112-2)
 	ld	l,0
 	call	sprite_set_xy
@@ -1018,7 +1018,7 @@ matrix_setup_sprites:
 	ld	bc,((32+2)<<8)|(112-2)
 	ld	l,3
 	call	sprite_set_xy
-	
+
 	ld	a,0
 	ld	l,0
 	call	sprite_set_tile
@@ -1031,10 +1031,10 @@ matrix_setup_sprites:
 	ld	a,6
 	ld	l,3
 	call	sprite_set_tile
-	
+
 	; MATRIX
-	
-	
+
+
 	ld	bc,((8+2)<<8)|(128-2)
 	ld	l,4
 	call	sprite_set_xy
@@ -1056,7 +1056,7 @@ matrix_setup_sprites:
 	ld	bc,((56+2)<<8)|(128-2)
 	ld	l,10
 	call	sprite_set_xy
-	
+
 	ld	a,8
 	ld	l,4
 	call	sprite_set_tile
@@ -1080,7 +1080,7 @@ matrix_setup_sprites:
 	call	sprite_set_tile
 
 	; HAS YOU
-	
+
 	ld	bc,((8+2)<<8)|(144-2)
 	ld	l,11
 	call	sprite_set_xy
@@ -1105,7 +1105,7 @@ matrix_setup_sprites:
 	ld	bc,((64+2)<<8)|(144-2)
 	ld	l,18
 	call	sprite_set_xy
-	
+
 	ld	a,22
 	ld	l,11
 	call	sprite_set_tile
@@ -1130,9 +1130,9 @@ matrix_setup_sprites:
 	ld	a,36
 	ld	l,18
 	call	sprite_set_tile
-	
+
 	; Done!
-	
+
 	ret
 
 ;-------------------------------------------------------------------
@@ -1140,44 +1140,44 @@ matrix_setup_sprites:
 ;-------------------------------------------------------------------
 
 matrix_vbl_handler:
-	
+
 	call	matrix_bg_load_palettes_sprites
-	
+
 	call	matrix_map_update_bg_attr
-	
+
 	LONG_CALL	gbt_update
-	
+
 	ret
 
 ;----------------------------------------------
-	
+
 	GLOBAL Matrix
-	
+
 Matrix:
 
 	call	matrix_init_variables
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,162
 	ld	hl,matrix_tiles
 	ld	de,128 ;  de = start index
 	call	vram_copy_tiles
-	
+
 	ld	bc,256-162
 	ld	hl,matrix_tiles+128*8
 	ld	de,128+162 ;  de = start index
 	call	vram_copy_tiles
-	
+
 	ld	bc,38
 	ld	hl,matrix_sprite_tiles
 	ld	de,0 ;  de = start index
 	call	vram_copy_tiles
-	
+
 	ld	a,1
 	ld	[rVBK],a
-	
+
 	ld	bc,32*32
 	ld	d,7
 	ld	hl,$9800
@@ -1185,54 +1185,53 @@ Matrix:
 
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,32*32
 	ld	d,0
 	ld	hl,$9800
 	call	vram_memset ; bc = size    d = value    hl = dest address
-	
+
 	call	matrix_map_clear
 
 	call	matrix_map_handle
-	
+
 	call	matrix_setup_sprites
-	
-	call	wait_vbl
-	
-	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800|LCDCF_OBJ16|LCDCF_OBJON ; configuration
-	ld	[rLCDC],a
-	
-	; Load palettes and configure IRQs
-	
-	ld	a,$01
-	ld	[rIE],a
-	
-	ld	bc,matrix_vbl_handler
-	call	irq_set_VBL
-	
-	ld	a,1
-	ld	[matrix_has_to_load_palettes_oam],a
-	
+
 	call	wait_vbl
 
-	; START	
-	
-.loop: ; Main loop
-	
-	call	matrix_handle_events
-	
-	call	matrix_map_handle
-	
+	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800|LCDCF_OBJ16|LCDCF_OBJON ; configuration
+	ld	[rLCDC],a
+
+	; Load palettes and configure IRQs
+
+	ld	a,$01
+	ld	[rIE],a
+
+	ld	bc,matrix_vbl_handler
+	call	irq_set_VBL
+
+	ld	a,1
+	ld	[matrix_has_to_load_palettes_oam],a
+
 	call	wait_vbl
-	
+
+	; START
+
+.loop: ; Main loop
+
+	call	matrix_handle_events
+
+	call	matrix_map_handle
+
+	call	wait_vbl
+
 	ld	a,[matrix_exit_demo]
 	and	a,a
 	jr	z,.loop
 
 	; Exit...
 	; -------
-	
-	call	demo_config_default
-	
-	ret
 
+	call	demo_config_default
+
+	ret

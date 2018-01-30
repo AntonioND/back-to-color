@@ -1,17 +1,17 @@
-; 
-; Copyright (c) 2014, Antonio Niño Díaz (AntonioND)
+;
+; Copyright (c) 2014-2018, Antonio Niño Díaz (AntonioND)
 ; All rights reserved.
-; 
+;
 ; Redistribution and use in source and binary forms, with or without
 ; modification, are permitted provided that the following conditions are met:
-; 
+;
 ; * Redistributions of source code must retain the above copyright notice, this
 ;   list of conditions and the following disclaimer.
-; 
+;
 ; * Redistributions in binary form must reproduce the above copyright notice,
 ;   this list of conditions and the following disclaimer in the documentation
 ;   and/or other materials provided with the distribution.
-; 
+;
 ; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,7 +22,7 @@
 ; CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-; 
+;
 
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
@@ -31,7 +31,7 @@ HORIZONTAL_BARS_BAR_HEIGHT	EQU	8
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "HORIZONTAL_BARS_DATA", DATA, BANK[1]
+	SECTION "HORIZONTAL_BARS_DATA", ROMX, BANK[1]
 
 horizontal_bars_handler_start_speeds: ; ((144/HORIZONTAL_BARS_BAR_HEIGHT) * 3)
 	DB	1,0,2
@@ -52,7 +52,7 @@ horizontal_bars_handler_start_speeds: ; ((144/HORIZONTAL_BARS_BAR_HEIGHT) * 3)
 	DB	1,1,2
 	DB	1,0,2
 	DB	0,1,2
-	
+
 horizontal_bars_handler_start_values: ; ((144/HORIZONTAL_BARS_BAR_HEIGHT) * 3)
 	DB	31,0,0
 	DB	0,15,0
@@ -106,7 +106,7 @@ horizontal_bars_bg_map:
 	DB	2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1
 	DB	1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2
 	DB	2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1
-	
+
 
 horizontal_bars_screen_text:
 	;DB	"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@          "
@@ -212,7 +212,7 @@ DB $1C,$14,$3C,$34,$34,$2C,$38,$38
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION	"Horizontal_Bars_Vars",BSS
+	SECTION	"Horizontal_Bars_Vars", WRAM0
 
 ; ly handler
 ; ----------
@@ -246,12 +246,12 @@ horizontal_bars_change_count:	DS	1
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "Horizontal_Bars", CODE, BANK[1]
+	SECTION "Horizontal_Bars", ROMX, BANK[1]
 
 ;----------------------------------------------
 
 horizontal_bars_font_get_ascii: ; a = ascii character
-	
+
 	cp	a,"!"
 	jr	nz,.__1
 	ld	a,26
@@ -296,7 +296,7 @@ horizontal_bars_font_get_ascii: ; a = ascii character
 	jr	c,.__9
 	cp	a,"9"+1
 	jr	nc,.__9
-	
+
 	sub	a,"0"
 	add	a,33
 	ret
@@ -313,20 +313,20 @@ horizontal_bars_font_get_ascii: ; a = ascii character
 .__11:
 
 	; We could check if it is actually a normal character, but we aren't going to write anything strange...
-	
+
 	; Characters A to Z
 	sub	a,"A"
-	
+
 	ret
 
 ;----------------------------------------------
 
 horizontal_bars_update_sprites:
-	
+
 	ld	a,[horizontal_bars_sprites_active]
 	and	a,a
 	ret	z
-	
+
 	ld	a,[horizontal_bars_change_count]
 	inc	a
 	ld	[horizontal_bars_change_count],a
@@ -345,20 +345,20 @@ horizontal_bars_update_sprites:
 	dec	hl
 	ld	[hl],e ; de = horizontal_bars_next_char
 	dec	de
-	
+
 	ld	hl,horizontal_bars_screen_text
 	add	hl,de ; hl = pointer to next character
 	ld	b,[hl] ; b = next character
-	
+
 	ld	hl,horizontal_bars_next_sprite
 	ld	a,[hl]
 	inc	a
 	cp	a,16
 	jr	nz,._no_limit
 	xor	a,a
-._no_limit:	
+._no_limit:
 	ld	[hl],a
-	
+
 	ld	l,a
 	ld	a,b
 	cp	a,123
@@ -371,10 +371,10 @@ horizontal_bars_update_sprites:
 	call	sprite_set_tile
 
 ._no_change:
-	
+
 	ld	hl,OAM_Copy
 	ld	b,0
-	
+
 ._next
 
 	inc	hl
@@ -384,207 +384,207 @@ horizontal_bars_update_sprites:
 	dec	hl
 	ld	d,Sine >> 8
 	ld	a,[de]
-	
+
 	sra	a
 	sra	a
 	sra	a
 	add	a,(144/2)+16-4
-	
+
 	ld	[hl],a
 
 	ld	de,4
 	add	hl,de
-	
+
 	inc	b
 	ld	a,b
 	cp	a,16
 	jr	nz,._next
-	
+
 	ret
 
 ;----------------------------------------------
 
 horizontal_bars_palette_set_fading:  ; b = red, c = green, l = blue
-	
+
 	push	bc
 	push	hl
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,l
 	or	a,c
 	ld	l,a
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,l
 	or	a,b
 	ld	e,a
 	ld	d,h ; de = rgb
-	
+
 	ld	hl,horizontal_bars_palette
 	ld	[hl],e
 	inc	hl
 	ld	[hl],d ; set first color...
-	
+
 	pop	hl
 	pop	bc
-	
+
 	ld	a,l
 	sub	a,8
 	jr	nc,._001
 	xor	a,a
 ._001:
 	ld	l,a
-	
+
 	ld	a,c
 	sub	a,8
 	jr	nc,._002
 	xor	a,a
 ._002:
 	ld	c,a
-	
+
 	ld	a,b
 	sub	a,8
 	jr	nc,._003
 	xor	a,a
 ._003:
 	ld	b,a
-	
+
 	push	bc
 	push	hl
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,l
 	or	a,c
 	ld	l,a
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,l
 	or	a,b
 	ld	e,a
 	ld	d,h ; de = rgb
-	
+
 	ld	hl,horizontal_bars_palette + 2
 	ld	[hl],e
 	inc	hl
 	ld	[hl],d ; set second color...
-	
+
 	pop	hl
 	pop	bc
-	
+
 	ld	a,l
 	sub	a,8
 	jr	nc,._004
 	xor	a,a
 ._004:
 	ld	l,a
-	
+
 	ld	a,c
 	sub	a,8
 	jr	nc,._005
 	xor	a,a
 ._005:
 	ld	c,a
-	
+
 	ld	a,b
 	sub	a,8
 	jr	nc,._006
 	xor	a,a
 ._006:
 	ld	b,a
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,l
 	or	a,c
 	ld	l,a
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,l
 	or	a,b
 	ld	e,a
 	ld	d,h ; de = rgb
-	
+
 	ld	hl,horizontal_bars_palette + 4
 	ld	[hl],e
 	inc	hl
 	ld	[hl],d ; set third color...
-	
+
 	ret
-	
+
 ;----------------------------------------------
 
 horizontal_bars_palette_load:
-	
+
 	call	wait_screen_blank
-	
+
 	ld	a,$80 ; auto increment
 	ld	[rBCPS],a
-	
+
 	ld	hl,horizontal_bars_palette
-	
+
 	ld	a,[hl+]
 	ld	[rBCPD],a
 	ld	a,[hl+]
 	ld	[rBCPD],a
-	
+
 	ld	a,[hl+]
 	ld	[rBCPD],a
 	ld	a,[hl+]
 	ld	[rBCPD],a
-	
+
 	ld	a,[hl+]
 	ld	[rBCPD],a
 	ld	a,[hl]
 	ld	[rBCPD],a
-	
+
 	ret
 
 ;----------------------------------------------
 
 horizontal_bars_handle_values:  ; e = array index   a = returned value
-	
+
 	ld	d,0 ; de = array index
-	
+
 	ld	hl,horizontal_bars_pal_speed
 	add	hl,de
 	ld	b,[hl] ; b = speed
-	
+
 	ld	hl,horizontal_bars_pal_value
 	add	hl,de
 	ld	c,[hl] ; c = base
-	
+
 	ld	a,c
 	add	a,b
-	
+
 	ld	c,a ; save new value
 	; check if lower than 0...
 	bit	7,a
@@ -605,36 +605,36 @@ horizontal_bars_handle_values:  ; e = array index   a = returned value
 	inc	a
 	ld	b,a	; speed = -speed
 ._save_values
-	
+
 	ld	hl,horizontal_bars_pal_speed
 	add	hl,de
 	ld	[hl],b ; b = speed
-	
+
 	ld	hl,horizontal_bars_pal_value
 	add	hl,de
 	ld	[hl],c ; c = base
-	
+
 	ld	a,c
-	
+
 	ret
-	
+
 ;----------------------------------------------
 
 horizontal_bars_bar_set_black: ; a = bar number
-	
+
 	ld	b,a
 	sla	a
 	add	a,b ; a *= 3
 	ld	e,a
 	ld	d,0 ; de = array index
 	xor	a,a
-	
+
 	ld	hl,horizontal_bars_pal_value
 	add	hl,de
 	ld	[hl+],a
 	ld	[hl+],a
 	ld	[hl+],a
-	
+
 	ld	hl,horizontal_bars_pal_speed
 	add	hl,de
 	ld	[hl+],a
@@ -644,11 +644,11 @@ horizontal_bars_bar_set_black: ; a = bar number
 	ret
 
 ;----------------------------------------------
-	
+
 horizontal_bars_lcd_handler:
-	
+
 	call	horizontal_bars_palette_load
-	
+
 	ld	a,[horizontal_bars_next_ly]
 	add	a,HORIZONTAL_BARS_BAR_HEIGHT
 	cp	a,143
@@ -660,7 +660,7 @@ horizontal_bars_lcd_handler:
 ._not_next_line_vbl:
 	ld	[rLYC],a
 	ld	[horizontal_bars_next_ly],a
-	
+
 	ld	hl,horizontal_bars_next_scroll_index
 	ld	e,[hl]
 	inc	[hl]
@@ -675,11 +675,11 @@ horizontal_bars_lcd_handler:
 	add	a,[hl]
 	pop	hl
 	ld	[hl],a
-	
+
 	ld	hl,horizontal_bars_next_index
 	ld	e,[hl]
 	inc	[hl]
-	
+
 	push	hl
 	call	horizontal_bars_handle_values
 	pop	hl
@@ -694,88 +694,88 @@ horizontal_bars_lcd_handler:
 	inc	[hl]
 	call	horizontal_bars_handle_values
 	ld	[horizontal_bars_pal_blue],a
-	
+
 	ld	a,[horizontal_bars_pal_red]
 	ld	b,a
 	ld	a,[horizontal_bars_pal_green]
 	ld	c,a
 	ld	a,[horizontal_bars_pal_blue]
 	ld	l,a
-	
-	call	horizontal_bars_palette_set_fading	
-	
+
+	call	horizontal_bars_palette_set_fading
+
 	ret
 
 ;----------------------------------------------
 
 horizontal_bars_vbl_handler:
-	
+
 	call	refresh_OAM
-	
+
 	call	horizontal_bars_update_sprites
-	
+
 	LONG_CALL	gbt_update
-	
+
 	ret
-	
+
 ;----------------------------------------------
-	
+
 	GLOBAL Horizontal_Bars
-	
+
 Horizontal_Bars:
-	
+
 	ld	a,LCDCF_BG8800|LCDCF_BG9800|LCDCF_WINON|LCDCF_WIN9C00|LCDCF_ON
-	ld	[rLCDC],a	
-	
+	ld	[rLCDC],a
+
 	; clear screen...
-	
+
 	xor	a,a
 	ld	[rWY],a
 	ld	[rWX],a
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	hl,$8000 + (16 * 256) ; clear tile 0
 	ld	bc,16
 	ld	d,$00
 	call	vram_memset
-	
-	ld	hl,$9C00 
+
+	ld	hl,$9C00
 	ld	bc,32*32
-	ld	d,$00	
-	call	vram_memset	
-	
+	ld	d,$00
+	call	vram_memset
+
 	ld	a,1
 	ld	[rVBK],a
-	
-	ld	hl,$9C00 
+
+	ld	hl,$9C00
 	ld	bc,32*32
 	ld	d,$07	; window use palette 7 (black)
-	call	vram_memset	
-	
+	call	vram_memset
+
 	ld	hl,$9800
 	ld	bc,32*32
 	ld	d,$00
 	call	vram_memset
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,32*18 ; size
 	ld	hl,horizontal_bars_bg_map ;src
 	ld	de,$9800 ;dst
 	call	vram_copy
-	
+
 	ld	bc,2
 	ld	hl,horizontal_bars_bg_tiles
 	ld	de,$0101 ;  de = start index
-	call	vram_copy_tiles     
-	
+	call	vram_copy_tiles
+
 	ld	bc,46
 	ld	hl,horizontal_bars_spr_font
 	ld	de,$0000 ;  de = start index
-	call	vram_copy_tiles     
+	call	vram_copy_tiles
 
 	xor	a,a
 	ld	[rSCY],a
@@ -783,23 +783,23 @@ Horizontal_Bars:
 	ld	[rWY],a
 	inc	a ; to avoid the window + bg scroll bug
 	ld	[rWX],a
-	
+
 	ld	bc,((144/HORIZONTAL_BARS_BAR_HEIGHT) * 3)
 	ld	de,horizontal_bars_pal_speed
 	ld	hl,horizontal_bars_handler_start_speeds
 	call	memcopy ; set initial speeds
-	
+
 	ld	bc,((144/HORIZONTAL_BARS_BAR_HEIGHT) * 3)
 	ld	de,horizontal_bars_pal_value
 	ld	hl,horizontal_bars_handler_start_values
 	call	memcopy ; set initial values
-	
+
 	; setup sprites
 	; -------------
-	
+
 	ld	b,168 ; x coordinate
 	ld	c,0 ; sprite number
-._setup_sprites	
+._setup_sprites
 	push	bc
 	ld	l,c
 	ld	c,0
@@ -819,40 +819,40 @@ Horizontal_Bars:
 	ld	b,a
 	cp	a,168
 	jr	nz,._setup_sprites
-	
+
 	ld	a,1
 	ld	[horizontal_bars_sprites_active],a
 	xor	a,a
 	ld	[horizontal_bars_next_sprite],a
 	ld	[horizontal_bars_next_char],a
 	ld	[horizontal_bars_change_count],a
-	
+
 	; Setup palette and IRQs
-	
+
 	ld b,144
 	call	wait_ly
 	xor	a,a
 	ld	hl,horizontal_bars_horizontal_bars_spr_font_pal
 	call	spr_set_palette
-	
+
 	ld	bc,horizontal_bars_vbl_handler
 	call	irq_set_VBL
-	
+
 	ld	bc,horizontal_bars_lcd_handler
 	call	irq_set_LCD
-	
+
 	ld	a,$03
 	ld	[rIE],a
-	
+
 	ld	a,STATF_LYC
 	ld	[rSTAT],a
 
 	ld	a,LCDCF_BG8800|LCDCF_BG9800|LCDCF_WINON|LCDCF_WIN9C00|LCDCF_ON|LCDCF_OBJ8|LCDCF_OBJON
 	ld	[rLCDC],a
-	
+
 	; Start...
 	; --------
-	
+
 ._show_bars:
 	ld	e,15 ; frames to wait to turn on a bar
 	call	wait_frames
@@ -861,15 +861,15 @@ Horizontal_Bars:
 	ld	[rWY],a
 	cp	a,144
 	jr	nz,._show_bars
-	
-	
+
+
 ._wait_end:
 	call	wait_vbl
 	ld	a,[horizontal_bars_sprites_active]
 	and	a,a
 	jr	nz,._wait_end
-	
-	
+
+
 	ld	b,18
 	ld	hl,horizontal_bars_switch_off_order
 ._next_bar:
@@ -883,15 +883,14 @@ Horizontal_Bars:
 	pop	bc
 	dec	b
 	jr	nz,._next_bar
-	
+
 	xor	a,a
 	ld	[rWY],a
 	ld	[rWX],a
 
 	; Exit...
 	; -------
-	
-	call	demo_config_default
-	
-	ret
 
+	call	demo_config_default
+
+	ret

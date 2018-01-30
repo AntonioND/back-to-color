@@ -1,17 +1,17 @@
-; 
-; Copyright (c) 2014, Antonio Niño Díaz (AntonioND)
+;
+; Copyright (c) 2014-2018, Antonio Niño Díaz (AntonioND)
 ; All rights reserved.
-; 
+;
 ; Redistribution and use in source and binary forms, with or without
 ; modification, are permitted provided that the following conditions are met:
-; 
+;
 ; * Redistributions of source code must retain the above copyright notice, this
 ;   list of conditions and the following disclaimer.
-; 
+;
 ; * Redistributions in binary form must reproduce the above copyright notice,
 ;   this list of conditions and the following disclaimer in the documentation
 ;   and/or other materials provided with the distribution.
-; 
+;
 ; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,7 +22,7 @@
 ; CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-; 
+;
 
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
@@ -34,7 +34,7 @@ TRAIN_ENABLE_BIRDS	EQU	1
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "TRAIN_DATA", DATA, BANK[5]
+	SECTION "TRAIN_DATA", ROMX, BANK[5]
 
 jordi_train_palettes:
 	DW	9023,6719,9533,7411
@@ -915,7 +915,7 @@ ENDC
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION	"Train_Vars",BSS
+	SECTION	"Train_Vars", WRAM0
 
 ; ---------------------------
 
@@ -959,8 +959,8 @@ TRAIN_SCROLL_SPEED_BUILDING		EQU	192
 TRAIN_SCROLL_SPEED_TRAIN:		DS	2 ; This starts as TRAIN_SCROLL_MAX_SPEED
 TRAIN_SCROLL_SPEED_FLOOR		EQU	512
 TRAIN_SCROLL_SPEED_GRASS		EQU	576
-TRAIN_SCROLL_SPEED_WATER_1		EQU	640 
-TRAIN_SCROLL_SPEED_WATER_2		EQU	768 
+TRAIN_SCROLL_SPEED_WATER_1		EQU	640
+TRAIN_SCROLL_SPEED_WATER_2		EQU	768
 TRAIN_SCROLL_SPEED_WATER_3		EQU	896 ; 896
 TRAIN_SCROLL_SPEED_WATER_4		EQU	1024 ; 1024
 TRAIN_SCROLL_SPEED_WATER_5		EQU	1280 ; 1152
@@ -988,7 +988,7 @@ ENDC
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "Train", CODE, BANK[5]
+	SECTION "Train", ROMX, BANK[5]
 
 ;----------------------------------------------
 
@@ -1007,7 +1007,7 @@ train_init_variables:
 	ld	[train_scroll_tile_water_4],a
 	ld	[train_scroll_tile_water_5],a
 	ld	[train_scroll_tile_water_6],a
-	
+
 	xor	a,a
 	ld	[train_scroll_scx_clouds+0],a
 	ld	[train_scroll_scx_clouds+1],a
@@ -1045,19 +1045,19 @@ ENDC
 	ld	[TRAIN_SCROLL_SPEED_TRAIN+0],a
 	ld	a,TRAIN_SCROLL_MIN_SPEED>>8
 	ld	[TRAIN_SCROLL_SPEED_TRAIN+1],a
-	
+
 	ld	a,0
 	ld	[train_acelerate],a
-	
+
 	; -----------
 
 	ld	a,0
 	ld	[train_exit_demo],a
-	
+
 	ld	a,0
 	ld	[train_event_count],a
 	ld	[train_event_count+1],a
-	
+
 	ld	hl,_event_table_train
 	ld	a,h
 	ld	[train_current_event],a
@@ -1084,32 +1084,32 @@ _event_train_decelerate:
 	ret
 
 _event_train_enable_1_bird:
-	
+
 	call	train_birds_configure_1
-	
+
 	ret
 
 _event_train_enable_3_birds:
-	
+
 	call	train_birds_configure_3
-	
+
 	ret
 
 ;-------------------
 
 _event_table_train:
-	
+
 	DW	1,_event_train_enable_1_bird
-	
+
 	DW	100,_event_train_acelerate
 	DW	400,_event_train_decelerate
-	
+
 	DW	800,_event_train_enable_3_birds
-	
+
 	DW	1000,_event_train_acelerate
 	DW	1400,_event_train_decelerate
 	DW	1450,_event_train_acelerate
-	
+
 	DW	1600,_event_exit_train_demo
 
 	DW	$FFFF,$0000 ; No more events! Don't remove this line!
@@ -1117,22 +1117,22 @@ _event_table_train:
 ;----------------------------------------------
 
 train_handle_events:
-	
+
 	; Handle events
 	; -------------
-	
+
 	ld	a,[train_event_count]
 	ld	e,a
 	ld	a,[train_event_count+1]
 	ld	d,a
-	
+
 	; Start of checking
-	
+
 	ld	a,[train_current_event]
 	ld	h,a
 	ld	a,[train_current_event+1]
 	ld	l,a
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = event counter trigger
@@ -1140,55 +1140,55 @@ train_handle_events:
 	and	a,b
 	cp	a,$FF ; if both are $FF, exit checking
 	jr	z,._exit_check_events
-	
+
 	ld	a,d
 	cp	a,b
 	jr	nz,._exit_check_events
-	
+
 	ld	a,e
 	cp	a,c
 	jr	nz,._exit_check_events
-	
+
 	inc	hl
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = ptr to function
 	inc	hl ; hl = ptr to next event
-	
+
 	ld	a,h
 	ld	[train_current_event],a
 	ld	a,l
 	ld	[train_current_event+1],a ; save pointer to next event
-	
+
 	ld	h,b
 	ld	l,c ; hl = ptr to function
-	
+
 	CALL_HL
 ._exit_check_events:
 
 	; Now, handle functions...
 	; ------------------------
-	
+
 	; More checks here
-	
+
 	; ...
-	
+
 	; Increase counter
 	; ----------------
-	
+
 	ld	a,[train_event_count]
 	ld	l,a
 	ld	a,[train_event_count+1]
 	ld	h,a
-	
+
 	inc	hl
-	
+
 	ld	a,l
 	ld	[train_event_count],a
 	ld	a,h
 	ld	[train_event_count+1],a
-	
+
 	ret
 
 ;----------------------------------------------
@@ -1199,61 +1199,61 @@ train_memcopy_src_dst:
 
 	ld	a,[hl]
 	ld	[de],a
-	
+
 	ld	a,b ; save b
-	
+
 	ld	bc,128
 	add	hl,bc ; increase source
 	push	hl
-	
+
 	ld	hl,32
 	add	hl,de ; increase dest
 	ld	e,l
 	ld	d,h
-	
+
 	pop	hl
-	
+
 	ld	b,a ; restore b
-	
+
 	dec	b
 	jr	nz,train_memcopy_src_dst
-	
+
 	ret
 
 ;----------------------------------------------
 
 train_copy_column: ; b = y (0-10) , c = x (0-127) , d = number of tiles to copy (going down)
-	
+
 	push	bc
-	
+
 	ld	a,c
-	
+
 	ld	c,0
 	srl	b
 	rr	c
 	or	a,c
 	ld	c,a ; bc = (y << 7) | x
-	
+
 	ld	a,d ; a = number of tiles to copy (going down)
-	
+
 	ld	hl,jordi_train_map
 	add	hl,bc ; hl = jordi_train_map + (y << 7) | x
 	ld	e,l
 	ld	d,h  ; de = jordi_train_map + (y << 7) | x
-	
+
 	ld	hl,jordi_train_attr
 	add	hl,bc ; hl = jordi_train_attr + (y << 7) | x
-	
+
 	pop	bc
-	
+
 	; a = number of tiles to copy (going down)
 	; bc = yx
 	; de = jordi_train_map + (y << 7) | x
 	; hl = jordi_train_attr + (y << 7) | x
-	
+
 	push	af
 	push	hl
-	
+
 	ld	a,31
 	and	a,c ; a = x & 31
 	ld	h,0
@@ -1265,76 +1265,76 @@ train_copy_column: ; b = y (0-10) , c = x (0-127) , d = number of tiles to copy 
 	add	hl,hl ; hl = y << 5
 	or	a,l
 	ld	l,a ; hl = (y << 5) | x
-	
+
 	ld	bc,MAP_TEMP
 	add	hl,bc ; hl = MAP_TEMP + ((y << 5) | x)
 	ld	b,h
 	ld	c,l ; bc = MAP_TEMP + ((y << 5) | x)
-	
-	pop	hl	
+
+	pop	hl
 	pop	af
-	
+
 	; a = number of tiles to copy (going down)
 	; bc = MAP_TEMP + ((y << 5) | x)
 	; de = jordi_train_map + (y << 7) | x
 	; hl = jordi_train_attr + (y << 7) | x
-	
+
 	; Copy tiles first
 	; ----------------
-	
+
 	push	hl
 	push	bc
 	push	af
-	
+
 	ld	h,d
 	ld	l,e ; hl = jordi_train_map + (y << 7) | x
-	
+
 	ld	d,b
 	ld	e,c ; de = MAP_TEMP + ((y << 5) | x)
-	
+
 	ld	b,a
-	
+
 	ld	c,128
-	
+
 	call	train_memcopy_src_dst ; b = size    hl = source    de = dest
-	
+
 	pop	bc
 	pop	de
 	pop	hl
-	
+
 	; b = number of tiles to copy (going down)
 	; de = MAP_TEMP + ((y << 5) | x)
 	; hl = jordi_train_attr + (y << 7) | x
-	
+
 	push	hl
 	ld	hl,ATTR_MAP_TEMP - MAP_TEMP
 	add	hl,de
 	ld	d,h
 	ld	e,l ; hl = ATTR_MAP_TEMP + ((y << 5) | x)
 	pop	hl
-	
+
 	; b = number of tiles to copy (going down)
 	; de = ATTR_MAP_TEMP + ((y << 5) | x)
 	; hl = jordi_train_attr + (y << 7) | x
-	
+
 	; Copy attr
 	; ---------
-	
+
 	ld	c,128
 
 	call	train_memcopy_src_dst ; b = size    hl = source    de = dest
-	
+
 	ret
 
 ;----------------------------------------------
 
 train_palette_load:
-	
+
 	ld	b,$90
 	call	wait_ly
-	
+
 	ld	hl,jordi_train_palettes
-	
+
 	ld	a,0
 	call	bg_set_palette
 	ld	a,1
@@ -1359,61 +1359,61 @@ IF	TRAIN_ENABLE_BIRDS == 1
 ENDC
 
 	ret
-	
+
 ;----------------------------------------------
 
 train_load_maps:
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	hl,jordi_train_map
 	ld	de,MAP_TEMP
 	ld	a,20 ; 18 + 2 extra rows
 .loop_tiles:
 	push	af
-	
+
 	ld	b,32
 	call	memcopy_fast
-	
+
 	; now increase src by 96 to align columns
-	
+
 	push	de
 	ld	de,96
 	add	hl,de
 	pop	de
-	
+
 	pop	af
 	dec	a
 	jr	nz,.loop_tiles
-	
+
 	; ----------------
-	
+
 	ld	a,1
 	ld	[rVBK],a
-	
+
 	ld	hl,jordi_train_attr
 	ld	de,ATTR_MAP_TEMP
 	ld	a,20 ; 18 + 2 extra rows
 .loop_attr:
 	push	af
-	
+
 	ld	b,32
 	call	memcopy_fast
-	
+
 	; now increase src by 96 to align columns
-	
+
 	push	de
 	ld	de,96
 	add	hl,de
 	pop	de
-	
+
 	pop	af
 	dec	a
 	jr	nz,.loop_attr
-	
+
 	; ----------------
-	
+
 	ld	a,0
 	ld	[rVBK],a
 
@@ -1425,34 +1425,34 @@ train_update_scrolls:
 
 	; Clouds
 	; ------
-	
+
 	ld	a,[train_scroll_scx_clouds+0]
 	ld	e,a
 	ld	a,[train_scroll_scx_clouds+1]
 	ld	d,a
 	and	a,$F8 ; remove lower 7 bits
 	ld	b,a ; save in b
-	
+
 	ld	hl,TRAIN_SCROLL_SPEED_CLOUDS
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_scroll_scx_clouds+0],a
 	ld	a,h
 	ld	[train_scroll_scx_clouds+1],a
-	
+
 	and	a,$F8 ; remove lower 7 bits
-	
+
 	cp	a,b ; check if higher byte has changed to update tile number
 	jr	z,.notchanged_clouds
-	
+
 	ld	a,[train_scroll_tile_clouds]
 	inc	a
 	and	a,127
 	ld	[train_scroll_tile_clouds],a
-	
+
 .notchanged_clouds:
-	
+
 	ld	a,[train_scroll_tile_clouds]
 	add	a,21
 	and	a,127
@@ -1460,35 +1460,35 @@ train_update_scrolls:
 	ld	c,a
 	ld	d,3
 	call	train_copy_column ; b = y (0-10) , c = x (0-127) , d = number of tiles to copy (going down)
-	
+
 	; Mountain
 	; --------
-	
+
 	ld	a,[train_scroll_scx_mountain+0]
 	ld	e,a
 	ld	a,[train_scroll_scx_mountain+1]
 	ld	d,a
 	and	a,$F8 ; remove lower 7 bits
 	ld	b,a ; save in b
-	
+
 	ld	hl,TRAIN_SCROLL_SPEED_MOUNTAIN
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_scroll_scx_mountain+0],a
 	ld	a,h
 	ld	[train_scroll_scx_mountain+1],a
-	
+
 	and	a,$F8 ; remove lower 7 bits
-	
+
 	cp	a,b ; check if higher byte has changed to update tile number
 	jr	z,.notchanged_mountain
-	
+
 	ld	a,[train_scroll_tile_mountain]
 	inc	a
 	and	a,127
 	ld	[train_scroll_tile_mountain],a
-	
+
 .notchanged_mountain:
 
 	ld	a,[train_scroll_tile_mountain]
@@ -1498,30 +1498,30 @@ train_update_scrolls:
 	ld	c,a
 	ld	d,2
 	call	train_copy_column ; b = y (0-10) , c = x (0-127) , d = number of tiles to copy (going down)
-	
+
 	; Buildings
 	; ---------
-	
+
 	ld	a,[train_scroll_scx_buildings+0]
 	ld	e,a
 	ld	a,[train_scroll_scx_buildings+1]
 	ld	d,a
 	and	a,$F8 ; remove lower 7 bits
 	ld	b,a ; save in b
-	
+
 	ld	hl,TRAIN_SCROLL_SPEED_BUILDING
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_scroll_scx_buildings+0],a
 	ld	a,h
 	ld	[train_scroll_scx_buildings+1],a
-	
+
 	and	a,$F8 ; remove lower 7 bits
-	
+
 	cp	a,b ; check if higher byte has changed to update tile number
 	jr	z,.notchanged_buildings
-	
+
 	ld	a,[train_scroll_tile_buildings]
 	inc	a
 	and	a,127
@@ -1546,28 +1546,28 @@ train_update_scrolls:
 	ld	h,a
 	and	a,$F8 ; remove lower 7 bits
 	ld	b,a ; save in b
-	
+
 	ld	a,[TRAIN_SCROLL_SPEED_TRAIN+0]
 	ld	e,a
 	ld	a,[TRAIN_SCROLL_SPEED_TRAIN+1]
 	ld	d,a
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_scroll_scx_train+0],a
 	ld	a,h
 	ld	[train_scroll_scx_train+1],a
-	
+
 	and	a,$F8 ; remove lower 7 bits
-	
+
 	cp	a,b ; check if higher byte has changed to update tile number
 	jr	z,.notchanged_train
-	
+
 	ld	a,[train_scroll_tile_train]
-	
+
 	bit	7,d
 	jr	z,._train_speed_positive
-	
+
 	; Speed is negative
 	dec	a
 	and	a,127
@@ -1601,32 +1601,32 @@ train_update_scrolls:
 
 	; Floor
 	; -----
-	
+
 	ld	a,[train_scroll_scx_floor+0]
 	ld	e,a
 	ld	a,[train_scroll_scx_floor+1]
 	ld	d,a
 	and	a,$F8 ; remove lower 7 bits
 	ld	b,a ; save in b
-	
+
 	ld	hl,TRAIN_SCROLL_SPEED_FLOOR
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_scroll_scx_floor+0],a
 	ld	a,h
 	ld	[train_scroll_scx_floor+1],a
-	
+
 	and	a,$F8 ; remove lower 7 bits
-	
+
 	cp	a,b ; check if higher byte has changed to update tile number
 	jr	z,.notchanged_floor
-	
+
 	ld	a,[train_scroll_tile_floor]
 	inc	a
 	and	a,127
 	ld	[train_scroll_tile_floor],a
-	
+
 	ld	a,[train_scroll_tile_floor]
 	add	a,21
 	and	a,127
@@ -1639,32 +1639,32 @@ train_update_scrolls:
 
 	; Grass
 	; -----
-	
+
 	ld	a,[train_scroll_scx_grass+0]
 	ld	e,a
 	ld	a,[train_scroll_scx_grass+1]
 	ld	d,a
 	and	a,$F8 ; remove lower 7 bits
 	ld	b,a ; save in b
-	
+
 	ld	hl,TRAIN_SCROLL_SPEED_GRASS
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_scroll_scx_grass+0],a
 	ld	a,h
 	ld	[train_scroll_scx_grass+1],a
-	
+
 	and	a,$F8 ; remove lower 7 bits
-	
+
 	cp	a,b ; check if higher byte has changed to update tile number
 	jr	z,.notchanged_grass
-	
+
 	ld	a,[train_scroll_tile_grass]
 	inc	a
 	and	a,127
 	ld	[train_scroll_tile_grass],a
-	
+
 	ld	a,[train_scroll_tile_grass]
 	add	a,21
 	and	a,127
@@ -1677,32 +1677,32 @@ train_update_scrolls:
 
 	; Water 1
 	; -------
-	
+
 	ld	a,[train_scroll_scx_water_1+0]
 	ld	e,a
 	ld	a,[train_scroll_scx_water_1+1]
 	ld	d,a
 	and	a,$F8 ; remove lower 7 bits
 	ld	b,a ; save in b
-	
+
 	ld	hl,TRAIN_SCROLL_SPEED_WATER_1
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_scroll_scx_water_1+0],a
 	ld	a,h
 	ld	[train_scroll_scx_water_1+1],a
-	
+
 	and	a,$F8 ; remove lower 7 bits
-	
+
 	cp	a,b ; check if higher byte has changed to update tile number
 	jr	z,.notchanged_water_1
-	
+
 	ld	a,[train_scroll_tile_water_1]
 	inc	a
 	and	a,127
 	ld	[train_scroll_tile_water_1],a
-	
+
 .notchanged_water_1:
 
 	ld	a,[train_scroll_tile_water_1]
@@ -1712,35 +1712,35 @@ train_update_scrolls:
 	ld	c,a
 	ld	d,1
 	call	train_copy_column ; b = y (0-10) , c = x (0-127) , d = number of tiles to copy (going down)
-	
+
 	; Water 2
 	; -------
-	
+
 	ld	a,[train_scroll_scx_water_2+0]
 	ld	e,a
 	ld	a,[train_scroll_scx_water_2+1]
 	ld	d,a
 	and	a,$F8 ; remove lower 7 bits
 	ld	b,a ; save in b
-	
+
 	ld	hl,TRAIN_SCROLL_SPEED_WATER_2
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_scroll_scx_water_2+0],a
 	ld	a,h
 	ld	[train_scroll_scx_water_2+1],a
-	
+
 	and	a,$F8 ; remove lower 7 bits
-	
+
 	cp	a,b ; check if higher byte has changed to update tile number
 	jr	z,.notchanged_water_2
-	
+
 	ld	a,[train_scroll_tile_water_2]
 	inc	a
 	and	a,127
 	ld	[train_scroll_tile_water_2],a
-	
+
 .notchanged_water_2:
 
 	ld	a,[train_scroll_tile_water_2]
@@ -1750,35 +1750,35 @@ train_update_scrolls:
 	ld	c,a
 	ld	d,1
 	call	train_copy_column ; b = y (0-10) , c = x (0-127) , d = number of tiles to copy (going down)
-	
+
 	; Water 3
 	; -------
-	
+
 	ld	a,[train_scroll_scx_water_3+0]
 	ld	e,a
 	ld	a,[train_scroll_scx_water_3+1]
 	ld	d,a
 	and	a,$F8 ; remove lower 7 bits
 	ld	b,a ; save in b
-	
+
 	ld	hl,TRAIN_SCROLL_SPEED_WATER_3
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_scroll_scx_water_3+0],a
 	ld	a,h
 	ld	[train_scroll_scx_water_3+1],a
-	
+
 	and	a,$F8 ; remove lower 7 bits
-	
+
 	cp	a,b ; check if higher byte has changed to update tile number
 	jr	z,.notchanged_water_3
-	
+
 	ld	a,[train_scroll_tile_water_3]
 	inc	a
 	and	a,127
 	ld	[train_scroll_tile_water_3],a
-	
+
 .notchanged_water_3:
 
 	ld	a,[train_scroll_tile_water_3]
@@ -1788,35 +1788,35 @@ train_update_scrolls:
 	ld	c,a
 	ld	d,1
 	call	train_copy_column ; b = y (0-10) , c = x (0-127) , d = number of tiles to copy (going down)
-	
+
 	; Water 4
 	; -------
-	
+
 	ld	a,[train_scroll_scx_water_4+0]
 	ld	e,a
 	ld	a,[train_scroll_scx_water_4+1]
 	ld	d,a
 	and	a,$F8 ; remove lower 7 bits
 	ld	b,a ; save in b
-	
+
 	ld	hl,TRAIN_SCROLL_SPEED_WATER_4
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_scroll_scx_water_4+0],a
 	ld	a,h
 	ld	[train_scroll_scx_water_4+1],a
-	
+
 	and	a,$F8 ; remove lower 7 bits
-	
+
 	cp	a,b ; check if higher byte has changed to update tile number
 	jr	z,.notchanged_water_4
-	
+
 	ld	a,[train_scroll_tile_water_4]
 	inc	a
 	and	a,127
 	ld	[train_scroll_tile_water_4],a
-	
+
 .notchanged_water_4:
 
 	ld	a,[train_scroll_tile_water_4]
@@ -1826,35 +1826,35 @@ train_update_scrolls:
 	ld	c,a
 	ld	d,1
 	call	train_copy_column ; b = y (0-10) , c = x (0-127) , d = number of tiles to copy (going down)
-	
+
 	; Water 5
 	; -------
-	
+
 	ld	a,[train_scroll_scx_water_5+0]
 	ld	e,a
 	ld	a,[train_scroll_scx_water_5+1]
 	ld	d,a
 	and	a,$F8 ; remove lower 7 bits
 	ld	b,a ; save in b
-	
+
 	ld	hl,TRAIN_SCROLL_SPEED_WATER_5
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_scroll_scx_water_5+0],a
 	ld	a,h
 	ld	[train_scroll_scx_water_5+1],a
-	
+
 	and	a,$F8 ; remove lower 7 bits
-	
+
 	cp	a,b ; check if higher byte has changed to update tile number
 	jr	z,.notchanged_water_5
-	
+
 	ld	a,[train_scroll_tile_water_5]
 	inc	a
 	and	a,127
 	ld	[train_scroll_tile_water_5],a
-	
+
 .notchanged_water_5:
 
 	ld	a,[train_scroll_tile_water_5]
@@ -1864,35 +1864,35 @@ train_update_scrolls:
 	ld	c,a
 	ld	d,1
 	call	train_copy_column ; b = y (0-10) , c = x (0-127) , d = number of tiles to copy (going down)
-	
+
 	; Water 6
 	; -------
-	
+
 	ld	a,[train_scroll_scx_water_6+0]
 	ld	e,a
 	ld	a,[train_scroll_scx_water_6+1]
 	ld	d,a
 	and	a,$F8 ; remove lower 7 bits
 	ld	b,a ; save in b
-	
+
 	ld	hl,TRAIN_SCROLL_SPEED_WATER_6
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_scroll_scx_water_6+0],a
 	ld	a,h
 	ld	[train_scroll_scx_water_6+1],a
-	
+
 	and	a,$F8 ; remove lower 7 bits
-	
+
 	cp	a,b ; check if higher byte has changed to update tile number
 	jr	z,.notchanged_water_6
-	
+
 	ld	a,[train_scroll_tile_water_6]
 	inc	a
 	and	a,127
 	ld	[train_scroll_tile_water_6],a
-	
+
 .notchanged_water_6:
 
 	ld	a,[train_scroll_tile_water_6]
@@ -1902,62 +1902,62 @@ train_update_scrolls:
 	ld	c,a
 	ld	d,1
 	call	train_copy_column ; b = y (0-10) , c = x (0-127) , d = number of tiles to copy (going down)
-	
+
 	; Finished!
 	; ---------
-	
+
 	ret
 
 ;----------------------------------------------
 
 train_handle_aceleration:
-	
+
 	ld	a,[TRAIN_SCROLL_SPEED_TRAIN+0]
 	ld	l,a
 	ld	a,[TRAIN_SCROLL_SPEED_TRAIN+1]
 	ld	h,a ; hl = speed
-	
+
 	ld	a,[train_acelerate]
 	and	a,a
 	jr	z,.deccelerate
-	
+
 	; Acelerate - from TRAIN_SCROLL_MIN_SPEED to TRAIN_SCROLL_MAX_SPEED
-	
+
 	ld	bc,$FFFF ; set speed: -1 -> speed is reversed
 	ld	de,TRAIN_SCROLL_MAX_SPEED ; set limit
 	jr	.check_limits
-	
-.deccelerate: 
-	
+
+.deccelerate:
+
 	; Decelerate - from TRAIN_SCROLL_MAX_SPEED to TRAIN_SCROLL_MIN_SPEED
-	
+
 	ld	bc,$0001 ; set speed: +1 -> speed is reversed
 	ld	de,TRAIN_SCROLL_MIN_SPEED ; set limit
-	
+
 .check_limits:
 
 	; If limit, return
-	
+
 	ld	a,d
 	cp	a,h
 	jr	nz,.not_equal
 	ld	a,e
 	cp	a,l
 	ret	z ; both equal, return
-	
+
 .not_equal
 	; If not, update speed
-	
+
 	add	hl,bc
 	add	hl,bc
-	
+
 	ld	a,l
 	ld	[TRAIN_SCROLL_SPEED_TRAIN+0],a
 	ld	a,h
 	ld	[TRAIN_SCROLL_SPEED_TRAIN+1],a
-	
+
 	ret
-	
+
 ;----------------------------------------------
 
 train_map_update_bg_attr:
@@ -1966,12 +1966,12 @@ train_map_update_bg_attr:
 	ld	[rVBK],a
 
 	DMA_COPY	ATTR_MAP_TEMP,$9800,32*20,0 ; src, dst, size, is_hdma
-	
+
 	ld	a,0
 	ld	[rVBK],a
 
 	DMA_COPY	MAP_TEMP,$9800,32*20,0 ; src, dst, size, is_hdma
-	
+
 	ret
 
 ;-------------------------------------------------------------------
@@ -1981,49 +1981,49 @@ train_map_update_bg_attr:
 IF	TRAIN_ENABLE_BIRDS == 1
 
 TRAIN_BIRD_ENABLE: MACRO ; \1 = number, \2 = start x, \3 = start y coordinate
-	
+
 	ld	bc,$0000
 	ld	l,((\1)*2)+0
 	call	sprite_set_xy
 	ld	bc,$0000
 	ld	l,((\1)*2)+1
 	call	sprite_set_xy
-	
+
 	ld	a,0
 	ld	l,((\1)*2)+0
 	call	sprite_set_tile
 	ld	a,2
 	ld	l,((\1)*2)+1
 	call	sprite_set_tile
-	
+
 	; --------------
-	
+
 	ld	a,0
 	ld	[train_bird_frame+(\1)],a
-	
+
 	ld	a,5
 	ld	[train_bird_ticks_to_change+(\1)],a
-	
+
 	ld	a,$80
 	ld	[train_bird_speed_x+((\1)*2)+0],a
 	ld	a,$FF
 	ld	[train_bird_speed_x+((\1)*2)+1],a
-	
+
 	ld	a,0
 	ld	[train_bird_speed_y+((\1)*2)+0],a
 	ld	a,0
 	ld	[train_bird_speed_y+((\1)*2)+1],a
-	
+
 	ld	a,0
 	ld	[train_bird_y+((\1)*2)+0],a
 	ld	a,\3
 	ld	[train_bird_y+((\1)*2)+1],a
-	
+
 	ld	a,0
 	ld	[train_bird_x+((\1)*2)+0],a
 	ld	a,\2
 	ld	[train_bird_x+((\1)*2)+1],a
-	
+
 	ld	a,1
 	ld	[train_bird_enabled+(\1)],a
 ENDM
@@ -2031,9 +2031,9 @@ ENDM
 ;-------------------------------
 
 train_birds_configure_1:
-	
+
 	TRAIN_BIRD_ENABLE	0,160+8,40
-	
+
 	ret
 
 ;-------------------------------
@@ -2049,89 +2049,89 @@ train_birds_configure_3:
 ;-------------------------------
 
 TRAIN_BIRD_HANDLE:	MACRO ; \1 = number
-	
+
 	ld	a,[train_bird_enabled+(\1)]
 	and	a,a
 	jp	z,.bird_disabled\@
-	
+
 	; Update position
 	; ---------------
-	
+
 	; Update X
-	
+
 	ld	a,[train_bird_speed_x+((\1)*2)+0]
 	ld	l,a
 	ld	a,[train_bird_speed_x+((\1)*2)+1]
 	ld	h,a
-	
+
 	ld	a,[train_bird_x+((\1)*2)+0]
 	ld	e,a
 	ld	a,[train_bird_x+((\1)*2)+1]
 	ld	d,a
-	
+
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_bird_x+((\1)*2)+0],a
 	ld	a,h
 	ld	[train_bird_x+((\1)*2)+1],a
-	
+
 	; Update Y
-	
+
 	ld	a,[train_bird_speed_y+((\1)*2)+0]
 	ld	l,a
 	ld	a,[train_bird_speed_y+((\1)*2)+1]
 	ld	h,a
-	
+
 	ld	a,[train_bird_y+((\1)*2)+0]
 	ld	e,a
 	ld	a,[train_bird_y+((\1)*2)+1]
 	ld	d,a
-	
+
 	add	hl,de
-	
+
 	ld	a,l
 	ld	[train_bird_y+((\1)*2)+0],a
 	ld	a,h
 	ld	[train_bird_y+((\1)*2)+1],a
-	
+
 	; Update animation
 	; ----------------
 
 	ld	a,[train_bird_ticks_to_change+(\1)]
 	dec	a
 	ld	[train_bird_ticks_to_change+(\1)],a
-	
+
 	jr	nz,.dont_change\@
-	
+
 	ld	a,5
 	ld	[train_bird_ticks_to_change+(\1)],a
-	
+
 	ld	a,[train_bird_frame+(\1)]
 	inc	a
 	cp	a,3
 	jr	nz,.not_end\@
-	
+
 	call	GetRandom
 	and	a,31
 	add	a,8
 	ld	[train_bird_ticks_to_change+(\1)],a
-	
+
 	ld	a,0
-	
+
 .not_end\@:
 	ld	[train_bird_frame+(\1)],a
 
 .dont_change\@:
-	
+
 	; Update speed based on animation
 	; -------------------------------
-	
+
 	ld	a,$20
 	ld	[train_bird_speed_y+((\1)*2)+0],a
 	ld	a,$00
 	ld	[train_bird_speed_y+((\1)*2)+1],a
-	
+
 	ld	a,[train_bird_frame+(\1)]
 	cp	a,1
 	jr	nz,.skip\@
@@ -2152,7 +2152,7 @@ TRAIN_BIRD_HANDLE:	MACRO ; \1 = number
 	ld	[train_bird_speed_x+((\1)*2)+0],a
 	ld	a,$FF
 	ld	[train_bird_speed_x+((\1)*2)+1],a
-	
+
 	ld	a,[train_bird_frame+(\1)]
 	cp	a,1
 	jr	nz,.skip2\@
@@ -2164,9 +2164,9 @@ TRAIN_BIRD_HANDLE:	MACRO ; \1 = number
 
 	; Update sprites
 	; --------------
-	
+
 	; Position
-	
+
 	ld	a,[train_bird_x+((\1)*2)+1]
 	ld	b,a
 	ld	a,[train_bird_y+((\1)*2)+1]
@@ -2175,22 +2175,22 @@ TRAIN_BIRD_HANDLE:	MACRO ; \1 = number
 	ld	l,((\1)*2)+0
 	call	sprite_set_xy
 	pop	bc
-	
+
 	ld	a,8
 	add	a,b
 	ld	b,a ; add 8 to x
 	ld	l,((\1)*2)+1
 	call	sprite_set_xy
-	
+
 	; Tiles
-	
+
 	ld	a,[train_bird_frame+(\1)]
 	and	a,3
 	sla	a
 	sla	a
 	ld	l,((\1)*2)+0
 	call	sprite_set_tile
-	
+
 	ld	a,[train_bird_frame+(\1)]
 	and	a,3
 	sla	a
@@ -2198,7 +2198,7 @@ TRAIN_BIRD_HANDLE:	MACRO ; \1 = number
 	sla	a
 	ld	l,((\1)*2)+1
 	call	sprite_set_tile
-	
+
 	; Done
 	; ----
 
@@ -2209,11 +2209,11 @@ ENDM
 ;-------------------------------
 
 train_birds_handle:
-	
+
 	TRAIN_BIRD_HANDLE	0
 	TRAIN_BIRD_HANDLE	1
 	TRAIN_BIRD_HANDLE	2
-	
+
 	ret
 
 ENDC
@@ -2225,20 +2225,20 @@ ENDC
 train_lcd_handler:
 
 	ld	a,[rLY]
-	
+
 	cp	a,(3*8)-1 ; Mountain?
 	jr	nz,.not_mountain
-	
+
 	call	wait_screen_blank
-	
+
 	ld	a,[train_scroll_scx_mountain+1]
 	ld	[rSCX],a
 	ld	a,(5*8)-1
 	ld	[rLYC],a
 	ret
-	
+
 .not_mountain:
-	
+
 	cp	a,(5*8)-1 ; Buildings?
 	jr	nz,.not_buildings
 
@@ -2251,23 +2251,23 @@ train_lcd_handler:
 	ret
 
 .not_buildings:
-	
+
 	cp	a,(7*8)-1 ; Train?
 	jr	nz,.not_train
-	
+
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_train+1]
-	ld	[rSCX],a	
+	ld	[rSCX],a
 	ld	a,(10*8)-1
 	ld	[rLYC],a
 	ret
 
 .not_train:
-	
+
 	cp	a,(10*8)-1 ; Floor?
 	jr	nz,.not_floor
-	
+
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_floor+1]
@@ -2277,10 +2277,10 @@ train_lcd_handler:
 	ret
 
 .not_floor:
-	
+
 	cp	a,(11*8)-1 ; Grass?
 	jr	nz,.not_grass
-	
+
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_grass+1]
@@ -2293,7 +2293,7 @@ train_lcd_handler:
 
 	cp	a,(12*8)-1 ; Water 1?
 	jr	nz,.not_water_1
-	
+
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_water_1+1]
@@ -2303,10 +2303,10 @@ train_lcd_handler:
 	ret
 
 .not_water_1:
-	
+
 	cp	a,(13*8)-1 ; Water 2?
 	jr	nz,.not_water_2
-	
+
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_water_2+1]
@@ -2319,7 +2319,7 @@ train_lcd_handler:
 
 	cp	a,(14*8)-1 ; Water 3?
 	jr	nz,.not_water_3
-	
+
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_water_3+1]
@@ -2329,10 +2329,10 @@ train_lcd_handler:
 	ret
 
 .not_water_3:
-	
+
 	cp	a,(15*8)-1 ; Water 4?
 	jr	nz,.not_water_4
-	
+
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_water_4+1]
@@ -2345,7 +2345,7 @@ train_lcd_handler:
 
 	cp	a,(16*8)-1 ; Water 5?
 	jr	nz,.not_water_5
-	
+
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_water_5+1]
@@ -2357,7 +2357,7 @@ train_lcd_handler:
 .not_water_5:
 
 	; Water 6
-	
+
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_water_6+1]
@@ -2374,28 +2374,28 @@ IF	TRAIN_ENABLE_BIRDS == 1
 ENDC
 
 	call	train_map_update_bg_attr
-	
+
 	ld	a,[train_scroll_scx_clouds+1]
 	ld	[rSCX],a
 	ld	a,(3*8)-1
 	ld	[rLYC],a ; first IRQ happens at this line
-	
+
 	LONG_CALL	gbt_update
 
 	ret
 
 ;----------------------------------------------
-	
+
 	GLOBAL Train
-	
+
 Train:
-	
+
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800 ; configuration
 	ld	[rLCDC],a
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,128
 	ld	hl,jordi_train_tiles
 	ld	de,256 ;  de = start index
@@ -2414,42 +2414,42 @@ ENDC
 	call	train_load_maps
 
 	call	train_init_variables
-	
+
 	call	wait_vbl
-	
+
 	call	train_map_update_bg_attr
 
 	call	wait_vbl
-	
+
 	call	train_palette_load
 
-IF	TRAIN_ENABLE_BIRDS == 1	
+IF	TRAIN_ENABLE_BIRDS == 1
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800|LCDCF_OBJON|LCDCF_OBJ16 ; configuration
 	ld	[rLCDC],a
 ENDC
 
 	ld	bc,train_vbl_handler
 	call	irq_set_VBL
-	
+
 	ld	bc,train_lcd_handler
 	call	irq_set_LCD
-	
+
 	ld	a,[train_scroll_scx_clouds+1]
 	ld	[rSCX],a
 	ld	a,(3*8)-1
 	ld	[rLYC],a ; first IRQ happens at this line
-	
+
 	ld	a,STATF_LYC
 	ld	[rSTAT],a
-	
+
 	ld	a,0
 	ld	[rIF],a
-	
+
 	ld	a,$03
 	ld	[rIE],a
-	
-	; START	
-	
+
+	; START
+
 .loop: ; Main loop
 
 	call	train_update_scrolls
@@ -2458,18 +2458,18 @@ IF	TRAIN_ENABLE_BIRDS == 1
 	call	train_birds_handle
 ENDC
 	call	train_handle_events
-	
+
 	call	wait_vbl
-	
+
 	ld	a,[train_exit_demo]
 	and	a,a
 	jr	z,.loop
-	
+
 	; Exit...
 	; -------
-	
+
 	call	demo_config_default
-	
+
 	ret
 
 ;-------------------------------------------------------------------

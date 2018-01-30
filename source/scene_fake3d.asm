@@ -1,17 +1,17 @@
-; 
-; Copyright (c) 2014, Antonio Niño Díaz (AntonioND)
+;
+; Copyright (c) 2014-2018, Antonio Niño Díaz (AntonioND)
 ; All rights reserved.
-; 
+;
 ; Redistribution and use in source and binary forms, with or without
 ; modification, are permitted provided that the following conditions are met:
-; 
+;
 ; * Redistributions of source code must retain the above copyright notice, this
 ;   list of conditions and the following disclaimer.
-; 
+;
 ; * Redistributions in binary form must reproduce the above copyright notice,
 ;   this list of conditions and the following disclaimer in the documentation
 ;   and/or other materials provided with the distribution.
-; 
+;
 ; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,7 +22,7 @@
 ; CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-; 
+;
 
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
@@ -32,7 +32,7 @@
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "FAKE3D_DATA", DATA[$4000], BANK[6]
+	SECTION "FAKE3D_DATA", ROMX[$4000], BANK[6]
 
 fake3d_y_and_w_table: ; y = fake3d_y_and_w_table[angle 0..255][dist 32..63][0] -> sin(angle) * dist
 DB $00,$00,$01,$02,$03,$03,$04,$05,$06,$07,$07,$08,$09,$0A,$0A,$0B,$0C,$0C,$0D,$0E,$0F,$0F,$10,$11,$11,$12,$13,$13,$14,$14,$15,$16
@@ -384,7 +384,7 @@ DW $3DE0,$4200,$4200,$4200,$4200,$4620,$4620,$4620,$4620,$4A40,$4A40,$4A40,$4A40
 
 fake3d_background_palette:
 	DW	(7<<10)|(7<<5)|(7),$0000,$0000,$0000
-	
+
 fake3d_round_and_round_palette:
 	DW	$0000,$7FFF,$3DEF,$0000
 
@@ -464,7 +464,7 @@ DB $02,$02,$02,$02,$02,$02,$02,$02,$02,$03
 
 	; Dist -> 32..64
 	; Angle -> 0..255
-	
+
 fake3d_vertices_list_pentagon:
 	DB	63,0
 	DB	63,256*1/5
@@ -515,27 +515,27 @@ fake3d_norm_list_star:
 	DB	((256*8)/10)-19
 	DB	((256*8)/10)+19
 	DB	0-19
-	
+
 fake3d_vertices_list_planes:
 	DB	63,0
 	DB	63,$80
-	
+
 	DB	63,$40
 	DB	63,$C0
-	
+
 	DB	63,$20
 	DB	63,$A0
-	
+
 	DB	63,$60
 	DB	63,$E0
 
 fake3d_norm_list_planes:
 	DB	$40
-	
+
 	DB	$80
-	
+
 	DB	$60
-	
+
 	DB	$A0
 
 fake3d_vertices_list_prisms:
@@ -544,7 +544,7 @@ fake3d_vertices_list_prisms:
 	DB	63,$80
 	DB	63,$A0
 	DB	63,0
-	
+
 	DB	63,$40
 	DB	63,$60
 	DB	63,$C0
@@ -556,7 +556,7 @@ fake3d_norm_list_prisms:
 	DB	$50
 	DB	$90
 	DB	$D0
-	
+
 	DB	$50
 	DB	$90
 	DB	$D0
@@ -568,7 +568,7 @@ fake3d_vertices_list_2blocks:
 	DB	63,$60
 	DB	45,$78
 	DB	45,$08
-	
+
 	DB	45,$88
 	DB	63,$A0
 	DB	63,$D0
@@ -594,7 +594,7 @@ fake3d_norm_list_ram_vertices:
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION	"FAKE3D_Vars",BSS
+	SECTION	"FAKE3D_Vars", WRAM0
 
 fake3d_ly_scy:	DS	128 ; starts at ly = $10 = 16
 fake3d_ly_scy_temp:	DS	128 ; starts at ly = $10 = 16
@@ -628,56 +628,56 @@ fake3d_ram_vertices_radius_increment:	DS	1 ; value to add to radius each frame
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "Fake_3D_Bank5_1", CODE, BANK[6]
+	SECTION "Fake_3D_Bank5_1", ROMX, BANK[6]
 
 ;-------------------------------------------------------------------------------------------------
 
 fake3d_init_variables:
-	
+
 	ld	bc,128
 	ld	d,0
 	ld	hl,fake3d_ly_scy
 	call	memset ; d = value    hl = start address    bc = size
-	
+
 	ld	bc,128
 	ld	d,0
 	ld	hl,fake3d_ly_scy_temp
 	call	memset ; d = value    hl = start address    bc = size
-	
+
 	ld	bc,128*2
 	ld	d,0
 	ld	hl,fake3d_ly_pal
 	call	memset ; d = value    hl = start address    bc = size
-	
+
 	ld	bc,128*2
 	ld	d,0
 	ld	hl,fake3d_ly_pal_temp
 	call	memset ; d = value    hl = start address    bc = size
-	
+
 	ld	a,0
 	ld	[fake3d_rotation_angle],a
 	ld	[fake3d_rotation_angle_temp],a
-	
+
 	ld	de,fake3d_vertices_list_pentagon
 	call	fake3d_set_vertices_list
-	
+
 	ld	de,fake3d_draw_function_nothing
 	call	fake3d_set_draw_function
-	
+
 	ld	a,-2
 	ld	[fake3d_rotation_angle_speed],a
-	
+
 	ld	a,$C0
 	ld	[fake3d_light_angle_offset],a
 	ld	[fake3d_light_angle_offset_temp],a
-	
+
 	ld	a,0
 	ld	[fake3d_light_angle_offset_speed],a
-	
+
 	; ----
-	
+
 	; Load vertices to ram
-	
+
 	ld	hl,fake3d_ram_vertices_list
 	ld	a,32
 	ld	[hl+],a
@@ -695,25 +695,25 @@ fake3d_init_variables:
 	ld	[hl+],a
 	ld	a,$C0
 	ld	[hl+],a
-	
+
 	ld	a,0
 	ld	[fake3d_ram_vertices_radius_increment],a
-	
+
 	; ----
-	
+
 	ld	a,0
 	ld	[fake3d_event_count],a
 	ld	[fake3d_event_count+1],a
-	
+
 	ld	a,0
 	ld	[fake3d_exit_demo],a
-	
+
 	ld	hl,_event_table_fake3d
 	ld	a,h
 	ld	[fake3d_current_event],a
 	ld	a,l
 	ld	[fake3d_current_event+1],a
-	
+
 	ret
 
 ;----------------------------------------------
@@ -750,7 +750,7 @@ _event_draw_pentagon_3faces:
 	ld	de,fake3d_draw_function_pentagon_3faces
 	call	fake3d_set_draw_function
 	ret
-	
+
 _event_draw_pentagon_4faces:
 	ld	de,fake3d_vertices_list_pentagon
 	call	fake3d_set_vertices_list
@@ -820,7 +820,7 @@ _event_ram_vertices_shrink:
 _event_ram_vertices_hold:
 	ld	a,0
 	ld	[fake3d_ram_vertices_radius_increment],a
-	ret	
+	ret
 
 ;_event_angle_rotation_speed_stop:
 ;	ld	a,0
@@ -865,25 +865,25 @@ _event_table_fake3d:
 	DW	70,_event_draw_pentagon_5faces
 
 	DW	130,_event_draw_2planes
-	
+
 	DW	180,_event_draw_4planes
-	
+
 	DW	230,_event_draw_ram_vertices
-	
+
 	DW	260,_event_ram_vertices_grow
 	DW	291,_event_ram_vertices_hold
 	DW	330,_event_ram_vertices_shrink
 	DW	361,_event_ram_vertices_hold
 
 	DW	400,_event_draw_star
-	
+
 	DW	420,_event_light_rotation_speed_set_minus_2
 
 	DW	612,_event_light_rotation_speed_stop
 	DW	650,_event_draw_2prisms
-	
+
 	DW	750,_event_draw_2blocks
-	
+
 	DW	880,_event_draw_nothing
 	DW	881,_event_exit_fake3d_demo
 
@@ -892,28 +892,28 @@ _event_table_fake3d:
 ;----------------------------------------------
 
 fake3d_handle_events:
-	
+
 ;	ld	hl,fake3d_rotation_angle
 ;	dec	[hl]
 ;	dec	[hl]
 ;	dec	[hl]
 ;	dec	[hl]
-	
+
 	; Handle events
 	; -------------
-	
+
 	ld	a,[fake3d_event_count]
 	ld	e,a
 	ld	a,[fake3d_event_count+1]
 	ld	d,a
-	
+
 	; Start of checking
-	
+
 	ld	a,[fake3d_current_event]
 	ld	h,a
 	ld	a,[fake3d_current_event+1]
 	ld	l,a
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = event counter trigger
@@ -921,43 +921,43 @@ fake3d_handle_events:
 	and	a,b
 	cp	a,$FF ; if both are $FF, exit checking
 	jr	z,._exit_check_events
-	
+
 	ld	a,d
 	cp	a,b
 	jr	nz,._exit_check_events
-	
+
 	ld	a,e
 	cp	a,c
 	jr	nz,._exit_check_events
-	
+
 	inc	hl
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = ptr to function
 	inc	hl ; hl = ptr to next event
-	
+
 	ld	a,h
 	ld	[fake3d_current_event],a
 	ld	a,l
 	ld	[fake3d_current_event+1],a ; save pointer to next event
-	
+
 	ld	h,b
 	ld	l,c ; hl = ptr to function
-	
+
 	CALL_HL
 ._exit_check_events:
 
 	; Now, handle functions...
 	; ------------------------
-	
+
 	; Increment/decrement radius of vertices in RAM
 	; It doesn't check bounds!!
-	
+
 	ld	a,[fake3d_ram_vertices_radius_increment]
 	and	a,a
 	jr	z,.dont_change_radius
-	
+
 	ld	b,a
 
 	ld	hl,fake3d_ram_vertices_list
@@ -965,43 +965,43 @@ fake3d_handle_events:
 	add	a,b
 	ld	[hl+],a
 	inc	hl
-	
+
 	ld	a,[hl]
 	add	a,b
 	ld	[hl+],a
 	inc	hl
-	
+
 	ld	a,[hl]
 	add	a,b
 	ld	[hl+],a
 	inc	hl
-	
+
 	ld	a,[hl]
 	add	a,b
 	ld	[hl+],a
 	inc	hl
-	
+
 .dont_change_radius:
 
 	; More checks here
-	
+
 	; ...
-	
+
 	; Increase counter
 	; ----------------
-	
+
 	ld	a,[fake3d_event_count]
 	ld	l,a
 	ld	a,[fake3d_event_count+1]
 	ld	h,a
-	
+
 	inc	hl
-	
+
 	ld	a,l
 	ld	[fake3d_event_count],a
 	ld	a,h
 	ld	[fake3d_event_count+1],a
-	
+
 	ret
 
 ;-------------------------------------------------------------------------------------------------
@@ -1009,7 +1009,7 @@ fake3d_handle_events:
 fake3d_draw_function_nothing:
 
 	ret
-	
+
 ; ------------------------------
 
 fake3d_draw_function_2planes:
@@ -1024,7 +1024,7 @@ fake3d_draw_function_2planes:
 	call	fake3d_get_y_and_w_from_vertex_number
 
 	; Draw faces
-	
+
 	ld	a,[fake3d_norm_list_planes+0]
 	ld	de,fake3d_pal_red
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
@@ -1036,7 +1036,7 @@ fake3d_draw_function_2planes:
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,2
 	call	fake3d_join_vertices
-	
+
 	ret
 
 ; ------------------------------
@@ -1061,7 +1061,7 @@ fake3d_draw_function_4planes:
 	call	fake3d_get_y_and_w_from_vertex_number
 
 	; Draw faces
-	
+
 	ld	a,[fake3d_norm_list_planes+0]
 	ld	de,fake3d_pal_red
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
@@ -1079,13 +1079,13 @@ fake3d_draw_function_4planes:
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,4
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_planes+3]
 	ld	de,fake3d_pal_blue
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,6
 	call	fake3d_join_vertices
-	
+
 	ret
 
 ; ------------------------------
@@ -1116,69 +1116,69 @@ fake3d_draw_function_star:
 	ld	a,10
 	ld	c,0
 	call	fake3d_copy_y_and_w_from_vertex_number ; a = dest, c = src
-	
+
 	; Draw faces
-	
+
 	ld	a,[fake3d_norm_list_star+0]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,0
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_star+1]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,1
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_star+2]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,2
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_star+3]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,3
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_star+4]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,4
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_star+5]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,5
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_star+6]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,6
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_star+7]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,7
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_star+8]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,8
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_star+9]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,9
 	call	fake3d_join_vertices
-	
+
 	ret
 
 ; ------------------------------
@@ -1191,7 +1191,7 @@ fake3d_draw_function_pentagon_1faces:
 	call	fake3d_get_y_and_w_from_vertex_number
 
 	; Draw faces
-	
+
 	ld	a,[fake3d_norm_list_pentagon+0]
 	ld	de,fake3d_pal_red
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
@@ -1212,13 +1212,13 @@ fake3d_draw_function_pentagon_2faces:
 	call	fake3d_get_y_and_w_from_vertex_number
 
 	; Draw faces
-	
+
 	ld	a,[fake3d_norm_list_pentagon+0]
 	ld	de,fake3d_pal_red
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,0
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_pentagon+1]
 	ld	de,fake3d_pal_green
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
@@ -1241,25 +1241,25 @@ fake3d_draw_function_pentagon_3faces:
 	call	fake3d_get_y_and_w_from_vertex_number
 
 	; Draw faces
-	
+
 	ld	a,[fake3d_norm_list_pentagon+0]
 	ld	de,fake3d_pal_red
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,0
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_pentagon+1]
 	ld	de,fake3d_pal_green
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,1
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_pentagon+2]
 	ld	de,fake3d_pal_blue
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,2
 	call	fake3d_join_vertices
-	
+
 	ret
 
 ; ------------------------------
@@ -1276,33 +1276,33 @@ fake3d_draw_function_pentagon_4faces:
 	call	fake3d_get_y_and_w_from_vertex_number
 	ld	a,4
 	call	fake3d_get_y_and_w_from_vertex_number
-	
+
 	; Draw faces
-	
+
 	ld	a,[fake3d_norm_list_pentagon+0]
 	ld	de,fake3d_pal_red
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,0
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_pentagon+1]
 	ld	de,fake3d_pal_green
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,1
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_pentagon+2]
 	ld	de,fake3d_pal_blue
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,2
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_pentagon+3]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,3
 	call	fake3d_join_vertices
-	
+
 	ret
 
 ; ------------------------------
@@ -1323,39 +1323,39 @@ fake3d_draw_function_pentagon_5faces:
 	ld	a,5
 	ld	c,0
 	call	fake3d_copy_y_and_w_from_vertex_number ; a = dest, c = src
-	
+
 	; Draw faces
-	
+
 	ld	a,[fake3d_norm_list_pentagon+0]
 	ld	de,fake3d_pal_red
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,0
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_pentagon+1]
 	ld	de,fake3d_pal_green
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,1
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_pentagon+2]
 	ld	de,fake3d_pal_blue
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,2
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_pentagon+3]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,3
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_pentagon+4]
 	ld	de,fake3d_pal_cyan
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,4
 	call	fake3d_join_vertices
-	
+
 	ret
 
 ; ------------------------------
@@ -1385,59 +1385,59 @@ fake3d_draw_function_2prisms:
 	ld	a,9
 	ld	c,5
 	call	fake3d_copy_y_and_w_from_vertex_number ; a = dest, c = src
-	
+
 	; Draw faces
-	
+
 	ld	a,[fake3d_norm_list_prisms+0]
 	ld	de,fake3d_pal_red
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,0
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_prisms+1]
 	ld	de,fake3d_pal_red
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,1
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_prisms+2]
 	ld	de,fake3d_pal_red
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,2
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_prisms+3]
 	ld	de,fake3d_pal_red
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,3
 	call	fake3d_join_vertices
-	
+
 	; ----------
-	
+
 	ld	a,[fake3d_norm_list_prisms+4]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,5
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_prisms+5]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,6
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_prisms+6]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,7
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_prisms+7]
 	ld	de,fake3d_pal_yellow
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,8
 	call	fake3d_join_vertices
-	
+
 	ret
 
 ; ------------------------------
@@ -1467,61 +1467,61 @@ fake3d_draw_function_2blocks:
 	ld	a,9
 	ld	c,5
 	call	fake3d_copy_y_and_w_from_vertex_number ; a = dest, c = src
-	
+
 	; Draw faces
-	
+
 	ld	a,[fake3d_norm_list_2blocks+0]
 	ld	de,fake3d_pal_green
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,0
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_2blocks+1]
 	ld	de,fake3d_pal_green
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,1
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_2blocks+2]
 	ld	de,fake3d_pal_green
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,2
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_2blocks+3]
 	add	a,$80
 	ld	de,fake3d_pal_green
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,3
 	call	fake3d_join_vertices
-	
+
 	; ----------
-	
+
 	ld	a,[fake3d_norm_list_2blocks+4]
 	ld	de,fake3d_pal_blue
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,5
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_2blocks+5]
 	ld	de,fake3d_pal_blue
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,6
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_2blocks+6]
 	ld	de,fake3d_pal_blue
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,7
 	call	fake3d_join_vertices
-	
+
 	ld	a,[fake3d_norm_list_2blocks+7]
 	add	a,$80
 	ld	de,fake3d_pal_blue
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
 	ld	a,8
 	call	fake3d_join_vertices
-	
+
 	ret
 
 ; ------------------------------
@@ -1542,7 +1542,7 @@ fake3d_draw_function_ram_vertices:
 	; ----------
 
 	; Draw faces
-	
+
 	ld	a,[fake3d_norm_list_ram_vertices+0]
 	ld	de,fake3d_pal_green
 	call	fake3d_set_drawing_color_from_angle_and_palette ; a = angle , de = palette
@@ -1572,7 +1572,7 @@ fake3d_draw_function_ram_vertices:
 ;-------------------------------------------------------------------------------------------------
 
 fake3d_copy_y_and_w_from_vertex_number: ; a = dest, c = src
-	
+
 	ld	b,0
 	ld	hl,fake3d_vertex_y
 	add	hl,bc
@@ -1580,16 +1580,16 @@ fake3d_copy_y_and_w_from_vertex_number: ; a = dest, c = src
 	ld	hl,fake3d_vertex_w
 	add	hl,bc
 	ld	e,[hl] ; e = w
-	
+
 	ld	c,a
 	ld	hl,fake3d_vertex_y
 	add	hl,bc
 	ld	[hl],d
-	
+
 	ld	hl,fake3d_vertex_w
 	add	hl,bc
 	ld	[hl],e
-	
+
 	ret
 
 ; -----------------------------
@@ -1597,26 +1597,26 @@ fake3d_copy_y_and_w_from_vertex_number: ; a = dest, c = src
 fake3d_get_y_and_w_from_vertex_number: ; a = vertex number
 
 	push	af ; *** save vertex
-	
+
 	ld	hl,fake3d_vertices_list_ptr
 	ld	d,[hl]
 	inc	hl
 	ld	h,[hl]
 	ld	l,d
-	
+
 	ld	e,a
 	ld	d,0
 	add	hl,de
 	add	hl,de ; hl = ptr to vertex
-	
+
 	ld	b,[hl] ; b = dist
-	
+
 	inc	hl
 	ld	c,[hl]
 	ld	a,[fake3d_rotation_angle]
 	add	a,c
 	ld	c,a ; c = angle + rotation
-	
+
 	ld	hl,fake3d_y_and_w_table
 	ld	e,c
 	ld	a,b
@@ -1627,14 +1627,14 @@ fake3d_get_y_and_w_from_vertex_number: ; a = vertex number
 	sra	a
 	add	a,96
 	ld	c,a ; c = ( (sin * dist) >> 1 ) + 96
-	
+
 	ld	hl,fake3d_y_and_w_table
 	ld	a,e
 	add	a,$40
 	ld	e,a
 	add	hl,de
 	ld	a,[hl]
-	
+
 	add	a,64
 	ld	b,a ; b = (cos * dist) + 64
 
@@ -1645,7 +1645,7 @@ fake3d_get_y_and_w_from_vertex_number: ; a = vertex number
 	ld	hl,fake3d_vertex_y
 	add	hl,de
 	ld	[hl],b
-	
+
 	ld	hl,fake3d_vertex_w
 	add	hl,de
 	ld	[hl],c
@@ -1655,10 +1655,10 @@ fake3d_get_y_and_w_from_vertex_number: ; a = vertex number
 ;-------------------------------------------------------------------------------------------------
 
 fake3d_div_hl_by_c: ; hl / c ==> hl
-	
+
 	bit	7,h
 	jr	nz,.negative
-	
+
 	xor	a
 	ld	b,16
 .loop:
@@ -1671,7 +1671,7 @@ fake3d_div_hl_by_c: ; hl / c ==> hl
 .skip:
 	dec	b
 	jr	nz,.loop
-	
+
 	ret
 
 .negative:
@@ -1682,7 +1682,7 @@ fake3d_div_hl_by_c: ; hl / c ==> hl
 	cpl
 	ld	l,a
 	inc	hl
-	
+
 	xor	a
 	ld	b,16
 
@@ -1696,7 +1696,7 @@ fake3d_div_hl_by_c: ; hl / c ==> hl
 .skip2:
 	dec	b
 	jr	nz,.loop2
-	
+
 	ld	a,h  ; negate hl
 	cpl
 	ld	h,a
@@ -1717,66 +1717,66 @@ fake3d_join_vertices: ; a = first vertex, a+1 = second vertex
 	ld	b,[hl]
 	inc	hl
 	ld	a,[hl]
-	
+
 	ld	hl,fake3d_vertex_w
 	add	hl,de
 	ld	c,[hl]
 	inc	hl
 	ld	d,[hl]
-	
+
 	; Vertex n+0 -> b,c (Y,W)
 	; Vertex n+1 -> a,d
 
 	cp	a,b
 	jr	nc,.dontswap
-	
+
 	ld	e,a
 	ld	a,b
 	ld	b,e
-	
+
 	ld	e,c
 	ld	c,d
 	ld	d,e
-	
+
 .dontswap:
-	
+
 	; Vertex 0 -> b,c (Y,W)
 	; Vertex 1 -> a,d     ->   a > b
-	
+
 	sub	a,b
 	inc	a ; lines to draw = deltaY + 1
 
 	push	bc ; save vertex 0 data (Y,W)
-	
+
 	ld	b,a ; b = Y1-Y0
-	
+
 	ld	a,d
 	sub	a,c
 	ld	c,a	; c = W1-W0
-	
+
 	; We want to calculate deltaW*256/deltaY
-	
+
 	ld	h,c
 	ld	l,0 ; hl = deltaW*256
 	ld	c,b ; c = deltaY
 	push	bc
 	call	fake3d_div_hl_by_c ; hl / c ==> quotient = hl, remainder = a 
 	pop	bc
-	
+
 	pop	de  ; restore vertex 0 data (Y,W)
-	
+
 	ld	a,c
-	
+
 	; a = deltaY + 1 = loop steps
 	; d = Y0
 	; e = W0
 	; hl = W increment per Y increment (8.8 fixed point)
-	
+
 	ld	b,d
-	
+
 	ld	d,e
 	ld	e,0
-	
+
 	push	de
 	push	hl
 	pop	de
@@ -1789,21 +1789,21 @@ fake3d_join_vertices: ; a = first vertex, a+1 = second vertex
 
 .loop:
 	push	af
-	
+
 	ld	a,h
 
 	push	hl
 	push	de
-	
+
 	; this checks if old Z is higher than new
-	
+
 	; fake3d_set_ly_scy: ; a = w, b = y
-	
+
 	ld	e,b
 	ld	d,0
 	ld	hl,fake3d_ly_scy_temp
 	add	hl,de
-	
+
 	cp	a,[hl]
 	jr	c,.next
 	ld	[hl],a
@@ -1811,27 +1811,27 @@ fake3d_join_vertices: ; a = first vertex, a+1 = second vertex
 	ld	hl,fake3d_ly_pal_temp
 	add	hl,de
 	add	hl,de
-	
+
 	ld	a,[fake3d_drawing_color]
 	ld	[hl+],a
 	ld	a,[fake3d_drawing_color+1]
 	ld	[hl],a
 .next:
-	
+
 	pop	de
 	pop	hl
-	
+
 	; Increment counters
-	
+
 	inc	b
-	
+
 	add	hl,de ; hl = Wn
 
 	pop	af
-	
+
 	dec	a
 	jr	nz,.loop
-	
+
 	ret
 
 ;-------------------------------------------------------------------------------------------------
@@ -1842,29 +1842,29 @@ fake3d_vbl_handler:
 	ld	a,[fake3d_rotation_angle_speed]
 	add	a,[hl]
 	ld	[hl],a
-	
+
 	ld	hl,fake3d_light_angle_offset_temp
 	ld	a,[fake3d_light_angle_offset_speed]
 	add	a,[hl]
 	ld	[hl],a
-	
+
 	LONG_CALL	gbt_update
-	
+
 	ret
 
 ;-------------------------------------------------------------------------------------------------
 
 fake3d_update_ly_scy_array:
-	
+
 	; Reset colors
-	
+
 	ld	b,128
 	ld	a,0
 	ld	hl,fake3d_ly_pal_temp
 	call	memset_fast ; a = value    hl = start address    b = size
 	ld	b,128
 	call	memset_fast
-	
+
 	; Reset array
 	ld	a,0
 	ld	hl,fake3d_ly_scy_temp
@@ -1877,13 +1877,13 @@ fake3d_update_ly_scy_array:
 	ld	h,[hl]
 	ld	l,a
 	CALL_HL
-	
+
 	; Wait to VBL for updating arrays
-	
+
 	call	wait_vbl
-	
+
 	; Convert W values to SCY in final buffer
-	
+
 	ld	hl,fake3d_ly_scy_temp
 	ld	de,fake3d_ly_scy
 	ld	b,0
@@ -1895,29 +1895,29 @@ fake3d_update_ly_scy_array:
 	sub	a,16
 	ld	[de],a
 	inc	de
-	
+
 	inc	b
 	ld	a,128
 	cp	a,b
 	jr	nz,.loop
-	
+
 	; Copy temp buffer to final buffer
-	
+
 	ld	b,128
 	ld	hl,fake3d_ly_pal_temp
 	ld	de,fake3d_ly_pal
 	call	memcopy_fast ; b = size    hl = source address    de = dest address
 	ld	b,128
 	call	memcopy_fast
-	
+
 	; Update angles
-	
+
 	ld	a,[fake3d_rotation_angle_temp]
 	ld	[fake3d_rotation_angle],a
-	
+
 	ld	a,[fake3d_light_angle_offset_temp]
 	ld	[fake3d_light_angle_offset],a
-	
+
 	ret
 
 ;-------------------------------------------------------------------------------------------------
@@ -1938,81 +1938,81 @@ fake3d_set_drawing_color_from_angle_and_palette: ; a = angle , de = palette
 	inc	hl
 	ld	d,[hl]
 	call	fake3d_set_drawing_color
-	
+
 	ret
-	
+
 ;-------------------------------------------------------------------------------------------------
 
 fake3d_set_drawing_color: ; de = color
-	
+
 	ld	hl,fake3d_drawing_color
 	ld	[hl],e
 	inc	hl
 	ld	[hl],d
-	
+
 	ret
 
 ;-------------------------------------------------------------------------------------------------
 
 fake3d_set_vertices_list: ; de = list
-	
+
 	ld	hl,fake3d_vertices_list_ptr
 	ld	[hl],e
 	inc	hl
 	ld	[hl],d
-	
+
 	ret
 
 ;-------------------------------------------------------------------------------------------------
 
 fake3d_set_draw_function: ; de = fn
-	
+
 	ld	hl,fake3d_draw_function
 	ld	[hl],e
 	inc	hl
 	ld	[hl],d
-	
+
 	ret
 
 ;-------------------------------------------------------------------------------------------------
-	
-	SECTION "Fake_3D_Bank0", HOME
-	
+
+	SECTION "Fake_3D_Bank0", ROM0
+
 fake3d_lcd_handler:
-	
+
 	; return if upper 16 lines
 	ld	a,[rLY]
 	cp	a,$0F
 	jr	nc,.not_upper_lines
-	
+
 	ld	a,128
 	ld	[rSCY],a
 	ret
-	
+
 .not_upper_lines:
-	
+
 	sub	a,16-1 ; configuration not for this line -> for the next one
 	ld	e,a
 	ld	d,0
 	ld	hl,fake3d_ly_pal
 	add	hl,de
 	add	hl,de
-	
+
 	ld	a,$86 ; auto increment
 	ld	[rBCPS],a
-	
+
 	ld	a,[hl+]
 	ld	b,[hl] ; ab = palette
-	
+
 	ld	[rBCPD],a
 	ld	a,b
 	ld	[rBCPD],a
-	
+
 	ld	hl,fake3d_ly_scy
 	add	hl,de
 	ld	a,[hl]
 	ld	[rSCY],a
-	
+
 	; tilt right 1
 ;	ld	hl,rLY
 ;	add	a,[hl]
@@ -2020,7 +2020,7 @@ fake3d_lcd_handler:
 ;	srl	a
 ;	sub	a,16
 ;	ld	[rSCX],a
-	
+
 	; tilt right 2
 ;	ld	hl,rLY
 ;	add	a,[hl]
@@ -2042,7 +2042,7 @@ fake3d_lcd_handler:
 ;	cpl
 ;	add	a,16+1
 ;	ld	[rSCX],a
-	
+
 	; tilt left 2
 ;	ld	hl,rLY
 ;	add	a,[hl]
@@ -2050,7 +2050,7 @@ fake3d_lcd_handler:
 ;	cpl
 ;	add	a,32+1
 ;	ld	[rSCX],a
-	
+
 	; tilt left 4
 ;	ld	hl,rLY
 ;	add	a,[hl]
@@ -2061,13 +2061,13 @@ fake3d_lcd_handler:
 	ret
 
 ;----------------------------------------------
-	
-	SECTION "Fake_3D_Bank5_2", CODE, BANK[6]
+
+	SECTION "Fake_3D_Bank5_2", ROMX, BANK[6]
 
 fake3d_setup_sprites:
-	
+
 	; ROUND
-	
+
 	ld	bc,((8+2)<<8)|(16+2)
 	ld	l,0
 	call	sprite_set_xy
@@ -2086,7 +2086,7 @@ fake3d_setup_sprites:
 	ld	bc,((48+2)<<8)|(16+2)
 	ld	l,5
 	call	sprite_set_xy
-	
+
 	ld	a,0
 	ld	l,0
 	call	sprite_set_tile
@@ -2105,9 +2105,9 @@ fake3d_setup_sprites:
 	ld	a,10
 	ld	l,5
 	call	sprite_set_tile
-	
+
 	; AND
-	
+
 	ld	bc,((72)<<8)|(24+2)
 	ld	l,6
 	call	sprite_set_xy
@@ -2120,7 +2120,7 @@ fake3d_setup_sprites:
 	ld	bc,((96)<<8)|(24+2)
 	ld	l,9
 	call	sprite_set_xy
-	
+
 	ld	a,12
 	ld	l,6
 	call	sprite_set_tile
@@ -2133,9 +2133,9 @@ fake3d_setup_sprites:
 	ld	a,18
 	ld	l,9
 	call	sprite_set_tile
-	
+
 	; ROUND
-	
+
 	ld	bc,((120-2)<<8)|(32+2)
 	ld	l,10
 	call	sprite_set_xy
@@ -2154,7 +2154,7 @@ fake3d_setup_sprites:
 	ld	bc,((160-2)<<8)|(32+2)
 	ld	l,15
 	call	sprite_set_xy
-	
+
 	ld	a,0
 	ld	l,10
 	call	sprite_set_tile
@@ -2173,14 +2173,14 @@ fake3d_setup_sprites:
 	ld	a,10
 	ld	l,15
 	call	sprite_set_tile
-	
+
 	; Load data
-	
+
 	ld	b,$90
 	call	wait_ly
-	
+
 	call	refresh_OAM
-	
+
 	ret
 
 ;----------------------------------------------
@@ -2189,77 +2189,77 @@ fake3d_load_vram:
 
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,4
 	ld	hl,fake3d_tiles
 	ld	de,256 ;  de = start index
 	call	vram_copy_tiles
-	
+
 	ld	bc,20
 	ld	hl,fake3d_round_and_round_tiles
 	ld	de,0 ;  de = start index
 	call	vram_copy_tiles
-	
+
 	; ----------------
-	
+
 	ld	a,1
 	ld	[rVBK],a
-	
+
 	ld	bc,32*32
 	ld	d,0
 	ld	hl,$9800
 	call	vram_memset ; bc = size    d = value    hl = dest address
-	
+
 	ld	bc,32*32
 	ld	d,0
 	ld	hl,$9C00
 	call	vram_memset ; bc = size    d = value    hl = dest address
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,32*32
 	ld	d,0
 	ld	hl,$9800
 	call	vram_memset
-	
+
 	ld	bc,32*32
 	ld	d,0
 	ld	hl,$9C00
 	call	vram_memset ; bc = size    d = value    hl = dest address
-	
+
 	; ----------------
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	hl,fake3d_map
 	ld	de,$9800
 	ld	a,10
 .loop_tiles:
 	push	af
-	
+
 	ld	bc,20
 	call	vram_copy
-	
+
 	; now increase dst by 12 to align columns
-	
+
 	push	hl
-	
+
 	ld	hl,12
 	add	hl,de
-	
+
 	ld	d,h
 	ld	e,l
-	
+
 	pop	hl
-	
+
 	pop	af
 	dec	a
 	jr	nz,.loop_tiles
-	
+
 	; ----------------
-	
+
 	ld	a,0
 	ld	[rVBK],a
 
@@ -2268,76 +2268,75 @@ fake3d_load_vram:
 ;----------------------------------------------
 
 	GLOBAL Fake_3D
-	
+
 Fake_3D:
-	
+
 	ld	a,LCDCF_ON
 	ld	[rLCDC],a
-	
+
 	call	fake3d_init_variables
-	
+
 	; load data...
 	; ------------
-	
+
 	call	fake3d_load_vram
 	call	fake3d_setup_sprites
-	
+
 	ld	a,LCDCF_ON|LCDCF_BG9800|LCDCF_BG8800|LCDCF_OBJ16|LCDCF_OBJON
 	ld	[rLCDC],a
 
 	; Set up interrupts...
 	; --------------------
-	
+
 	ld	b,$90
 	call	wait_ly
-	
+
 	ld	bc,fake3d_vbl_handler
 	call	irq_set_VBL
-	
+
 	ld	bc,fake3d_lcd_handler
 	call	irq_set_LCD
-	
+
 	ld	a,0
 	ld	[rIF],a
-	
+
 	ld	a,$03
 	ld	[rIE],a
-	
+
 	ld	a,STATF_MODE00
 	ld	[rSTAT],a
-	
+
 	; Set up first frame and palettes...
 	; ----------------------------------
-	
+
 	call	fake3d_update_ly_scy_array
 	call	fake3d_handle_events
-	
+
 	call	wait_vbl
-	
+
 	ld	a,0
 	ld	hl,fake3d_round_and_round_palette
 	call	spr_set_palette
-	
+
 	ld	a,0
 	ld	hl,fake3d_background_palette
 	call	bg_set_palette
-	
+
 	; Main loop
 	; ---------
-	
+
 .loop:
 
 	call	fake3d_update_ly_scy_array
 	call	fake3d_handle_events
-	
+
 	ld	a,[fake3d_exit_demo]
 	and	a,a
 	jr	z,.loop
-	
+
 	; Exit...
 	; -------
 
 	call	demo_config_default
 
 	ret
-

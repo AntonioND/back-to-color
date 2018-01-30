@@ -1,17 +1,17 @@
-; 
-; Copyright (c) 2014, Antonio Niño Díaz (AntonioND)
+;
+; Copyright (c) 2014-2018, Antonio Niño Díaz (AntonioND)
 ; All rights reserved.
-; 
+;
 ; Redistribution and use in source and binary forms, with or without
 ; modification, are permitted provided that the following conditions are met:
-; 
+;
 ; * Redistributions of source code must retain the above copyright notice, this
 ;   list of conditions and the following disclaimer.
-; 
+;
 ; * Redistributions in binary form must reproduce the above copyright notice,
 ;   this list of conditions and the following disclaimer in the documentation
 ;   and/or other materials provided with the distribution.
-; 
+;
 ; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,14 +22,14 @@
 ; CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-; 
+;
 
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "CREDITS_DATA", DATA, BANK[2]
+	SECTION "CREDITS_DATA", ROMX, BANK[2]
 
 jordi_city_palettes:
 	DW	32767,22197,12684,0
@@ -650,7 +650,7 @@ CLEAR_SCR		EQU	"*"
 credits_text:
 	DB	"Credits.",WAIT_HALFSEC,".",WAIT_HALFSEC,".",WAIT_HALFSEC
 	DB	CLEAR_SCR
-	
+
 	DB	"Code, music & gfx"
 	DB	"  AntonioND",WAIT_HALFSEC,NEWLINE
 	DB	NEWLINE
@@ -663,52 +663,52 @@ credits_text:
 	DB	"antonio_nd@",NEWLINE
 	DB	"       outlook.com",WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC
 	DB	CLEAR_SCR
-	
+
 	DB	"Email",WAIT_HALFSEC,NEWLINE
 	DB	NEWLINE
 	DB	"antonionidi@",NEWLINE
 	DB	"         gmail.com",WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC
 	DB	CLEAR_SCR
-	
+
 	DB	"Email",WAIT_HALFSEC,NEWLINE
 	DB	NEWLINE
 	DB	"jordirafel@",NEWLINE
 	DB	"         gmail.com",WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC
 	DB	CLEAR_SCR
-	
+
 	DB	"Twitter",WAIT_HALFSEC,NEWLINE
 	DB	NEWLINE
 	DB	"  @antonionidi",NEWLINE
 	DB	NEWLINE
 	DB	"  @jordirafel",WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC
 	DB	CLEAR_SCR
-	
+
 	DB	"Webpage",WAIT_HALFSEC,NEWLINE
 	DB	NEWLINE
 	DB	"antoniond_blog.",NEWLINE
 	DB	"drunkencoders.com",WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC
 	DB	CLEAR_SCR
-	
+
 	DB	"Webpage",WAIT_HALFSEC,NEWLINE
 	DB	NEWLINE
 	DB	"antoniond.",NEWLINE
 	DB	"drunkencoders.com",WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC
 	DB	CLEAR_SCR
-	
+
 	DB	"Tools",WAIT_HALFSEC,NEWLINE
 	DB	NEWLINE
 	DB	"RGBDS, GBTK & GBMB"
 	DB	"BGB, GBT Player",NEWLINE
 	DB	"VBA-M, OpenMPT",WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC
 	DB	CLEAR_SCR
-	
+
 	DB	"Thanks to all the",NEWLINE
 	DB	"Game Boy scene!",WAIT_HALFSEC,NEWLINE
 	DB	NEWLINE
 	DB	"And thank you",NEWLINE
 	DB	"for watching!",WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,NEWLINE
 	DB	CLEAR_SCR
-	
+
 	DB	"Keep the Game Boy",NEWLINE
 	DB	"forever alive!",WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,NEWLINE
 	DB	CLEAR_SCR
@@ -720,7 +720,7 @@ credits_text:
 	DB	"Antonio Ni~o Diaz",WAIT_HALFSEC,NEWLINE
 
 	DB	0 ; End and halt
-	
+
 ; ---------------------------
 
 not_cgb_text:
@@ -730,12 +730,12 @@ not_cgb_text:
 	DB	NEWLINE
 	DB	"Copyright % 2014",NEWLINE
 	DB	"Antonio Ni~o Diaz",WAIT_HALFSEC,NEWLINE
-	
+
 	DB	0 ; End and halt
-	
+
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION	"Credits_Vars",BSS
+	SECTION	"Credits_Vars", WRAM0
 
 ; ---------------------------
 
@@ -748,7 +748,7 @@ FRAMES_TO_WAIT_FOR_CHARACTER	EQU	2
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "Credits", CODE, BANK[2]
+	SECTION "Credits", ROMX, BANK[2]
 
 ;----------------------------------------------
 
@@ -758,42 +758,42 @@ credits_init_variables:
 	ld	[credits_write_tile_x],a
 	ld	a,12
 	ld	[credits_write_tile_y],a
-	
+
 	ld	hl,credits_text
 	ld	a,h
 	ld	[credits_text_next_char_ptr],a
 	ld	a,l
 	ld	[credits_text_next_char_ptr+1],a
-	
+
 	ld	a,FRAMES_TO_WAIT_FOR_CHARACTER
 	ld	[credits_text_newchar_countdown],a
-	
+
 	ret
 
 ;----------------------------------------------
 
 credits_set_bg_tile: ; b = x, c = y, a = tile
-	
+
 	ld	d,$9800 >> 8
 	ld	e,b ; de = base + x
-	
+
 	ld	l,c
 	ld	h,$00 ; hl = y
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl ; hl = y *  32
-	
+
 	add	hl,de ; hl = base + x + (y * 32)
-	
+
 	push	af
 	call	wait_screen_blank
 	pop	af
-	
+
 	ld	[hl],a
-	
+
 	ret
 
 ;----------------------------------------------------------------------------
@@ -861,7 +861,7 @@ CHARACTER	SET	CHARACTER+1
 ;----------------------------------------------------------------------------
 
 credits_convert_ascii_to_tiles: ; a = ascii code. returns tile number in a
-	
+
 	sub	a,32 ; Non-printing characters
 	ld	hl,credits_ascii_to_tiles_table
 	ld	d,0
@@ -870,76 +870,76 @@ credits_convert_ascii_to_tiles: ; a = ascii code. returns tile number in a
 	ld	a,[hl]
 
 	ret
-	
+
 ;----------------------------------------------
 
 credits_handle_text:
-	
+
 	ld	a,[credits_text_newchar_countdown]
 	dec	a
 	ld	[credits_text_newchar_countdown],a
 	and	a,a
 	ret	nz ; if not 0, return
-	
+
 	ld	a,FRAMES_TO_WAIT_FOR_CHARACTER
 	ld	[credits_text_newchar_countdown],a
-	
+
 	ld	a,[credits_write_tile_x]
 	ld	b,a
 	ld	a,[credits_write_tile_y]
 	ld	c,a
-	
+
 	ld	a,[credits_text_next_char_ptr]
 	ld	h,a
 	ld	a,[credits_text_next_char_ptr+1]
 	ld	l,a
-	
+
 	ld	a,[hl]
-	
+
 	and	a,a
 	ret	z ; if character = 0, return (stop text)
-	
+
 	inc	hl
-	
+
 	push	af
 	ld	a,h
 	ld	[credits_text_next_char_ptr],a
 	ld	a,l
 	ld	[credits_text_next_char_ptr+1],a
 	pop	af
-	
+
 	; handle special characters...
-	
+
 	cp	a,NEWLINE ; newline
 	jr	z,.newline
-	
+
 	cp	a,CLEAR_SCR ; clear text
 	jr	nz,.dontclear
 	call	credits_clear_text
 	ret
 .dontclear
-	
+
 	cp	a,WAIT_HALFSEC ; wait 1/2 second
 	jr	nz,.dontwait
 	ld	a,30
 	ld	[credits_text_newchar_countdown],a
 	ret
 .dontwait:
-	
+
 	; end handle special characters...
-	
+
 	call	credits_convert_ascii_to_tiles
-	
+
 	call	credits_set_bg_tile  ; b = x, c = y, a = tile
-	
+
 	; increase x position
-	
+
 	ld	a,[credits_write_tile_x]
 	inc	a
 	cp	a,19
 	ld	[credits_write_tile_x],a
 	ret	nz
-	
+
 .newline:
 
 	ld	a,1
@@ -952,21 +952,21 @@ credits_handle_text:
 	cp	a,17
 	ld	[credits_write_tile_y],a
 	ret	nz
-	
+
 	ld	a,12
 	ld	[credits_write_tile_y],a
-	
+
 	ret
 
 ;----------------------------------------------
 
 credits_palette_load:
-	
+
 	ld	b,$90
 	call	wait_ly ; destroys register A
-	
+
 	ld	hl,jordi_city_palettes
-	
+
 	ld	a,0
 	call	bg_set_palette
 	ld	a,1
@@ -983,120 +983,120 @@ credits_palette_load:
 	call	bg_set_palette
 	ld	a,7
 	call	bg_set_palette
-	
+
 	ret
 
 ;----------------------------------------------
 
 credits_clear_text:
-	
+
 	ld	a,1
 	ld	[credits_write_tile_x],a
 	ld	a,12
 	ld	[credits_write_tile_y],a
-	
+
 	; rVBK should be 0
-	
+
 	ld	d,O_SPACE
 	ld	bc,6*32
 	ld	hl,$9800+12*32
 	call	vram_memset ; bc = size    d = value    hl = dest address
-	
+
 	ret
-	
+
 ;----------------------------------------------
 
 credits_load_maps:
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	hl,jordi_city_map
 	ld	de,$9800
 	ld	a,18
 .loop_tiles:
 	push	af
-	
+
 	ld	bc,20
 	call	vram_copy
-	
+
 	; now increase dst by 12 to align columns
-	
+
 	push	hl
-	
+
 	ld	hl,12
 	add	hl,de
-	
+
 	ld	d,h
 	ld	e,l
-	
+
 	pop	hl
-	
+
 	pop	af
 	dec	a
 	jr	nz,.loop_tiles
-	
+
 	; ----------------
-	
+
 	ld	a,1
 	ld	[rVBK],a
-	
+
 	ld	hl,jordi_city_attr
 	ld	de,$9800
 	ld	a,18
 .loop_attr:
 	push	af
-	
+
 	ld	bc,20
 	call	vram_copy
-	
+
 	; now increase dst by 12 to align columns
-	
+
 	push	hl
-	
+
 	ld	hl,12
 	add	hl,de
-	
+
 	ld	d,h
 	ld	e,l
-	
+
 	pop	hl
-	
+
 	pop	af
 	dec	a
 	jr	nz,.loop_attr
-	
+
 	; ----------------
-	
+
 	ld	a,0
 	ld	[rVBK],a
 
 	ret
-	
+
 ;-------------------------------------------------------------------
 ;-                              OTHER                              -
 ;-------------------------------------------------------------------
 
 credits_vbl_handler:
-	
+
 	LONG_CALL	gbt_update
 
 	call	credits_handle_text
-	
+
 	ret
 
 ;----------------------------------------------
-	
+
 	GLOBAL Credits
-	
+
 Credits:
-	
+
 	ld	a,LCDCF_ON|LCDCF_BG8000|LCDCF_BG9800 ; configuration
 	ld	[rLCDC],a
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,256
 	ld	hl,jordi_city_tiles
 	ld	de,$0000 ;  de = start index
@@ -1105,19 +1105,19 @@ Credits:
 	call	credits_load_maps
 
 	call	credits_init_variables
-	
+
 	call	wait_vbl
-	
+
 	call	credits_palette_load
-	
+
 	ld	a,$01
 	ld	[rIE],a
-	
+
 	ld	bc,credits_vbl_handler
 	call	irq_set_VBL
-	
-	; START	
-	
+
+	; START
+
 .loop: ; Main loop
 
 	call	wait_vbl
@@ -1126,9 +1126,9 @@ Credits:
 
 	; Exit...
 	; -------
-	
+
 	;call	demo_config_default
-	
+
 	;ret
 
 ;-------------------------------------------------------------------
@@ -1136,34 +1136,34 @@ Credits:
 ;-------------------------------------------------------------------
 
 not_cgb_load_maps:
-	
+
 	ld	hl,jordi_city_map
 	ld	de,$9800
 	ld	a,18
 .loop_tiles:
 	push	af
-	
+
 	ld	bc,20
 	call	vram_copy
-	
+
 	; now increase dst by 12 to align columns
-	
+
 	push	hl
-	
+
 	ld	hl,12
 	add	hl,de
-	
+
 	ld	d,h
 	ld	e,l
-	
+
 	pop	hl
-	
+
 	pop	af
 	dec	a
 	jr	nz,.loop_tiles
 
 	ret
-	
+
 ;------------------------------
 
 not_cgb_init_variables:
@@ -1172,33 +1172,33 @@ not_cgb_init_variables:
 	ld	[credits_write_tile_x],a
 	ld	a,12
 	ld	[credits_write_tile_y],a
-	
+
 	ld	hl,not_cgb_text
 	ld	a,h
 	ld	[credits_text_next_char_ptr],a
 	ld	a,l
 	ld	[credits_text_next_char_ptr+1],a
-	
+
 	ld	a,FRAMES_TO_WAIT_FOR_CHARACTER
 	ld	[credits_text_newchar_countdown],a
-	
+
 	ret
 
 ;------------------------------
 
 	GLOBAL Not_CGB
-	
+
 Not_CGB:
-	
+
 	ld	a,LCDCF_ON|LCDCF_BG8000|LCDCF_BG9800|LCDCF_BGON ; configuration
 	ld	[rLCDC],a
-	
+
 	ld	a,$00
 	ld	[rBGP],a
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,256
 	ld	hl,jordi_city_tiles
 	ld	de,$0000 ;  de = start index
@@ -1207,21 +1207,20 @@ Not_CGB:
 	call	not_cgb_load_maps
 
 	call	not_cgb_init_variables
-	
+
 	call	wait_vbl
-	
+
 	ld	a,$E4
 	ld	[rBGP],a
-	
+
 	ld	a,$01
 	ld	[rIE],a
-	
+
 	ld	bc,credits_vbl_handler
 	call	irq_set_VBL
-	
+
 .loop: ; Main loop
-	
+
 	call	wait_vbl
 
 	jr	.loop
-

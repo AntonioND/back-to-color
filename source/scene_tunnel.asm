@@ -1,17 +1,17 @@
-; 
-; Copyright (c) 2014, Antonio Niño Díaz (AntonioND)
+;
+; Copyright (c) 2014-2018, Antonio Niño Díaz (AntonioND)
 ; All rights reserved.
-; 
+;
 ; Redistribution and use in source and binary forms, with or without
 ; modification, are permitted provided that the following conditions are met:
-; 
+;
 ; * Redistributions of source code must retain the above copyright notice, this
 ;   list of conditions and the following disclaimer.
-; 
+;
 ; * Redistributions in binary form must reproduce the above copyright notice,
 ;   this list of conditions and the following disclaimer in the documentation
 ;   and/or other materials provided with the distribution.
-; 
+;
 ; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,7 +22,7 @@
 ; CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-; 
+;
 
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
@@ -32,7 +32,7 @@ ATTR_MAP_TEMP		EQU	$D800 ;($D400 + 32*32)
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "TUNNEL_DATA", DATA, BANK[3]
+	SECTION "TUNNEL_DATA", ROMX, BANK[3]
 
 tunnel_palettes:
 	DW $6FFB,$4EF3,$2DEB,$0CE3
@@ -185,7 +185,7 @@ DB $03,$03,$03,$03,$03,$03,$03,$03,$03,$03
 DB $03,$03,$03,$03
 
 	SECTION "TUNNEL_DATA_DISTANCE_PALETTES",ROMX[$6400],BANK[3]
-	
+
 tunnel_distance_palettes:
 DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00,$00
 DB $00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00,$00
@@ -486,7 +486,7 @@ DB $30,$30,$30,$31,$31,$31,$32,$32,$32,$32,$33,$33,$33,$34,$34,$34,$34,$35,$35,$
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION	"Tunnel_Vars",BSS
+	SECTION	"Tunnel_Vars", WRAM0
 
 ; ---------------------------
 
@@ -517,7 +517,7 @@ tunnel_temp_angles:		DS	4
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "Tunnel", CODE, BANK[3]
+	SECTION "Tunnel", ROMX, BANK[3]
 
 ;----------------------------------------------
 
@@ -525,17 +525,17 @@ tunnel_init_variables:
 
 	ld	a,0
 	ld	[tunnel_exit_demo],a
-	
+
 	ld	[tunnel_has_to_update_bgs_dma],a
 	ld	[tunnel_has_to_refresh_oam],a
-	
+
 	ld	[tunnel_x_increment],a
 	ld	[tunnel_y_increment],a
 	ld	[tunnel_temp_rSCX],a
 	ld	[tunnel_temp_rSCY],a
 	ld	[tunnel_distance_increment],a
 	ld	[tunnel_angle_increment],a
-	
+
 	ld	a,2
 	ld	[tunnel_x_increment_speed],a
 	ld	a,1
@@ -544,16 +544,16 @@ tunnel_init_variables:
 	ld	[tunnel_angle_increment_speed],a
 	ld	a,1
 	ld	[tunnel_distance_increment_speed],a
-	
+
 	ld	a,0
 	ld	[tunnel_event_count],a
 	ld	[tunnel_event_count+1],a
-	
+
 	ld	a,0
 	ld	[tunnel_window_increment],a
 	ld	[rWX],a
 	ld	[rWY],a
-	
+
 	ld	hl,_event_table_tunnel
 	ld	a,h
 	ld	[tunnel_current_event],a
@@ -590,32 +590,32 @@ _event_table_tunnel:
 
 	DW	1,_event_tunnel_window_hide
 	DW	19,_event_tunnel_window_stop
-	
+
 	DW	164,_event_tunnel_window_show
 	DW	182,_event_tunnel_window_stop
 	DW	183,_event_exit_tunnel_demo
-	
+
 	DW	$FFFF,$0000 ; No more events! Don't remove this line!
 
 ;----------------------------------------------
 
 tunnel_handle_events:
-	
+
 	; Handle events
 	; -------------
-	
+
 	ld	a,[tunnel_event_count]
 	ld	e,a
 	ld	a,[tunnel_event_count+1]
 	ld	d,a
-	
+
 	; Start of checking
-	
+
 	ld	a,[tunnel_current_event]
 	ld	h,a
 	ld	a,[tunnel_current_event+1]
 	ld	l,a
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = event counter trigger
@@ -623,33 +623,33 @@ tunnel_handle_events:
 	and	a,b
 	cp	a,$FF ; if both are $FF, exit checking
 	jr	z,._exit_check_events
-	
+
 	ld	a,d
 	cp	a,b
 	jr	nz,._exit_check_events
-	
+
 	ld	a,e
 	cp	a,c
 	jr	nz,._exit_check_events
-	
+
 	inc	hl
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = ptr to function
 	inc	hl ; hl = ptr to next event
-	
+
 	ld	a,h
 	ld	[tunnel_current_event],a
 	ld	a,l
 	ld	[tunnel_current_event+1],a ; save pointer to next event
-	
+
 	ld	h,b
 	ld	l,c ; hl = ptr to function
-	
+
 	call	._call_event_function
 	jr	._exit_check_events
-	
+
 ._call_event_function
 	jp	hl
 
@@ -657,26 +657,26 @@ tunnel_handle_events:
 
 	; Now, handle functions...
 	; ------------------------
-	
+
 	; More checks here
-	
+
 	; ...
-	
+
 	; Increase counter
 	; ----------------
-	
+
 	ld	a,[tunnel_event_count]
 	ld	l,a
 	ld	a,[tunnel_event_count+1]
 	ld	h,a
-	
+
 	inc	hl
-	
+
 	ld	a,l
 	ld	[tunnel_event_count],a
 	ld	a,h
 	ld	[tunnel_event_count+1],a
-	
+
 	ret
 
 ;----------------------------------------------
@@ -684,10 +684,10 @@ tunnel_handle_events:
 tunnel_palettes_load:
 
 	ld	hl,tunnel_palettes
-	
+
 	ld	a,$80 ; auto increment
 	ld	[rBCPS],a
-	
+
 	ld	c,(rBCPD&$FF)
 	REPT	4*8
 	ld	a,[hl+]
@@ -695,14 +695,14 @@ tunnel_palettes_load:
 	ld	a,[hl+]
 	ld	[$FF00+c],a
 	ENDR
-	
+
 	; -------
-	
+
 	ld	hl,tunnel_sprites_palette
-	
+
 	ld	a,$80 ; auto increment
 	ld	[rOCPS],a
-	
+
 	ld	c,(rOCPD&$FF)
 	REPT	4
 	ld	a,[hl+]
@@ -710,27 +710,27 @@ tunnel_palettes_load:
 	ld	a,[hl+]
 	ld	[$FF00+c],a
 	ENDR
-	
+
 	ret
 
 ;----------------------------------------------
 
 TUNNEL_SET_TILE: MACRO ; b = x, c = y, a = tile
-	
+
 	ld	d,MAP_TEMP >> 8
 	ld	e,b ; de = base + x
-	
+
 	ld	l,c
 	ld	h,$00 ; hl = y
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl ; hl = y * 32
-	
+
 	add	hl,de ; hl = base + x + (y * 32)
-	
+
 	ld	[hl],a
 
 ENDM
@@ -741,28 +741,28 @@ tunnel_map_update_scroll:
 
 	ld	a,[tunnel_temp_rSCX]
 	ld	[rSCX],a
-	
+
 	ld	a,[tunnel_temp_rSCY]
 	ld	[rSCY],a
-	
+
 	ret
 
 ;---------------------------------
 
 tunnel_map_handle:
-	
+
 	ld	a,[tunnel_has_to_update_bgs_dma]
 	and	a,a
 	jr	z,.continue ; wait until last frame is copied
-	
+
 	halt
 	jr	tunnel_map_handle
-	
+
 .continue:
 
 	; Calculate effect
 	; ----------------
-	
+
 	ld	a,[tunnel_y_increment]
 	sra	a
 	sra	a
@@ -781,139 +781,139 @@ tunnel_map_handle:
 .loopx
 	push	de ; de first!!!!
 	push	bc
-	
+
 	;----
-	
+
 	; Get 4 subtiles
-	
+
 	sla	b
 	sla	c
-	
+
 	ld	e,b
-	
+
 	ld	l,c
 	ld	h,0
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	push	hl
 	push	de
-	
+
 	; Calculate distances
-	
+
 	ld	d,tunnel_distance>>8
 	add	hl,de
-	
+
 	ld	a,[tunnel_distance_increment]
 	ld	c,a ; c = tunnel_distance_increment
 	ld	b,31
-	
+
 	ld	a,[hl+]
 	add	a,c
 	and	a,b
 	ld	[tunnel_temp_distances+0],a
-	
+
 	ld	a,[hl]
 	add	a,c
 	and	a,b
 	ld	[tunnel_temp_distances+1],a
-	
+
 	ld	de,64-1
 	add	hl,de
-	
+
 	ld	a,[hl+]
 	add	a,c
 	and	a,b
 	ld	[tunnel_temp_distances+2],a
-	
+
 	ld	a,[hl]
 	add	a,c
 	and	a,b
 	ld	[tunnel_temp_distances+3],a
-	
+
 	; Calculate angles
-	
+
 	pop	de
 	pop	hl
-	
+
 	ld	d,tunnel_angle>>8
 	add	hl,de
-	
+
 	ld	a,[tunnel_angle_increment]
 	ld	c,a ; c = tunnel_angle_increment
 	;ld	b,31
-	
+
 	ld	a,[hl+]
 	add	a,c
 	and	a,b
 	ld	[tunnel_temp_angles+0],a
-	
+
 	ld	a,[hl]
 	add	a,c
 	and	a,b
 	ld	[tunnel_temp_angles+1],a
-	
+
 	ld	de,64-1
 	add	hl,de
-	
+
 	ld	a,[hl+]
 	add	a,c
 	and	a,b
 	ld	[tunnel_temp_angles+2],a
-	
+
 	ld	a,[hl]
 	add	a,c
 	and	a,b
 	ld	[tunnel_temp_angles+3],a
 
 	; Get texture coordinate from distance and angle
-	
+
 	; Distance -> Y -> b
 	; Angle -> X -> a
-	
+
 	; Subtile 1
-	
+
 	ld	d,tunnel_texture>>8
 	ld	a,[tunnel_temp_angles+0]
 	ld	e,a
-	
+
 	ld	h,0
 	ld	a,[tunnel_temp_distances+0]
 	ld	l,a
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	add	hl,de
-	
+
 	ld	b,[hl] ; b = subtile1
-	
+
 	; Subtile 2
-	
+
 	;ld	d,tunnel_texture>>8
 	ld	a,[tunnel_temp_angles+1]
 	ld	e,a
-	
+
 	ld	h,0
 	ld	a,[tunnel_temp_distances+1]
 	ld	l,a
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	add	hl,de
-	
+
 	ld	a,[hl] ; a = subtile2
 	rla
 	rla
@@ -921,105 +921,105 @@ tunnel_map_handle:
 	ld	b,a ; b = subtile1 | (subtile2<<2)
 
 	; Subtile 3
-	
+
 	;ld	d,tunnel_texture>>8
 	ld	a,[tunnel_temp_angles+2]
 	ld	e,a
-	
+
 	ld	h,0
 	ld	a,[tunnel_temp_distances+2]
 	ld	l,a
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	add	hl,de
-	
+
 	ld	a,[hl] ; a = subtile3
 	swap	a
 	or	a,b
 	ld	b,a ; b = subtile1 | (subtile2<<2) | (subtile3<<4)
 
 	; Subtile 4
-	
+
 	;ld	d,tunnel_texture>>8
 	ld	a,[tunnel_temp_angles+3]
 	ld	e,a
-	
+
 	ld	h,0
 	ld	a,[tunnel_temp_distances+3]
 	ld	l,a
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	add	hl,de
-	
+
 	ld	a,[hl] ; a = subtile4
 	rrca
 	rrca
 	or	a,b ; a = subtile1 | (subtile2<<2) | (subtile3<<4) | (subtile4<<6)
 
 	; Write tile to temp buffer
-	
+
 	pop	bc
 	push	bc
 
 	TUNNEL_SET_TILE
-	
+
 	;----
-	
+
 	pop	bc
 	pop	de
-	
+
 	inc	b
 	ld	a,d
 	cp	a,b
 	jp	nz,.loopx
-	
+
 	inc	c
 	ld	a,e
 	cp	a,c
 	jp	nz,.loopy
-	
+
 	; Increment variables for next frame
-	
+
 	ld	a,[tunnel_angle_increment]
 	ld	hl,tunnel_angle_increment_speed
 	add	a,[hl]
 	and	a,31
 	ld	[tunnel_angle_increment],a
-	
+
 	ld	a,[tunnel_distance_increment]
 	ld	hl,tunnel_distance_increment_speed
 	add	a,[hl]
 	and	a,31
 	ld	[tunnel_distance_increment],a
-	
+
 	; Update temp scroll values
-	
+
 	ld	a,[tunnel_x_increment]
 	and	a,$FF&(~3)
 	ld	[tunnel_temp_rSCX],a
-	
+
 	ld	a,[tunnel_y_increment]
 	and	a,$FF&(~3)
 	ld	[tunnel_temp_rSCY],a
-	
+
 	; X scroll
-	
+
 	ld	a,[tunnel_x_increment]
 	ld	hl,tunnel_x_increment_speed
 	add	a,[hl]
 	add	a,[hl]
 	ld	[tunnel_x_increment],a
-	
+
 	cp	a,0
 	jr	nz,._not_x_zero
 	ld	[hl],1
@@ -1037,7 +1037,7 @@ tunnel_map_handle:
 	add	a,[hl]
 	add	a,[hl]
 	ld	[tunnel_y_increment],a
-	
+
 	cp	a,0
 	jr	nz,._not_y_zero
 	ld	[hl],1
@@ -1049,37 +1049,37 @@ tunnel_map_handle:
 ._not_y_max
 
 	; Tell the VBL handler to update screen
-	
+
 	ld	a,1
 	ld	[tunnel_has_to_update_bgs_dma],a
-	
+
 	ret
 
 ;----------------------------------------------
 
 tunnel_update_bg:
-	
+
 	ld	a,[tunnel_has_to_update_bgs_dma]
 	and	a,a
 	ret	z
-	
+
 	call	tunnel_map_update_scroll
-	
+
 	ld	a,0
 	ld	[tunnel_has_to_update_bgs_dma],a
-	
+
 	ld	a,0
 	ld	[rVBK],a ; should be 20*18, but as there is space between rows, use 32
 	DMA_COPY	MAP_TEMP,$9800,32*32,0 ; src, dst, size, is_hdma
-	
+
 	ret
 
 ;----------------------------------------------
 
 tunnel_setup_sprites:
-	
+
 	; TUNNEL
-	
+
 	ld	bc,((113-2)<<8)|(144-2)
 	ld	l,0
 	call	sprite_set_xy
@@ -1101,7 +1101,7 @@ tunnel_setup_sprites:
 	ld	bc,((161-2)<<8)|(144-2)
 	ld	l,6
 	call	sprite_set_xy
-	
+
 	ld	a,0
 	ld	l,0
 	call	sprite_set_tile
@@ -1123,29 +1123,29 @@ tunnel_setup_sprites:
 	ld	a,12
 	ld	l,6
 	call	sprite_set_tile
-	
+
 	; Done!
-	
+
 	ld	a,1
 	ld	[tunnel_has_to_refresh_oam],a
-	
+
 	ret
 
 ;----------------------------------------------
 
 tunnel_load_sprites:
-	
+
 	ld	a,[tunnel_has_to_refresh_oam]
 	and	a,a
 	ret	z
-	
+
 	xor	a,a
 	ld	[tunnel_has_to_refresh_oam],a
-	
+
 	call	refresh_OAM
-	
+
 	ret
-	
+
 ;-------------------------------------------------------------------
 ;-                              OTHER                              -
 ;-------------------------------------------------------------------
@@ -1153,40 +1153,40 @@ tunnel_load_sprites:
 tunnel_vbl_handler:
 
 	; --------------------
-	
+
 	call	tunnel_load_sprites
-	
+
 	; --------------------
-	
+
 	call	tunnel_update_bg
-	
+
 	; --------------------
-	
+
 	; Window increments
-	
+
 	ld	hl,tunnel_window_increment
 	ld	a,[rWX]
 	add	a,[hl]
 	ld	[rWX],a
-	
+
 	ld	a,[rWY]
 	add	a,[hl]
 	ld	[rWY],a
-	
+
 	; --------------------
-	
+
 	LONG_CALL	gbt_update
-	
+
 	; --------------------
-	
+
 	ret
 
 ;----------------------------------------------
-	
+
 	GLOBAL Tunnel
-	
+
 Tunnel:
-	
+
 	xor	a,a ; hide things with window
 	ld	[rWX],a
 	ld	[rWY],a
@@ -1195,12 +1195,12 @@ Tunnel:
 
 	ld	a,LCDCF_ON|LCDCF_WINON|LCDCF_WIN9C00 ; use window to hide things
 	ld	[rLCDC],a
-	
+
 	; ---- set window to palette 7, tile = 0 (all colors are black)
-	
+
 	ld	a,1
 	ld	[rVBK],a
-	
+
 	ld	bc,32*32
 	ld	d,7
 	ld	hl,$9C00
@@ -1208,73 +1208,73 @@ Tunnel:
 
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,32*32
 	ld	d,0
 	ld	hl,$9C00
 	call	vram_memset ; bc = size    d = value    hl = dest address
-	
-	; ----	
-	
+
+	; ----
+
 	call	tunnel_init_variables
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	LONG_CALL	demo_load_4x4_tiles
 
 	ld	bc,14
 	ld	hl,tunnel_sprite_tiles
 	ld	de,0 ;  de = start index
 	call	vram_copy_tiles
-	
+
 	ld	a,1
 	ld	[rVBK],a
-	
+
 	ld	bc,32*32
 	ld	de,$9800
 	ld	hl,tunnel_distance_palettes
 	call	vram_copy ; bc = size    hl = source address    de = dest address
-	
+
 	call	tunnel_setup_sprites
-	
+
 	call	wait_vbl
-	
+
 	call	tunnel_map_update_scroll
-	
+
 	call	wait_vbl
-	
+
 	call	tunnel_map_handle
-	
+
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800|LCDCF_WINON|LCDCF_WIN9C00|LCDCF_OBJ16|LCDCF_OBJON
 	ld	[rLCDC],a ; configuration
-	
+
 	ld	a,0
 	ld	[rWY],a ; reset window
 	ld	a,7
 	ld	[rWX],a
-	
+
 	; Load palettes
-	
+
 	call	wait_vbl
-	
+
 	call	tunnel_palettes_load
-	
+
 	; Configure IRQs
-	
+
 	ld	a,$01
 	ld	[rIE],a
-	
+
 	ld	bc,tunnel_vbl_handler
 	call	irq_set_VBL
-	
-	; START	
-	
+
+	; START
+
 .loop: ; Main loop
-	
+
 	call	tunnel_handle_events
 	call	tunnel_map_handle
-	
+
 	call	wait_vbl
 
 	ld	a,[tunnel_exit_demo]
@@ -1283,8 +1283,8 @@ Tunnel:
 
 	; Exit...
 	; -------
-	
+
 	call	demo_config_default
-	
+
 	ret
 

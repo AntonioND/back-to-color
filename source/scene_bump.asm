@@ -1,17 +1,17 @@
-; 
-; Copyright (c) 2014, Antonio Niño Díaz (AntonioND)
+;
+; Copyright (c) 2014-2018, Antonio Niño Díaz (AntonioND)
 ; All rights reserved.
-; 
+;
 ; Redistribution and use in source and binary forms, with or without
 ; modification, are permitted provided that the following conditions are met:
-; 
+;
 ; * Redistributions of source code must retain the above copyright notice, this
 ;   list of conditions and the following disclaimer.
-; 
+;
 ; * Redistributions in binary form must reproduce the above copyright notice,
 ;   this list of conditions and the following disclaimer in the documentation
 ;   and/or other materials provided with the distribution.
-; 
+;
 ; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,7 +22,7 @@
 ; CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-; 
+;
 
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
@@ -35,7 +35,7 @@ MAP_TEMP_2			EQU	$D400 ; ($D000 + 32*32)
 ; More or less based on this:
 ; http://www.flipcode.com/archives/The_Art_of_Demomaking-Issue_07_Bump_Mapping.shtml
 
-	SECTION "BUMP_DATA", DATA, BANK[4]
+	SECTION "BUMP_DATA", ROMX, BANK[4]
 
 bump_palettes:
 	DW $0000,$0000,$0000,$0000
@@ -923,7 +923,7 @@ DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION	"Bump_Vars",BSS
+	SECTION	"Bump_Vars", WRAM0
 
 ; ---------------------------
 
@@ -945,7 +945,7 @@ bump_movement_count_y:	DS	1
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "Bump", CODE, BANK[4]
+	SECTION "Bump", ROMX, BANK[4]
 
 ;----------------------------------------------
 
@@ -954,23 +954,23 @@ bump_init_variables:
 	ld	a,0
 	ld	[bump_coord_x],a
 	ld	[bump_coord_y],a
-	
+
 	ld	[bump_movement_count_x],a
 	ld	[bump_movement_count_y],a
-	
+
 	ld	[bump_has_to_update_pal],a
 	ld	[bump_current_pal],a
 	ld	[bump_has_to_update_bgs_dma],a
-	
+
 	ld	a,bump_deltas_table_1 & $FF
 	ld	[bump_deltas_table_current+0],a
 	ld	a,bump_deltas_table_1 >> 8
 	ld	[bump_deltas_table_current+1],a
-	
+
 	ld	a,0
 	ld	[bump_event_count],a
 	ld	[bump_event_count+1],a
-	
+
 	ld	hl,_event_table_bump
 	ld	a,h
 	ld	[bump_current_event],a
@@ -1020,65 +1020,65 @@ _event_bump_set_table_1:
 	ld	a,bump_deltas_table_1 >> 8
 	ld	[bump_deltas_table_current+1],a
 	ret
-	
+
 _event_bump_set_table_2:
 	ld	a,bump_deltas_table_2 & $FF
 	ld	[bump_deltas_table_current+0],a
 	ld	a,bump_deltas_table_2 >> 8
 	ld	[bump_deltas_table_current+1],a
 	ret
-	
+
 ;-------------------
 
 _event_table_bump:
-	
+
 	DW	0,_event_bump_set_table_2
-	
+
 	DW	2,_event_bump_set_pal_0
 	DW	4,_event_bump_set_pal_1
 	DW	6,_event_bump_set_pal_2
 	DW	8,_event_bump_set_pal_3
-	
+
 	DW	102,_event_bump_set_pal_3
 	DW	104,_event_bump_set_pal_2
 	DW	106,_event_bump_set_pal_1
 	DW	108,_event_bump_set_pal_0
 
 	DW	110,_event_bump_set_table_1
-	
+
 	DW	112,_event_bump_set_pal_0
 	DW	114,_event_bump_set_pal_1
 	DW	116,_event_bump_set_pal_2
 	DW	118,_event_bump_set_pal_3
-	
+
 	DW	212,_event_bump_set_pal_3
 	DW	214,_event_bump_set_pal_2
 	DW	216,_event_bump_set_pal_1
 	DW	218,_event_bump_set_pal_0
-	
+
 	DW	220,_event_exit_bump_demo
-	
+
 	DW	$FFFF,$0000 ; No more events! Don't remove this line!
 
 ;----------------------------------------------
 
 bump_handle_events:
-	
+
 	; Handle events
 	; -------------
-	
+
 	ld	a,[bump_event_count]
 	ld	e,a
 	ld	a,[bump_event_count+1]
 	ld	d,a
-	
+
 	; Start of checking
-	
+
 	ld	a,[bump_current_event]
 	ld	h,a
 	ld	a,[bump_current_event+1]
 	ld	l,a
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = event counter trigger
@@ -1086,30 +1086,30 @@ bump_handle_events:
 	and	a,b
 	cp	a,$FF ; if both are $FF, exit checking
 	jr	z,._exit_check_events
-	
+
 	ld	a,d
 	cp	a,b
 	jr	nz,._exit_check_events
-	
+
 	ld	a,e
 	cp	a,c
 	jr	nz,._exit_check_events
-	
+
 	inc	hl
-	
+
 	ld	c,[hl]
 	inc hl
 	ld	b,[hl] ; bc = ptr to function
 	inc	hl ; hl = ptr to next event
-	
+
 	ld	a,h
 	ld	[bump_current_event],a
 	ld	a,l
 	ld	[bump_current_event+1],a ; save pointer to next event
-	
+
 	ld	h,b
 	ld	l,c ; hl = ptr to function
-	
+
 	CALL_HL
 ._exit_check_events:
 
@@ -1119,7 +1119,7 @@ bump_handle_events:
 	ld	a,[bump_movement_count_x]
 	add	a,9
 	ld	[bump_movement_count_x],a
-	
+
 	ld	l,a
 	ld	h,Sine>>8
 	ld	a,[hl]
@@ -1132,11 +1132,11 @@ bump_handle_events:
 	add	a,b
 	sub	a,20
 	ld	[bump_coord_x],a
-	
+
 	ld	a,[bump_movement_count_y]
 	add	a,11
 	ld	[bump_movement_count_y],a
-	
+
 	ld	l,a
 	ld	h,Cosine>>8
 	ld	a,[hl]
@@ -1150,102 +1150,102 @@ bump_handle_events:
 	sub	a,18
 	ld	[bump_coord_y],a
 
-	
+
 	IF	0
 	ld	a,[joy_held]
 	and	a,PAD_UP
 	jr	z,.notup
-	
+
 	ld	a,[bump_coord_y]
 	inc	a
 	ld	[bump_coord_y],a
-	
+
 .notup:
-	
+
 	ld	a,[joy_held]
 	and	a,PAD_DOWN
 	jr	z,.notdown
-	
+
 	ld	a,[bump_coord_y]
 	dec	a
 	ld	[bump_coord_y],a
-	
+
 .notdown:
 
 	ld	a,[joy_held]
 	and	a,PAD_LEFT
 	jr	z,.notleft
-	
+
 	ld	a,[bump_coord_x]
 	inc	a
 	ld	[bump_coord_x],a
-	
+
 .notleft:
-	
+
 	ld	a,[joy_held]
 	and	a,PAD_RIGHT
 	jr	z,.notright
-	
+
 	ld	a,[bump_coord_x]
 	dec	a
 	ld	[bump_coord_x],a
-	
+
 .notright:
 	ENDC
-	
+
 	; More checks here
-	
+
 	; ...
-	
+
 	; Increase counter
 	; ----------------
-	
+
 	ld	a,[bump_event_count]
 	ld	l,a
 	ld	a,[bump_event_count+1]
 	ld	h,a
-	
+
 	inc	hl
-	
+
 	ld	a,l
 	ld	[bump_event_count],a
 	ld	a,h
 	ld	[bump_event_count+1],a
-	
+
 	ret
 
 ;----------------------------------------------
 
 bump_palette_refresh:
-	
+
 	ld	a,[bump_has_to_update_pal]
 	and	a,a
 	ret	z
-	
+
 	xor	a,a
 	ld	[bump_has_to_update_pal],a
-	
+
 	ld	a,[bump_current_pal]
-	
+
 	ld	l,a
 	ld	h,0
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl ; hl = a * 8
-	
+
 	ld	de,bump_palettes
 	add	hl,de  ; hl = bump_palettes + a * 8
-	
+
 	ld	a,$80 ; pal 0, auto increment
 	ld	[rBCPS],a
-	
+
 	ld	c,8
 .repeat:
 	ld	a,[hl+]
 	ld	[rBCPD],a
 	dec	c
 	jr	nz,.repeat
-	
+
 	ret
 
 ;-------------------------------------------------------------------------------------
@@ -1254,21 +1254,21 @@ bump_get_subtile_texture_from_coords: ; b = x, c = y -> returns d,e = subtiles 1
 
 	ld	e,b
 	ld	d,0 ; de = x
-	
+
 	ld	l,c
 	ld	h,0
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl ; hl = y * 64
-	
+
 	add	hl,de ; hl = y * 64 + x
-	
+
 	add	hl,hl ; hl = ( y * 64 + x ) * 2
-	
+
 	ld	a,[bump_deltas_table_current+0]
 	ld	e,a
 	ld	a,[bump_deltas_table_current+1]
@@ -1276,7 +1276,7 @@ bump_get_subtile_texture_from_coords: ; b = x, c = y -> returns d,e = subtiles 1
 
 	;ld	de,bump_deltas_table_1
 	add	hl,de ; hl = bump_deltas_table + ( y * 64 + x ) * 2
-	
+
 	ld	a,[hl+] ; a = dx
 	add	a,b ; a = dx + x
 	push	hl
@@ -1288,9 +1288,9 @@ bump_get_subtile_texture_from_coords: ; b = x, c = y -> returns d,e = subtiles 1
 	ld	de,$0000
 	ret
 .valid1:
-	
+
 	ld	d,a ; d = dx + x
-	
+
 	ld	a,[hl]  ; a = dy
 	add	a,c	; a = dy + y
 	ld	hl,bump_coord_y
@@ -1300,7 +1300,7 @@ bump_get_subtile_texture_from_coords: ; b = x, c = y -> returns d,e = subtiles 1
 	ld	de,$0000
 	ret
 .valid2:
-	
+
 	ld	l,a
 	ld	h,0 ; hl = dy + y
 	add	hl,hl
@@ -1311,15 +1311,15 @@ bump_get_subtile_texture_from_coords: ; b = x, c = y -> returns d,e = subtiles 1
 	ld	a,d
 	or	a,l
 	ld	l,a ; hl = (dy + y) * 32 + dx + x
-	
+
 	ld	de,bump_intensity_table_1
 	add	hl,de ; hl = bump_intensity_table + (dy + y) * 32 + dx + x
 	ld	a,[hl]
-	
+
 	ld	de,32*32 ; bump_intensity_table_2 is next to bump_intensity_table_1
 	add	hl,de
 	ld	e,[hl]
-	
+
 	ld	d,a
 
 	ret
@@ -1328,42 +1328,42 @@ bump_get_subtile_texture_from_coords: ; b = x, c = y -> returns d,e = subtiles 1
 ;-------------------------------------------------------------------------------------
 
 bump_map_handle:
-	
+
 	; Wait until maps are copied to VRAM
-	
+
 	ld	a,[bump_has_to_update_bgs_dma]
 	and	a,a
 	jr	z,.update
-	
+
 	halt
 	jr	bump_map_handle
-	
+
 .update:
-	
+
 	; Calculate effect
 	; ----------------
-	
+
 	ld	c,0 ; c = y
 .loopy
 	ld	b,0 ; b = x
 .loopx
 	push	bc
-	
+
 	;----
-	
+
 	; Get 4 subtiles
-	
+
 	sla	b
 	sla	c
-	
+
 	push	bc
-	call	bump_get_subtile_texture_from_coords	
+	call	bump_get_subtile_texture_from_coords
 	pop	bc
 	push	de ; save tiles
-	
+
 	push	bc
 	inc	b
-	call	bump_get_subtile_texture_from_coords	
+	call	bump_get_subtile_texture_from_coords
 	pop	bc
 	push	de ; save tiles
 
@@ -1372,125 +1372,125 @@ bump_map_handle:
 	call	bump_get_subtile_texture_from_coords
 	pop	bc
 	push	de ; save tiles
-	
+
 	inc	b
 	call	bump_get_subtile_texture_from_coords
-	
+
 	; Reconstruct tile
-	
+
 	ld	a,d
 	rla
 	rla
 	ld	b,a ; b = combined 1
-	
+
 	ld	a,e
 	rla
 	rla
 	ld	c,a ; c = combined 2
-	
+
 	pop	de
-	
+
 	ld	a,b
 	or	a,d
 	rla
 	rla
 	ld	b,a ; b = combined 1
-	
+
 	ld	a,c
 	or	a,e
 	rla
 	rla
 	ld	c,a ; c = combined 2
-	
+
 	pop	de
-	
+
 	ld	a,b
 	or	a,d
 	rla
 	rla
 	ld	b,a ; b = combined 1
-	
+
 	ld	a,c
 	or	a,e
 	rla
 	rla
 	ld	c,a ; c = combined 2
-	
+
 	pop	de
-	
+
 	ld	a,b
 	or	a,d
 	ld	d,a ; d = combined 1
-	
+
 	ld	a,c
 	or	a,e
 	ld	e,a ; e = combined 2
-	
+
 	; d = combined 1
 	; e = combined 2
-	
+
 	; Set tile to temp buffer
-	
+
 	pop	bc
 	push	bc
-	
+
 	push	de
 	ld	d,MAP_TEMP_1 >> 8
 	ld	e,b ; de = base + x
-	
+
 	ld	l,c
 	ld	h,$00 ; hl = y
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl ; hl = y * 32
-	
+
 	add	hl,de ; hl = base + x + (y * 32)
 	pop	de
 
 	ld	[hl],d ; write combined 1
-	
+
 	ld	a,e ; save combined 2
-	
+
 	ld	de,32*32 ; MAP_TEMP_2 is next to MAP_TEMP_1
 	add	hl,de
-	
+
 	ld	[hl],a  ; write combined 2
 
 	;----
-	
+
 	pop	bc
-	
+
 	inc	b
 	ld	a,20
 	cp	a,b
 	jr	nz,.loopx
-	
+
 	inc	c
 	ld	a,18
 	cp	a,c
 	jr	nz,.loopy
-	
+
 	; Tell the VBL handler to copy maps to VRAM
-	
+
 	ld	a,1
 	ld	[bump_has_to_update_bgs_dma],a
-	
+
 	ret
 
 ;-------------------------------------------------------------------------------------
 
 bump_map_update_bgs:
-	
+
 	ld	a,[bump_has_to_update_bgs_dma]
 	and	a,a
 	ret	z
-	
+
 	ld	a,0
 	ld	[bump_has_to_update_bgs_dma],a
-	
+
 	ld	[rVBK],a
 	DMA_COPY	MAP_TEMP_1,$9800,32*20,0 ; src, dst, size, is_hdma
 
@@ -1503,39 +1503,39 @@ bump_map_update_bgs:
 ;-------------------------------------------------------------------
 
 bump_vbl_handler:
-	
+
 	ld	a,[rLCDC]
 	xor	a,LCDCF_BG9C00
 	ld	[rLCDC],a
-	
+
 	call	bump_palette_refresh
-	
+
 	call	bump_map_update_bgs
-	
+
 	LONG_CALL	gbt_update
 
 	ret
 
 ;----------------------------------------------
-	
+
 	GLOBAL Bump
-	
+
 Bump:
 
-	; ----	
-	
+	; ----
+
 	ld	a,1
 	ld	[rVBK],a
-	
+
 	ld	bc,32*32*2 ; the 2 maps
 	ld	d,0
 	ld	hl,$9800
 	call	vram_memset ; bc = size    d = value    hl = dest address
 
-	; ----	
-	
+	; ----
+
 	call	bump_init_variables
-	
+
 	ld	a,0
 	ld	[rVBK],a
 
@@ -1548,44 +1548,43 @@ Bump:
 	call	vram_copy_tiles
 
 	call	bump_map_handle
-	
+
 	call	wait_vbl
-	
+
 	call	bump_map_update_bgs
-	
+
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800 ; configuration
 	ld	[rLCDC],a
-	
+
 	; Configure IRQs
-	
+
 	ld	a,$01
 	ld	[rIE],a
-	
+
 	ld	bc,bump_vbl_handler
 	call	irq_set_VBL
 
 	; Refresh screen
 
 	call	wait_vbl
-	
-	; START	
+
+	; START
 
 .loop: ; Main loop
-	
+
 	call	bump_handle_events
-	
+
 	call	bump_map_handle
 
 	call	wait_vbl
-	
+
 	ld	a,[bump_exit_demo]
 	and	a,a
 	jr	z,.loop
 
 	; Exit...
 	; -------
-	
-	call	demo_config_default
-	
-	ret
 
+	call	demo_config_default
+
+	ret

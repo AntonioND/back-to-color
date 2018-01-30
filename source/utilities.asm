@@ -1,17 +1,17 @@
-; 
-; Copyright (c) 2014, Antonio Niño Díaz (AntonioND)
+;
+; Copyright (c) 2014-2018, Antonio Niño Díaz (AntonioND)
 ; All rights reserved.
-; 
+;
 ; Redistribution and use in source and binary forms, with or without
 ; modification, are permitted provided that the following conditions are met:
-; 
+;
 ; * Redistributions of source code must retain the above copyright notice, this
 ;   list of conditions and the following disclaimer.
-; 
+;
 ; * Redistributions in binary form must reproduce the above copyright notice,
 ;   this list of conditions and the following disclaimer in the documentation
 ;   and/or other materials provided with the distribution.
-; 
+;
 ; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,30 +22,30 @@
 ; CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-; 
+;
 
 	INCLUDE "hardware.inc"
 	INCLUDE "header.inc"
-	
+
 ;--------------------------------------------------------------------------
 ;-                          GENERAL FUNCTIONS                             -
-;--------------------------------------------------------------------------	
+;--------------------------------------------------------------------------
 
-	SECTION	"Utilities",HOME
-	
+	SECTION	"Utilities", ROM0
+
 ;--------------------------------------------------------------------------
 ;- memset()    d = value    hl = start address    bc = size               -
 ;--------------------------------------------------------------------------
 
 memset::
-	
+
 	ld	a,d
 	ld	[hl+],a
 	dec	bc
 	ld	a,b
 	or	a,c
 	jr	nz,memset
-	
+
 	ret
 
 ;--------------------------------------------------------------------------
@@ -53,11 +53,11 @@ memset::
 ;--------------------------------------------------------------------------
 
 memset_fast::
-	
+
 	ld	[hl+],a
 	dec	b
 	jr	nz,memset_fast
-	
+
 	ret
 
 ;--------------------------------------------------------------------------
@@ -65,7 +65,7 @@ memset_fast::
 ;--------------------------------------------------------------------------
 
 memset_rand::
-	
+
 	push	hl
 	call	GetRandom
 	pop	hl
@@ -74,15 +74,15 @@ memset_rand::
 	ld	a,b
 	or	a,c
 	jr	nz,memset_rand
-	
+
 	ret
-	
+
 ;--------------------------------------------------------------------------
 ;- memcopy()    bc = size    hl = source address    de = dest address     -
 ;--------------------------------------------------------------------------
 
 memcopy:: ; hl and de should be incremented at the end of this
-	
+
 	ld	a,[hl+]
 	ld	[de],a
 	inc	de
@@ -90,7 +90,7 @@ memcopy:: ; hl and de should be incremented at the end of this
 	ld	a,b
 	or	a,c
 	jr	nz,memcopy
-	
+
 	ret
 
 ;--------------------------------------------------------------------------
@@ -98,13 +98,13 @@ memcopy:: ; hl and de should be incremented at the end of this
 ;--------------------------------------------------------------------------
 
 memcopy_fast:: ; hl and de should be incremented at the end of this
-	
+
 	ld	a,[hl+]
 	ld	[de],a
 	inc	de
 	dec	b
 	jr	nz,memcopy_fast
-	
+
 	ret
 
 ;--------------------------------------------------------------------------
@@ -112,31 +112,31 @@ memcopy_fast:: ; hl and de should be incremented at the end of this
 ;--------------------------------------------------------------------------
 
 memcopy_inc:: ; hl and de should be incremented at the end of this
-	
+
 	ld	a,[hl]
 	ld	[de],a
-	
+
 	inc	de ; increase dest
-	
+
 	ld	a,b ; save b
 	ld	b,$00
 	add	hl,bc ; increase source
 	ld	b,a ; restore b
-	
+
 	dec	b
 	jr	nz,memcopy_inc
-	
+
 	ret
 
 ;--------------------------------------------------------------------------
 ;-                                 MATH                                  -
-;--------------------------------------------------------------------------	
-	
+;--------------------------------------------------------------------------
+
 ;--------------------------------------------------------------------------
 ;-                               Functions                                -
-;--------------------------------------------------------------------------	
+;--------------------------------------------------------------------------
 
-	SECTION	"MathFunctions",HOME
+	SECTION	"MathFunctions", ROM0
 
 ;--------------------------------------------------------------------------
 ;- mul_u8u8u16()    hl = returned value    a,c = initial values           -
@@ -148,68 +148,68 @@ mul_u8u8u16:: ; super fast unrolled multiplication
 
 	ld	hl,$0000  ; 3   -> 4
 	ld	b,l       ; 1
-	
+
 	rla ; bit 7   ; 1
 	jr	nc,.skip0 ; 3/2 -> 7/6
 	add	hl,bc     ; 2
 .skip0:
 	add	hl,hl     ; 2
-	
+
 	rla ; bit 6   ; 1
 	jr	nc,.skip1 ; 3/2 -> 7/6
 	add	hl,bc     ; 2
 .skip1:
 	add	hl,hl     ; 2
-	
+
 	rla ; bit 5   ; 1
 	jr	nc,.skip2 ; 3/2 -> 7/6
 	add	hl,bc     ; 2
 .skip2:
 	add	hl,hl     ; 2
-	
+
 	rla ; bit 4   ; 1
 	jr	nc,.skip3 ; 3/2 -> 7/6
 	add	hl,bc     ; 2
 .skip3:
 	add	hl,hl     ; 2
-	
+
 	rla ; bit 3   ; 1
 	jr	nc,.skip4 ; 3/2 -> 7/6
 	add	hl,bc     ; 2
 .skip4:
 	add	hl,hl     ; 2
-	
+
 	rla ; bit 2   ; 1
 	jr	nc,.skip5 ; 3/2 -> 7/6
 	add	hl,bc     ; 2
 .skip5:
 	add	hl,hl     ; 2
-	
+
 	rla ; bit 1   ; 1
 	jr	nc,.skip6 ; 3/2 -> 7/6
 	add	hl,bc     ; 2
 .skip6:
 	add	hl,hl     ; 2
-	
+
 	rla ; bit 0   ; 1
 	ret	nc        ; 5/2 -> 9/6
 	add	hl,bc     ; 2
 	ret           ; 4
 
 	IF	0 ; Old version
-	
+
 	ld	hl,$0000
 	ld	b,h
-.nextbit:	
+.nextbit:
 	bit	0,a
 	jr	z,.no_add
 	add	hl,bc
 .no_add:
-	sla	c 
+	sla	c
 	rl	b ; bc <<= 1
 	srl	a ; a >>= 1
 	jr	nz,.nextbit
-	
+
 	ret
 
 	ENDC
@@ -219,7 +219,7 @@ mul_u8u8u16:: ; super fast unrolled multiplication
 ;--------------------------------------------------------------------------
 
 mul_s8u8s16::
-	
+
 	ld	e,a
 	bit	7,e
 	jr	nz,.negative
@@ -244,11 +244,11 @@ mul_s8u8s16::
 ;--------------------------------------------------------------------------
 
 div_u8u8u8::
-	
+
 	inc	b
 	dec	b
 	jr	z,.div_by_zero ; check if divisor is 0
-	
+
 	ld	c,$FF ; -1
 .continue:
 	inc	c
@@ -270,16 +270,16 @@ div_u8u8u8::
 ;--------------------------------------------------------------------------
 
 div_s8s8s8::
-	
+
 	ld	e,$00 ; bit 0 of e = result sign (0/1 = +/-)
-	
+
 	bit	7,a
 	jr	z,.dividend_is_positive
 	inc	e
 	cpl ; change sign
 	inc	a
 .dividend_is_positive
-	
+
 	bit	7,b
 	jr	z,.divisor_is_positive
 	ld	c,a
@@ -289,52 +289,52 @@ div_s8s8s8::
 	ld	b,a ; change sign
 	inc	e
 .divisor_is_positive
-	
+
 	call	div_u8u8u8
 	ret	c ; if division by 0, exit now
-	
+
 	bit	0,e
 	ret	z ; exit if both signs are the same
-	
+
 	ld	b,a ; save modulo
 	ld	a,c ; change sign
 	cpl
 	inc	a
 	ld	c,a
 	ld	a,b ; get modulo
-	
+
 	ret
 
 ;--------------------------------------------------------------------------
 ;-                            JOYPAD HANDLER                              -
-;--------------------------------------------------------------------------	
+;--------------------------------------------------------------------------
 
 ;--------------------------------------------------------------------------
 ;-                               Variables                                -
-;--------------------------------------------------------------------------	
+;--------------------------------------------------------------------------
 
 	SECTION	"JoypadHandlerVariables",HRAM
 
-_joy_old:		DS	1			
+_joy_old:		DS	1
 joy_held::		DS	1
 joy_pressed::	DS	1
 
 ;--------------------------------------------------------------------------
 ;-                               Functions                                -
-;--------------------------------------------------------------------------	
+;--------------------------------------------------------------------------
 
-	SECTION	"JoypadHandler",HOME
-	
+	SECTION	"JoypadHandler", ROM0
+
 ;--------------------------------------------------------------------------
 ;- scan_keys()                                                            -
 ;--------------------------------------------------------------------------
 
 scan_keys::
-	
+
 	ld	a,[joy_held]
 	ld	[_joy_old],a   ; current state = old state
 	ld	c,a            ; c = old state
-	
+
 	ld	a,$10
 	ld	[rP1],a  ; select P14
 	ld	a,[rP1]
@@ -354,14 +354,14 @@ scan_keys::
 	cpl
 	and	a,$0F
 	or	a,b            ; put A and B together
-	
+
 	ld	[joy_held],a
-	
+
 	xor	a,c            ; c = old state
 	and	a,c
-	
+
 	ld	[joy_pressed],a
-	
+
 	ld	a,$00          ; deselect P14 and P15
 	ld	[rP1],a  ; RESET Joypad
 
@@ -370,88 +370,88 @@ scan_keys::
 
 ;--------------------------------------------------------------------------
 ;-                              ROM HANDLER                               -
-;--------------------------------------------------------------------------	
+;--------------------------------------------------------------------------
 
 
 ;--------------------------------------------------------------------------
 ;-                               Variables                                -
-;--------------------------------------------------------------------------	
+;--------------------------------------------------------------------------
 
-	SECTION	"RomHandlerVariables",BSS
+	SECTION	"RomHandlerVariables", WRAM0
 
 rom_stack:		DS	$20
 rom_position:	DS	1
 
 ;--------------------------------------------------------------------------
 ;-                               Functions                                -
-;--------------------------------------------------------------------------	
+;--------------------------------------------------------------------------
 
-	SECTION	"RomHandler",HOME
+	SECTION	"RomHandler", ROM0
 
 ;--------------------------------------------------------------------------
 ;- rom_handler_init()                                                     -
 ;--------------------------------------------------------------------------
-	
+
 rom_handler_init::
-	
+
 	xor	a,a
-	ld	[rom_position],a	
-	
+	ld	[rom_position],a
+
 	ld	b,1
 	call	rom_bank_set  ; select rom bank 1
-	
-	ret	
-	
+
+	ret
+
 ;--------------------------------------------------------------------------
 ;- rom_bank_pop()                                                         -
 ;--------------------------------------------------------------------------
-	
+
 rom_bank_pop::
 	ld	hl,rom_position
 	dec	[hl]
-	
+
 	ld	hl,rom_stack
-	
+
 	ld	d,$00
 	ld	a,[rom_position]
 	ld	e,a
-	
+
 	add	hl,de             ; hl now holds the pointer to the bank we want to change to
 	ld	a,[hl]            ; and a the bank we want to change to
-	
+
 	ld	[$2000],a         ; select rom bank
-	
+
 	ret
 
 ;--------------------------------------------------------------------------
 ;- rom_bank_push()                                                        -
 ;--------------------------------------------------------------------------
-	
+
 rom_bank_push::
 	ld	hl,rom_position
 	inc	[hl]
 
 	ret
-	
+
 ;--------------------------------------------------------------------------
 ;- rom_bank_set()    b = bank to change to                                -
 ;--------------------------------------------------------------------------
-	
+
 rom_bank_set::
 	ld	hl,rom_stack
-	
+
 	ld	d,$00
 	ld	a,[rom_position]
 	ld	e,a
 	add	hl,de
-	
+
 	ld	a,b               ; hl = pointer to stack, a = bank to change to
-	
+
 	ld	[hl],a
 	ld	[$2000],a         ; select rom bank
-	
+
 	ret
-	
+
 ;--------------------------------------------------------------------------
 ;- rom_bank_push_set()    b = bank to change to                           -
 ;--------------------------------------------------------------------------
@@ -459,16 +459,16 @@ rom_bank_set::
 rom_bank_push_set::
 	ld	hl,rom_position
 	inc	[hl]
-	
+
 	ld	hl,rom_stack
-	
+
 	ld	d,$00
 	ld	a,[rom_position]
 	ld	e,a
 	add	hl,de
-	
+
 	ld	a,b               ; hl = pointer to stack, a = bank to change to
-	
+
 	ld	[hl],a
 	ld	[$2000],a         ; select rom bank
 
@@ -502,4 +502,3 @@ ___long_call_args:: ; can use bc and de for passing arguments
 	CALL_HL
 	call	rom_bank_pop
 	ret
-

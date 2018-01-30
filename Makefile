@@ -2,7 +2,7 @@
 ##                           ROM NAME                              ##
 
 NAME = demo
-EXT	 = gbc
+EXT  = gbc
 
 ##                                                                 ##
 #####################################################################
@@ -17,7 +17,7 @@ RGBFIX  = ../rgbfix
 ##                                                                 ##
 #####################################################################
 
-BIN	:= $(NAME).$(EXT)
+BIN := $(NAME).$(EXT)
 
 # Source folders - including subfolders
 SOURCE = source

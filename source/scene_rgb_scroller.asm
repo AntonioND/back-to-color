@@ -1,17 +1,17 @@
-; 
-; Copyright (c) 2014, Antonio Niño Díaz (AntonioND)
+;
+; Copyright (c) 2014-2018, Antonio Niño Díaz (AntonioND)
 ; All rights reserved.
-; 
+;
 ; Redistribution and use in source and binary forms, with or without
 ; modification, are permitted provided that the following conditions are met:
-; 
+;
 ; * Redistributions of source code must retain the above copyright notice, this
 ;   list of conditions and the following disclaimer.
-; 
+;
 ; * Redistributions in binary form must reproduce the above copyright notice,
 ;   this list of conditions and the following disclaimer in the documentation
 ;   and/or other materials provided with the distribution.
-; 
+;
 ; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,19 +22,19 @@
 ; CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-; 
+;
 
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 	INCLUDE	"gbt_player.inc"
 
 	GLOBAL	demo_config_default
-	
+
 MAP_TEMP		EQU	$D000
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "RGB_DATA", DATA[$4000], BANK[1]
+	SECTION "RGB_DATA", ROMX[$4000], BANK[1]
 
 rgb_scroller_sine_wave_data:  ; Aligned to $100
 
@@ -46,7 +46,7 @@ rgb_scroller_sine_wave_data:  ; Aligned to $100
 	DB	$04,$04,$03,$03,$02,$02,$01,$01,$01,$00,$00,$00,$00,$00,$00,$00
 	DB	$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$02,$02,$03,$03,$04
 	DB	$04,$05,$05,$06,$06,$07,$08,$08,$09,$0A,$0B,$0B,$0C,$0D,$0D,$0E
-	
+
 	DB	$0F,$10,$11,$11,$12,$13,$13,$14,$15,$16,$16,$17,$18,$18,$19,$19
 	DB	$1A,$1A,$1B,$1B,$1C,$1C,$1D,$1D,$1D,$1E,$1E,$1E,$1E,$1E,$1E,$1E
 	DB	$1F,$1E,$1E,$1E,$1E,$1E,$1E,$1E,$1D,$1D,$1D,$1C,$1C,$1B,$1B,$1A
@@ -118,7 +118,7 @@ DB $5A,$66,$DA,$E6,$3A,$C6,$F6,$0E
 DB $E4,$1C,$18,$F8,$F0,$F0,$00,$00
 DB $00,$00,$FE,$FE,$82,$FE,$BA,$C6
 DB $BA,$C6,$9A,$E6,$DA,$E6,$5A,$66
-	
+
 rgb_scroller_bg_map:
 DB $00,$00,$10,$10,$08,$0D,$10,$00,$10,$00
 DB $18,$19,$00,$10,$00,$10,$00,$10,$00,$00
@@ -310,10 +310,10 @@ DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-	
+
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION	"RGB_Vars",BSS
+	SECTION	"RGB_Vars", WRAM0
 
 ; Intro/End
 ; ---------
@@ -364,62 +364,62 @@ rgb_scroller_blue_enabled:	DS	1
 
 ;-------------------------------------------------------------------------------------------------
 
-	SECTION "RGB_Flasher", CODE, BANK[1]
-	
+	SECTION "RGB_Flasher", ROMX, BANK[1]
+
 rgb_scroller_vbl_handler:
-	
+
 	ld	a,$98 ; If this is 0, first lines will still use last line's palette
 	ld	[rLYC],a
-	
+
 	; Handle colors
 	; -------------
-	
+
 	ld	hl,rgb_scroller_component_pos_old
-	
+
 	ld	a,[rgb_scroller_inc_red]
 	add	a,[hl]
-	ld	[hl+],a	
+	ld	[hl+],a
 	ld	[rgb_scroller_red_pos],a
 
 	ld	a,[rgb_scroller_inc_green]
 	add	a,[hl]
-	ld	[hl+],a	
+	ld	[hl+],a
 	ld	[rgb_scroller_green_pos],a
-	
+
 	ld	a,[rgb_scroller_inc_blue]
 	add	a,[hl]
-	ld	[hl],a	
+	ld	[hl],a
 	ld	[rgb_scroller_blue_pos],a
 
 	; Wave effect
 	; -----------
-	
+
 	ld	hl,rgb_scroller_sine_pos_old
 	ld	a,[rgb_scroller_inc_sine]
 	add	a,[hl]
-	ld	[hl],a	
-	ld	[rgb_scroller_sine_pos],a	
+	ld	[hl],a
+	ld	[rgb_scroller_sine_pos],a
 
 	; Scroll
 	; ------
-	
+
 	ld	hl,rgb_scroller_wait_scr
 	ld	a,[hl]
 	and	a,a
 	jr	z,.continue_scroll
-	
+
 	dec	[hl]
 	jp .rgb_scroller_vbl_handler_end
-	
+
 .continue_scroll:
 	ld	hl,rgb_scroller_inc_scroll
 	ld	c,[hl] ; c = rgb_scroller_inc_scroll
-	
+
 	ld	a,[rSCY]
 	ld	b,a ; save old scy
 	add	a,c
 	ld	[rSCY],a ; scroll bg...
-	
+
 	ld	a,b ; get old scy
 	and	a,$7
 	add	a,c
@@ -439,21 +439,21 @@ rgb_scroller_vbl_handler:
 	inc	a
 	and	a,31
 	ld	[hl],a
-	
+
 	; copy next line to screen
-	
+
 	ld	b,a ; save tile line
 
 	ld	hl,rgb_scroller_next_data
 	ld	e,[hl]
 	inc	hl
 	ld	d,[hl]
-	
+
 	push	de ; source
-	
+
 	ld	h,d
 	ld	l,e
-	
+
 	ld	de,20
 	add	hl,de
 
@@ -463,7 +463,7 @@ rgb_scroller_vbl_handler:
 	inc	de
 	ld	a,h
 	ld	[de],a ; save next position to read from
-	
+
 	ld	de,$9800
 	ld	h,$00
 	ld	l,b  ; get tile line
@@ -473,14 +473,14 @@ rgb_scroller_vbl_handler:
 	add	hl,hl
 	add	hl,hl ; * 32
 	add	hl,de ; hl = dest
-	
+
 	ld	d,h
 	ld	e,l ;de = dest
 	pop	hl ; hl = source
-	
+
 	;ld	bc,20
 	;call	memcopy ; vram_copy not needed, we're in vblank
-	
+
 	; make it copy fast
 	REPT 20
 	ld	a,[hl+]
@@ -489,35 +489,35 @@ rgb_scroller_vbl_handler:
 	ENDR
 
 .rgb_scroller_vbl_handler_end
-	
+
 	LONG_CALL	gbt_update
-	
+
 	ret
 
 ;----------------------------------------------
-	
+
 rgb_scroller_lcd_handler:
-	
+
 	; handle color components' pointers
 	; ---------------------------------
-	
+
 	ld	hl,rgb_scroller_component_pos
-	
+
 	ld	a,[rgb_scroller_inc_red_line]
 	add	a,[hl]
-	ld	[hl+],a	
-	
+	ld	[hl+],a
+
 	ld	a,[rgb_scroller_inc_green_line]
 	add	a,[hl]
-	ld	[hl+],a	
-	
+	ld	[hl+],a
+
 	ld	a,[rgb_scroller_inc_blue_line]
 	add	a,[hl]
 	ld	[hl],a
-	
+
 	; Check if this line has to be black...
 	; -------------------------------------
-	
+
 	ld	a,[rgb_scroller_start_ly]
 	cp	a,$98
 	jr	z,._check_rgb_scroller_end_ly
@@ -525,13 +525,13 @@ rgb_scroller_lcd_handler:
 	ld	a,[rLY]
 	cp	a,b
 	jr	c,._line_black
-	
+
 ._check_rgb_scroller_end_ly:
 	ld	a,[rgb_scroller_end_ly]
 	ld	b,a
 	ld	a,[rLY]
 	cp	a,b
-	jr	c,._line_colors	
+	jr	c,._line_colors
 
 ._line_black
 	; black line ...
@@ -543,71 +543,71 @@ rgb_scroller_lcd_handler:
 	and	a,$02
 	jr	nz,._not_yet
 	jp	._load_palette
-	
+
 ._line_colors:
 
 	; get values from the pointers...
 	; -------------------------------
 
 	ld	h,rgb_scroller_sine_wave_data >> 8
-	
+
 	ld	a,[rgb_scroller_red_pos]
-	ld	l,a	
+	ld	l,a
 	ld	b,[hl] ; b = red
 	ld	a,[rgb_scroller_red_enabled]
 	and a,b
 	ld	b,a
-	
+
 	ld	a,[rgb_scroller_green_pos]
 	ld	l,a
 	ld	c,[hl] ; c = green
 	ld	a,[rgb_scroller_green_enabled]
 	and a,c
 	ld	c,a
-	
+
 	ld	a,[rgb_scroller_blue_pos]
 	ld	l,a
 	ld	l,[hl] ; l = blue
 	ld	a,[rgb_scroller_blue_enabled]
 	and a,l
 	ld	l,a
-	
+
 	; get rgb 16-bit value...
 	; -----------------------
-	
+
 	; l = blue
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,c ; c = green
 	or	a,l
 	ld	l,a
-	
+
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	
+
 	ld	a,b ; b = red
 	or	a,l
 	ld	l,a
-	
+
 	; don't test if screen blank... we should be there right now...
-	
-	
+
+
 ._load_palette:
 
 	; hl = rgb value, load it...
 	; --------------------------
-	
+
 	ld	a,$80 ; palette 0 * 8, autoincrement
 	ld	[rBCPS],a
-	
+
 	ld	a,l
 	ld	[rBCPD],a
 	ld	a,h
@@ -615,14 +615,14 @@ rgb_scroller_lcd_handler:
 
 	; handle wave ...
 	; ---------------
-	
+
 	; do this when hblank or it will sometimes make some lines appear bad
-	
+
 	ld	hl,rgb_scroller_sine_pos
 	ld	a,[rgb_scroller_inc_sine_line]
 	add	a,[hl]
-	ld	[hl],a	
-	
+	ld	[hl],a
+
 	ld	h,Sine >> 8
 	ld	l,a
 	ld	a,[hl]
@@ -631,50 +631,50 @@ rgb_scroller_lcd_handler:
 	sra	a
 	sra	a
 	ld	[rSCX],a
-	
+
 	; prepare next interrupt
 	; ----------------------
-	
+
 	; in this way, if the interrupt lasts more than one line, it will happen the next possible line.
-	
+
 	ld	a,[rLY]
 	inc	a
 	ld	[rLYC],a
-	
+
 	ret
 
 ;----------------------------------------------
 
 	GLOBAL RGB_Scroller
-	
+
 RGB_Scroller:
-	
+
 	; Use window to hide screen
-	
+
 	ld	b,$90
 	call	wait_ly
-	
+
 	call	vram_clear_palettes
-	
+
 	ld	a,LCDCF_ON
 	ld	[rLCDC],a
-	
+
 	; load data...
 	; ------------
-	
+
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,29
 	ld	de,256
 	ld	hl,rgb_scroller_tiles
 	call	vram_copy_tiles
-	
+
 	ld	bc,32*32
 	ld	d,0
 	ld	hl,MAP_TEMP
 	call	memset
-	
+
 	ld	a,1
 	ld	[rVBK],a
 
@@ -685,17 +685,17 @@ RGB_Scroller:
 
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	ld	bc,32*32
 	ld	hl,MAP_TEMP
 	ld	de,$9800
 	call	vram_copy ; clear tile index map
-	
+
 	; Configure some things...
 	; ------------------------
 
 	; rgb handler
-	
+
 	ld	a,$0
 	ld	[rgb_scroller_red_pos],a
 	ld	[rgb_scroller_green_pos],a
@@ -703,7 +703,7 @@ RGB_Scroller:
 	ld	[rgb_scroller_red_pos_old],a
 	ld	[rgb_scroller_green_pos_old],a
 	ld	[rgb_scroller_blue_pos_old],a
-	
+
 	ld	a,-3
 	ld	[rgb_scroller_inc_red_line],a
 	ld	a,-2
@@ -716,20 +716,20 @@ RGB_Scroller:
 	ld	[rgb_scroller_inc_green],a
 	ld	a,2
 	ld	[rgb_scroller_inc_blue],a
-	
+
 	; wave effect
-	
+
 	ld	a,$0
 	ld	[rgb_scroller_sine_pos],a
 	ld	[rgb_scroller_sine_pos_old],a
-	
+
 	ld	a,$8
 	ld	[rgb_scroller_inc_sine],a
 	ld	a,$4
 	ld	[rgb_scroller_inc_sine_line],a
-	
+
 	; scroller
-	
+
 	ld	a,18 ; start drawing outside the screen
 	ld	[rgb_scroller_current_y],a
 	ld	a,0
@@ -739,42 +739,42 @@ RGB_Scroller:
 	ld	[hl+],a
 	ld	[hl],a
 	ld	hl,rgb_scroller_next_data
-	ld	a,rgb_scroller_bg_map & $FF 
+	ld	a,rgb_scroller_bg_map & $FF
 	ld	[hl+],a
 	ld	[hl],rgb_scroller_bg_map >> 8
-	
+
 	ld	a,$1
 	ld	[rgb_scroller_inc_scroll],a
-	
+
 	; Setup scrolls
-	
+
 	ld	a,0
 	ld	[rSCX],a
 	ld	[rSCY],a
 	ld	[rWY],a
 	ld	a,7
 	ld	[rWX],a
-	
+
 	; Set up window...
-	
+
 	call	wait_screen_blank
-	
+
 	ld	a,(7*8) | $80 ; palette 7 * 8, autoincrement
 	ld	[rBCPS],a
-	
+
 	xor	a,a
 	ld	[rBCPD],a
 	ld	[rBCPD],a
-	
+
 	ld	[rBCPD],a
 	ld	[rBCPD],a
-	
+
 	ld	[rBCPD],a
 	ld	[rBCPD],a
-	
+
 	ld	[rBCPD],a
 	ld	[rBCPD],a
-	
+
 	ld	a,1
 	ld	[rVBK],a
 	ld	hl,$9C00
@@ -783,120 +783,120 @@ RGB_Scroller:
 	call	vram_memset
 	ld	a,0
 	ld	[rVBK],a
-	
+
 	; Load palette
-	
+
 	ld	b,145
 	call	wait_ly
-	
+
 	ld	a,0
 	ld	hl,rgb_scroller_palette
 	call	bg_set_palette
-	
+
 	; Power on LCD...
-	
+
 	ld	a,LCDCF_BG8800|LCDCF_BG9800|LCDCF_WINON|LCDCF_WIN9C00|LCDCF_ON
 	ld	[rLCDC],a
-	
+
 	; Set up interrupts...
 	; --------------------
-	
+
 	ld	b,$90
 	call	wait_ly
-	
+
 	ld	bc,rgb_scroller_vbl_handler
 	call	irq_set_VBL
-	
+
 	ld	bc,rgb_scroller_lcd_handler
 	call	irq_set_LCD
-	
+
 	ld	a,0
 	ld	[rIF],a
-	
+
 	ld	a,$03
 	ld	[rIE],a
-	
+
 	ld	a,STATF_LYC
 	ld	[rSTAT],a
-	
+
 	; Begin ...
 	; ---------
 
 	ld	a,$91
-	ld	[rgb_scroller_start_ly],a 
+	ld	[rgb_scroller_start_ly],a
 	ld	[rgb_scroller_end_ly],a
-	
+
 	ld  a,$FF ; enable all colors
 	ld	[rgb_scroller_red_enabled],a
 	ld	[rgb_scroller_green_enabled],a
 	ld	[rgb_scroller_blue_enabled],a
-	
+
 	;-------------------------
 	; INTRO - BLACK TO COLORS
 	;-------------------------
-	
+
 ._black_to_colors:		; show screen...
 	ld	a,255
-	ld	[rgb_scroller_wait_scr],a ; don't let the scroller start...	
-	
+	ld	[rgb_scroller_wait_scr],a ; don't let the scroller start...
+
 	call	wait_vbl
-	
+
 	ld	hl,rWX
 	inc [hl]
-	
+
 	ld	hl,rgb_scroller_start_ly
 	dec	[hl]
 	ld	a,[hl]
 	and	a,a
 	jr	nz,._black_to_colors
-	
+
 ._hide_window:		; hide the rest of the window...
 	ld	a,255
 	ld	[rgb_scroller_wait_scr],a ; don't let the scroller start...
-	
+
 	call	wait_vbl
-	
+
 	ld	hl,rWX
 	inc [hl]
-	
+
 	ld	a,168
 	cp	a,[hl]
 	jr	nc,._hide_window
-	
-	ld  a,$FF 
+
+	ld  a,$FF
 	ld	[rgb_scroller_red_enabled],a
 	ld	a,0
 	ld	[rgb_scroller_green_enabled],a
-	ld  a,0 
+	ld  a,0
 	ld	[rgb_scroller_blue_enabled],a
-	
+
 	; start scroller
-	
+
 	ld	a,30
 	ld	[rgb_scroller_wait_scr],a ; wait half a second before starting the scroller
 
 	ld	a,$98 ; this is ready now
 	ld	[rgb_scroller_start_ly],a
-	
+
 	;-----------------
 	; MAIN LOOP START
 	;-----------------
-	
+
 	; Wait until "hello" is in the screen
 ._hello:
 	call	wait_vbl
 	ld	hl,rgb_scroller_scroll_pos
 	ld	a,[hl]
-	cp	a,$0C	
+	cp	a,$0C
 	jr	nz,._hello
-	
-	ld  a,0 
+
+	ld  a,0
 	ld	[rgb_scroller_red_enabled],a
 	ld	a,$FF
 	ld	[rgb_scroller_green_enabled],a
-	ld  a,0 
+	ld  a,0
 	ld	[rgb_scroller_blue_enabled],a
-	
+
 	ld	a,$4         ; wait 1 second ...
 	ld	[rgb_scroller_inc_sine],a
 	ld	a,60
@@ -905,99 +905,99 @@ RGB_Scroller:
 	call	wait_frames
 	ld	a,$8
 	ld	[rgb_scroller_inc_sine],a
-	
-	ld  a,0 
+
+	ld  a,0
 	ld	[rgb_scroller_red_enabled],a
 	ld	a,0
 	ld	[rgb_scroller_green_enabled],a
 	ld  a,$FF
 	ld	[rgb_scroller_blue_enabled],a
-	
+
 	ld	a,$4         ; wait 1 second ...
 	ld	[rgb_scroller_inc_sine],a
 	ld	a,60
 	ld	[rgb_scroller_wait_scr],a
 	ld	e,60
 	call	wait_frames
-	
+
 	ld	a,$8
 	ld	[rgb_scroller_inc_sine],a
-	
-	ld  a,0 
+
+	ld  a,0
 	ld	[rgb_scroller_red_enabled],a
 	ld	a,$FF
 	ld	[rgb_scroller_green_enabled],a
 	ld  a,$FF
 	ld	[rgb_scroller_blue_enabled],a
-	
+
 	; Start scrolling after "hello" and stop at "Back to color" title
-	
+
 ._rgb_scroller_title:
 	call	wait_vbl
 	ld	a,[rgb_scroller_scroll_pos]
 	cp	a,$3D
 	jr	nz,._rgb_scroller_title
-	
+
 	ld	a,$4          ; wait 2 seconds ...
 	ld	[rgb_scroller_inc_sine],a
 	ld	a,120
 	ld	[rgb_scroller_wait_scr],a
 	ld	e,120
 	call	wait_frames
-	
+
 	ld  a,$FF
 	ld	[rgb_scroller_red_enabled],a
 	ld	a,$FF
 	ld	[rgb_scroller_green_enabled],a
 	ld  a,0
 	ld	[rgb_scroller_blue_enabled],a
-	
+
 	ld	a,$4          ; wait 1 second ...
 	ld	[rgb_scroller_inc_sine],a
 	ld	a,60
 	ld	[rgb_scroller_wait_scr],a
 	ld	e,60
 	call	wait_frames
-	
+
 	ld  a,$FF
 	ld	[rgb_scroller_red_enabled],a
 	ld	a,0
 	ld	[rgb_scroller_green_enabled],a
 	ld  a,$FF
 	ld	[rgb_scroller_blue_enabled],a
-	
+
 	ld	a,$4          ; wait 1 second ...
 	ld	[rgb_scroller_inc_sine],a
 	ld	a,60
 	ld	[rgb_scroller_wait_scr],a
 	ld	e,60
 	call	wait_frames
-	
+
 	ld	a,$8
 	ld	[rgb_scroller_inc_sine],a
-	
+
 	ld  a,$FF
 	ld	[rgb_scroller_red_enabled],a
 	ld	a,$FF
 	ld	[rgb_scroller_green_enabled],a
 	ld  a,$FF
 	ld	[rgb_scroller_blue_enabled],a
-	
+
 	; Start moving after "Back to color" title
 
 	ld	a,0
 	ld	[rgb_scroller_inc_scroll],a  ; stop scroller
 	ld	a,$4
 	ld	[rgb_scroller_inc_sine],a
-	
+
 
 	ld	a,1
 	ld	[rgb_scroller_inc_scroll],a  ; stop scroller
 	ld	a,$8
 	ld	[rgb_scroller_inc_sine],a
-	
+
 	; Wait for the end of the scroller
-	
+
 ._not_end:
 	call	wait_vbl
 	ld	a,[rgb_scroller_scroll_pos]
@@ -1006,33 +1006,32 @@ RGB_Scroller:
 
 	ld	a,0
 	ld	[rgb_scroller_inc_scroll],a  ; stop scroller
-	
+
 	;-----------------------
 	; END - COLORS TO BLACK
 	;-----------------------
 
 	ld	e,50
 	call	wait_frames
-	
+
 ._colors_to_black:		; hide screen...
 
 	call	wait_vbl
 	ld	hl,rWX
 	dec [hl]
-	
+
 	ld	hl,rgb_scroller_end_ly
 	dec	[hl]
 	ld	a,[hl]
 	and	a,a
 	jr	nz,._colors_to_black
-	
+
 	ld	a,$98
 	ld	[rgb_scroller_start_ly],a ; black
-	
+
 	; Exit...
 	; -------
-	
-	call	demo_config_default
-	
-	ret
 
+	call	demo_config_default
+
+	ret

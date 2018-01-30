@@ -1,17 +1,17 @@
-; 
-; Copyright (c) 2014, Antonio Niño Díaz (AntonioND)
+;
+; Copyright (c) 2014-2018, Antonio Niño Díaz (AntonioND)
 ; All rights reserved.
-; 
+;
 ; Redistribution and use in source and binary forms, with or without
 ; modification, are permitted provided that the following conditions are met:
-; 
+;
 ; * Redistributions of source code must retain the above copyright notice, this
 ;   list of conditions and the following disclaimer.
-; 
+;
 ; * Redistributions in binary form must reproduce the above copyright notice,
 ;   this list of conditions and the following disclaimer in the documentation
 ;   and/or other materials provided with the distribution.
-; 
+;
 ; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,18 +22,18 @@
 ; CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-; 
+;
 
 	INCLUDE	"hardware.inc"
-	
+
 ;----------------------------------------------------------
 ;-                                                        -
 ;-                SINE AND COSINE LUTS                    -
 ;-                                                        -
 ;----------------------------------------------------------
 
-	SECTION "SineLUT", HOME[$3E00]
-	
+	SECTION "SineLUT", ROM0[$3E00]
+
 _Sine:
 	DB	$00,$03,$06,$09,$0c,$0f,$12,$15,$18,$1b,$1e,$21,$24,$27,$2a,$2d
 	DB	$30,$33,$36,$39,$3b,$3e,$41,$43,$46,$49,$4b,$4e,$50,$52,$55,$57
@@ -52,8 +52,8 @@ _Sine:
 	DB	$a7,$a9,$ab,$ae,$b0,$b2,$b5,$b7,$ba,$bd,$bf,$c2,$c5,$c7,$ca,$cd
 	DB	$d0,$d3,$d6,$d9,$dc,$df,$e2,$e5,$e8,$eb,$ee,$f1,$f4,$f7,$fa,$fd
 
-	SECTION "CosineLUT", HOME[$3F00]
-	
+	SECTION "CosineLUT", ROM0[$3F00]
+
 _Cosine:
 	DB	$7f,$7e,$7e,$7e,$7e,$7e,$7d,$7d,$7c,$7b,$7b,$7a,$79,$78,$77,$76
 	DB	$75,$74,$72,$71,$70,$6e,$6c,$6b,$69,$67,$66,$64,$62,$60,$5e,$5b
@@ -77,8 +77,8 @@ _Cosine:
 ;-                       RANDOM                           -
 ;-                                                        -
 ;----------------------------------------------------------
-	
-	SECTION "RandomLUT", HOME[$3D00]
+
+	SECTION "RandomLUT", ROM0[$3D00]
 
 _Random:
 	DB	$29,$23,$be,$84,$e1,$6c,$d6,$ae,$52,$90,$49,$f1,$f1,$bb,$e9,$eb
@@ -98,11 +98,11 @@ _Random:
 	DB	$18,$70,$92,$da,$64,$54,$ce,$b1,$85,$3e,$69,$15,$f8,$46,$6a,$04
 	DB	$96,$73,$0e,$d9,$16,$2f,$67,$68,$d4,$f7,$4a,$4a,$d0,$57,$68,$76
 
-	SECTION	"RandomPtr",BSS
+	SECTION	"RandomPtr", WRAM0
 
 random_ptr:	DS	1
 
-	SECTION "RandomFunction", HOME
+	SECTION "RandomFunction", ROM0
 
 ; ----------------------------------
 
@@ -111,22 +111,22 @@ GetRandom::
 	ld	hl,random_ptr
 	ld	l,[hl]
 	ld	h,_Random>>8
-	
+
 	ld	a,[rDIV]
 	xor	a,[hl]
-	
+
 	inc	l
 	add	a,[hl]
-	
+
 	ld	hl,random_ptr
 	ld	[hl],a
-	
+
 	ret
 
 ; ----------------------------------
 
-SetRandomSeed:: 
-	
+SetRandomSeed::
+
 	ld	[random_ptr],a
 	ret
 
