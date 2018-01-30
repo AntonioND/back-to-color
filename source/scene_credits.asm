@@ -678,21 +678,12 @@ credits_text:
 
 	DB	"Twitter",WAIT_HALFSEC,NEWLINE
 	DB	NEWLINE
-	DB	"  @antonionidi",NEWLINE
-	DB	NEWLINE
 	DB	"  @jordirafel",WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC
 	DB	CLEAR_SCR
 
 	DB	"Webpage",WAIT_HALFSEC,NEWLINE
 	DB	NEWLINE
-	DB	"antoniond_blog.",NEWLINE
-	DB	"drunkencoders.com",WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC
-	DB	CLEAR_SCR
-
-	DB	"Webpage",WAIT_HALFSEC,NEWLINE
-	DB	NEWLINE
-	DB	"antoniond.",NEWLINE
-	DB	"drunkencoders.com",WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC
+	DB	"www.skylyrac.net",WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC,WAIT_HALFSEC
 	DB	CLEAR_SCR
 
 	DB	"Tools",WAIT_HALFSEC,NEWLINE
@@ -715,8 +706,8 @@ credits_text:
 
 	DB	"Back to Color",NEWLINE
 	DB	NEWLINE
-	DB	NEWLINE
-	DB	"Copyright % 2014",NEWLINE
+	DB	"Copyright %",NEWLINE
+	DB	"         2014-2018"
 	DB	"Antonio Ni~o Diaz",WAIT_HALFSEC,NEWLINE
 
 	DB	0 ; End and halt
@@ -727,8 +718,8 @@ not_cgb_text:
 
 	DB	"Back to Color",NEWLINE
 	DB	"Only for GBC!",NEWLINE
-	DB	NEWLINE
-	DB	"Copyright % 2014",NEWLINE
+	DB	"Copyright %",NEWLINE
+	DB	"         2014-2018"
 	DB	"Antonio Ni~o Diaz",WAIT_HALFSEC,NEWLINE
 
 	DB	0 ; End and halt
