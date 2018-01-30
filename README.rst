@@ -59,7 +59,7 @@ Credits
 * Code, music, most graphics: Antonio Niño Díaz (AntonioND)
 
   * Emails: antonio_nd@outlook.com / antonionidi@gmail.com
-  * Webpage: http://www.skylyrac.net
+  * Webpage: www.skylyrac.net
 
 * Train and credits art: jordirafel
 
