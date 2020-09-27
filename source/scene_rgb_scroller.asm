@@ -28,7 +28,7 @@
 	INCLUDE "header.inc"
 	INCLUDE	"gbt_player.inc"
 
-	GLOBAL	demo_config_default
+	EXPORT	demo_config_default
 
 MAP_TEMP		EQU	$D000
 
@@ -645,7 +645,7 @@ rgb_scroller_lcd_handler:
 
 ;----------------------------------------------
 
-	GLOBAL RGB_Scroller
+	EXPORT RGB_Scroller
 
 RGB_Scroller:
 

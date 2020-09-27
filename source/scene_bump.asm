@@ -1518,7 +1518,7 @@ bump_vbl_handler:
 
 ;----------------------------------------------
 
-	GLOBAL Bump
+	EXPORT Bump
 
 Bump:
 

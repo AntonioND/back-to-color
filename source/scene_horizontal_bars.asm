@@ -720,7 +720,7 @@ horizontal_bars_vbl_handler:
 
 ;----------------------------------------------
 
-	GLOBAL Horizontal_Bars
+	EXPORT Horizontal_Bars
 
 Horizontal_Bars:
 

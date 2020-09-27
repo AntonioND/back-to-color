@@ -1072,7 +1072,7 @@ bouncing_balls_vbl_handler:
 
 ;-------------------------------------------------------------------------------------------------
 
-	GLOBAL Bouncing_Balls
+	EXPORT Bouncing_Balls
 
 Bouncing_Balls:
 

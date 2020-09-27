@@ -28,7 +28,7 @@
 	INCLUDE "header.inc"
 	INCLUDE	"gbt_player.inc"
 
-	GLOBAL	demo_config_default
+	EXPORT	demo_config_default
 
 ;-------------------------------------------------------------------------------------------------
 
@@ -2267,7 +2267,7 @@ fake3d_load_vram:
 
 ;----------------------------------------------
 
-	GLOBAL Fake_3D
+	EXPORT Fake_3D
 
 Fake_3D:
 

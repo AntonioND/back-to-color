@@ -637,7 +637,7 @@ sine_plasma_vbl_handler:
 
 ;----------------------------------------------
 
-	GLOBAL Sine_Plasma
+	EXPORT Sine_Plasma
 
 Sine_Plasma:
 

@@ -1125,7 +1125,7 @@ pentagon_vbl_handler:
 
 ;----------------------------------------------
 
-	GLOBAL Pentagon
+	EXPORT Pentagon
 
 Pentagon:
 

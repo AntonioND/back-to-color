@@ -1241,7 +1241,7 @@ plasma_lines_vbl_handler:
 
 ;----------------------------------------------
 
-	GLOBAL Plasma_Lines
+	EXPORT Plasma_Lines
 
 Plasma_Lines:
 

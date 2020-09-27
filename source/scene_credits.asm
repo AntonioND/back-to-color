@@ -1078,7 +1078,7 @@ credits_vbl_handler:
 
 ;----------------------------------------------
 
-	GLOBAL Credits
+	EXPORT Credits
 
 Credits:
 
@@ -1177,7 +1177,7 @@ not_cgb_init_variables:
 
 ;------------------------------
 
-	GLOBAL Not_CGB
+	EXPORT Not_CGB
 
 Not_CGB:
 

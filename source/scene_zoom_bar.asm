@@ -261,7 +261,7 @@ vbl_handler:
 
 ;----------------------------------------------
 
-	GLOBAL Zoom_Bars
+	EXPORT Zoom_Bars
 
 Zoom_Bars:
 

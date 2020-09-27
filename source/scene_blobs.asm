@@ -858,7 +858,7 @@ blobs_vbl_handler:
 
 ;----------------------------------------------
 
-	GLOBAL Blobs
+	EXPORT Blobs
 
 Blobs:
 

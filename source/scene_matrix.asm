@@ -1151,7 +1151,7 @@ matrix_vbl_handler:
 
 ;----------------------------------------------
 
-	GLOBAL Matrix
+	EXPORT Matrix
 
 Matrix:
 

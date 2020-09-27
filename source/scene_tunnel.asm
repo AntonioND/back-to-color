@@ -1183,7 +1183,7 @@ tunnel_vbl_handler:
 
 ;----------------------------------------------
 
-	GLOBAL Tunnel
+	EXPORT Tunnel
 
 Tunnel:
 

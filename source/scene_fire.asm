@@ -1109,7 +1109,7 @@ fire_vbl_handler:
 
 ;----------------------------------------------
 
-	GLOBAL Fire
+	EXPORT Fire
 
 Fire:
 

@@ -36,23 +36,23 @@ common_bufffers4::	DS	32*32
 
 	SECTION	"Main", ROM0
 
-	GLOBAL	RGB_Scroller
-	GLOBAL	Plasma_Lines
-	GLOBAL	Horizontal_Bars
-	GLOBAL	Sine_Plasma
-	GLOBAL	Fire
-	GLOBAL	Tunnel
-	GLOBAL	Blobs
-	GLOBAL	Credits
-	GLOBAL	Pentagon
-	GLOBAL	Fake_3D
-	GLOBAL	Train
-	GLOBAL	Bump
-	GLOBAL	Zoom_Bars
-	GLOBAL	Bouncing_Balls
-	GLOBAL	Matrix
+	EXPORT	RGB_Scroller
+	EXPORT	Plasma_Lines
+	EXPORT	Horizontal_Bars
+	EXPORT	Sine_Plasma
+	EXPORT	Fire
+	EXPORT	Tunnel
+	EXPORT	Blobs
+	EXPORT	Credits
+	EXPORT	Pentagon
+	EXPORT	Fake_3D
+	EXPORT	Train
+	EXPORT	Bump
+	EXPORT	Zoom_Bars
+	EXPORT	Bouncing_Balls
+	EXPORT	Matrix
 
-	GLOBAL	Not_CGB ; in scene_credits.asm
+	EXPORT	Not_CGB ; in scene_credits.asm
 
 ;--------------------------------------------------------------------------
 ;- Main()                                                                 -

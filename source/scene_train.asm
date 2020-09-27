@@ -2386,7 +2386,7 @@ ENDC
 
 ;----------------------------------------------
 
-	GLOBAL Train
+	EXPORT Train
 
 Train:
 
