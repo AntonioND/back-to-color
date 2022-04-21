@@ -744,43 +744,43 @@ _event_set_sprite_priority_reverse:
 
 _event_table_pentagon:
 
-EVENT_COUNT	SET	(144-((144-64)/2)) / 2
+EVENT_COUNT	=	(144-((144-64)/2)) / 2
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_move_left
 
-EVENT_COUNT	SET	EVENT_COUNT+10
+EVENT_COUNT	=	EVENT_COUNT+10
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_move_up
 
-EVENT_COUNT	SET	EVENT_COUNT+10
+EVENT_COUNT	=	EVENT_COUNT+10
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_move_right
 
-EVENT_COUNT	SET	EVENT_COUNT+10
+EVENT_COUNT	=	EVENT_COUNT+10
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_move_down
 
-EVENT_COUNT	SET	EVENT_COUNT+20
+EVENT_COUNT	=	EVENT_COUNT+20
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_move_right
 
-EVENT_COUNT	SET	EVENT_COUNT+10
+EVENT_COUNT	=	EVENT_COUNT+10
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_move_up
 
-EVENT_COUNT	SET	EVENT_COUNT+10
+EVENT_COUNT	=	EVENT_COUNT+10
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_move_right
 
-EVENT_COUNT	SET	EVENT_COUNT+((160-16)-((160-64)/2)) / 2 - 10
+EVENT_COUNT	=	EVENT_COUNT+((160-16)-((160-64)/2)) / 2 - 10
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_stop
 
-EVENT_COUNT	SET	EVENT_COUNT+1
+EVENT_COUNT	=	EVENT_COUNT+1
 	DW	EVENT_COUNT,_event_set_sprite_priority_reverse
 
-EVENT_COUNT	SET	EVENT_COUNT+1
+EVENT_COUNT	=	EVENT_COUNT+1
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_move_left
 
-EVENT_COUNT	SET	EVENT_COUNT+24
+EVENT_COUNT	=	EVENT_COUNT+24
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_stop
 
-EVENT_COUNT	SET	EVENT_COUNT+5
+EVENT_COUNT	=	EVENT_COUNT+5
 	DW	EVENT_COUNT,_event_set_pentagon_sprite_move_fn_move_right
 
-EVENT_COUNT	SET	EVENT_COUNT+24+24
+EVENT_COUNT	=	EVENT_COUNT+24+24
 	DW	EVENT_COUNT,_event_exit_pentagon_demo
 
 	DW	$FFFF,$0000 ; No more events! Don't remove this line!
