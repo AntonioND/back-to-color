@@ -479,25 +479,25 @@ _event_bouncing_balls_set_y_offset_fn_rise_and_disappear:
 ;-------------------
 
 _event_table_bouncing_balls:
-EVENT_COUNT	=	64+48
+	DEF EVENT_COUNT	=	64+48
 	DW	EVENT_COUNT,_event_bouncing_balls_set_y_offset_fn_none_to_sine_1
-EVENT_COUNT	=	EVENT_COUNT+128
+	DEF EVENT_COUNT	=	EVENT_COUNT+128
 	DW	EVENT_COUNT,_event_bouncing_balls_set_y_offset_fn_sine_1
-EVENT_COUNT	=	EVENT_COUNT+(256-128)+256
+	DEF EVENT_COUNT	=	EVENT_COUNT+(256-128)+256
 	DW	EVENT_COUNT,_event_bouncing_balls_set_y_offset_fn_sine_1_to_none
-EVENT_COUNT	=	EVENT_COUNT+128
+	DEF EVENT_COUNT	=	EVENT_COUNT+128
 	DW	EVENT_COUNT,_event_bouncing_balls_set_y_offset_fn_none
-EVENT_COUNT	=	EVENT_COUNT+(256-128)
+	DEF EVENT_COUNT	=	EVENT_COUNT+(256-128)
 	DW	EVENT_COUNT,_event_bouncing_balls_set_y_offset_fn_none_to_sine_2
-EVENT_COUNT	=	EVENT_COUNT+128
+	DEF EVENT_COUNT	=	EVENT_COUNT+128
 	DW	EVENT_COUNT,_event_bouncing_balls_set_y_offset_fn_sine_2
-EVENT_COUNT	=	EVENT_COUNT+(256-128)+256
+	DEF EVENT_COUNT	=	EVENT_COUNT+(256-128)+256
 	DW	EVENT_COUNT,_event_bouncing_balls_set_y_offset_fn_sine_2_to_none
-EVENT_COUNT	=	EVENT_COUNT+128
+	DEF EVENT_COUNT	=	EVENT_COUNT+128
 	DW	EVENT_COUNT,_event_bouncing_balls_set_y_offset_fn_none
-EVENT_COUNT	=	EVENT_COUNT+128+32
+	DEF EVENT_COUNT	=	EVENT_COUNT+128+32
 	DW	EVENT_COUNT,_event_bouncing_balls_set_y_offset_fn_rise_and_disappear
-EVENT_COUNT	=	EVENT_COUNT+96
+	DEF EVENT_COUNT	=	EVENT_COUNT+96
 	DW	EVENT_COUNT,_event_exit_bouncing_balls_demo
 
 	DW	$FFFF,$0000 ; No more events! Don't remove this line!
@@ -695,7 +695,7 @@ ENDC
 	ld	b,a ; b = max z
 	ld	c,0 ; c = max z ball index
 
-NUM_BALL	=	1
+	DEF NUM_BALL	=	1
 	REPT	32-1 ; BOUNCING_BALLS_NUMBER_OF_BALLS - 1
 
 	ld	a,[hl+] ; a = bouncing_balls_z[num of ball]
@@ -706,7 +706,7 @@ NUM_BALL	=	1
 	ld	c,NUM_BALL ; c = max z ball index
 .not_higher\@:
 
-NUM_BALL	=	NUM_BALL+1
+	DEF NUM_BALL	=	NUM_BALL+1
 	ENDR
 
 	; Inner loop end *

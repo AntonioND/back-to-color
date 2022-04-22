@@ -11,7 +11,7 @@
 ;                                          antonio_nd@outlook.com
 
     IF !DEF(GBT_PLAYER_INC)
-GBT_PLAYER_INC  =  1
+    DEF GBT_PLAYER_INC  =  1
 
 ; ------------------------------------------------------------------------
     EXPORT  gbt_play   ; Starts playing a song.
