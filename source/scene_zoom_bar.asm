@@ -125,9 +125,9 @@ zoom_bar_color:		DS  2
 
 zoom_bar_scroll_ptr:	DS	2 ; LSB first
 
-ZOOM_BAR_SCROLL_SPEED	EQU	3*7
+    DEF ZOOM_BAR_SCROLL_SPEED	EQU	3*7
 
-ZOOM_BAR_MAX_SCROLL		EQU	75*ZOOM_BAR_SCROLL_SPEED
+    DEF ZOOM_BAR_MAX_SCROLL		EQU	75*ZOOM_BAR_SCROLL_SPEED
 
 ;-------------------------------------------------------------------------------------------------
 
@@ -190,7 +190,7 @@ lcd_handler:
 	ld	a,[zoom_bar_scroll_ptr+1]
 	ld	h,a
 
-	ld	a,[rLY]
+	ldh	a,[rLY]
 	cp	a,$89
 	ret	z
 
@@ -201,7 +201,7 @@ lcd_handler:
 	add	hl,de
 
 	inc	a
-	ld	[rLYC],a
+	ldh	[rLYC],a
 
 	ld	a,[hl+] ; R
 	ld	b,a
@@ -233,7 +233,7 @@ lcd_handler:
 	ld	d,h ; de = rgb
 
 	ld	a,$80 ; auto increment
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	call	wait_screen_blank ; destroys register a
 
@@ -253,7 +253,7 @@ vbl_handler:
 	call	zoom_bar_handle_scroll
 
 	ld	a,0
-	ld	[rLYC],a
+	ldh	[rLYC],a
 
 	LONG_CALL	gbt_update
 
@@ -266,14 +266,14 @@ vbl_handler:
 Zoom_Bars:
 
 	ld	a,LCDCF_BG8800|LCDCF_BG9800|LCDCF_ON
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	call	zoom_bar_init_variables
 
 	; clear screen...
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	hl,$8000 + (16 * 256) ; clear tile 0 ($8800 mapping)
 	ld	bc,16
@@ -286,7 +286,7 @@ Zoom_Bars:
 	call	vram_memset
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	hl,$9800
 	ld	bc,32*32
@@ -304,13 +304,13 @@ Zoom_Bars:
 	call	irq_set_LCD
 
 	ld	a,$03
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	a,STATF_LYC
-	ld	[rSTAT],a
+	ldh	[rSTAT],a
 
 	ld	a,LCDCF_BG8800|LCDCF_BG9800|LCDCF_ON
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	; Start...
 	; --------

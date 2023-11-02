@@ -27,9 +27,9 @@
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 
-MAP_TEMP			EQU	$D000
-ATTR_MAP_TEMP		EQU	$D300 ;($D000 + 32*18) aligned to $100
-COMBINED_MAP_TEMP	EQU	$D600 ;($D300 + 32*18) aligned to $100
+    DEF MAP_TEMP			EQU	$D000
+    DEF ATTR_MAP_TEMP		EQU	$D300 ;($D000 + 32*18) aligned to $100
+    DEF COMBINED_MAP_TEMP	EQU	$D600 ;($D300 + 32*18) aligned to $100
 
 ;-------------------------------------------------------------------------------------------------
 
@@ -600,7 +600,7 @@ sine_plasma_setup_sprites:
 ;-                              OTHER                              -
 ;-------------------------------------------------------------------
 
-SINE_PLASMA_MAP_UPDATE_BG_ATTR: MACRO
+MACRO SINE_PLASMA_MAP_UPDATE_BG_ATTR
 
 	ld	a,[sine_plasma_dma_copy_ready]
 	and	a,a
@@ -610,17 +610,17 @@ SINE_PLASMA_MAP_UPDATE_BG_ATTR: MACRO
 	ld	[sine_plasma_dma_copy_ready],a
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	DMA_COPY	MAP_TEMP,$9800,32*18,0 ; src, dst, size, is_hdma
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	DMA_COPY	ATTR_MAP_TEMP,$9800,32*18,0 ; src, dst, size, is_hdma
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 .skip:
 
 ENDM
@@ -642,10 +642,10 @@ sine_plasma_vbl_handler:
 Sine_Plasma:
 
 	ld	a,LCDCF_ON|LCDCF_WINON|LCDCF_WIN9C00 ; use window to hide things
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,16
 	ld	hl,sine_plasma_tiles
@@ -667,7 +667,7 @@ Sine_Plasma:
 	call	sine_plasma_map_draw
 
 	ld	a,$01
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	bc,sine_plasma_vbl_handler
 	call	irq_set_VBL
@@ -694,7 +694,7 @@ Sine_Plasma:
 	call	spr_set_palette
 
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800|LCDCF_OBJON|LCDCF_OBJ16 ; configuration
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	; START
 

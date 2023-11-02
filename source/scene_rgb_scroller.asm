@@ -30,7 +30,7 @@
 
 	EXPORT	demo_config_default
 
-MAP_TEMP		EQU	$D000
+    DEF MAP_TEMP		EQU	$D000
 
 ;-------------------------------------------------------------------------------------------------
 
@@ -369,7 +369,7 @@ rgb_scroller_blue_enabled:	DS	1
 rgb_scroller_vbl_handler:
 
 	ld	a,$98 ; If this is 0, first lines will still use last line's palette
-	ld	[rLYC],a
+	ldh	[rLYC],a
 
 	; Handle colors
 	; -------------
@@ -415,10 +415,10 @@ rgb_scroller_vbl_handler:
 	ld	hl,rgb_scroller_inc_scroll
 	ld	c,[hl] ; c = rgb_scroller_inc_scroll
 
-	ld	a,[rSCY]
+	ldh	a,[rSCY]
 	ld	b,a ; save old scy
 	add	a,c
-	ld	[rSCY],a ; scroll bg...
+	ldh	[rSCY],a ; scroll bg...
 
 	ld	a,b ; get old scy
 	and	a,$7
@@ -522,14 +522,14 @@ rgb_scroller_lcd_handler:
 	cp	a,$98
 	jr	z,._check_rgb_scroller_end_ly
 	ld	b,a
-	ld	a,[rLY]
+	ldh	a,[rLY]
 	cp	a,b
 	jr	c,._line_black
 
 ._check_rgb_scroller_end_ly:
 	ld	a,[rgb_scroller_end_ly]
 	ld	b,a
-	ld	a,[rLY]
+	ldh	a,[rLY]
 	cp	a,b
 	jr	c,._line_colors
 
@@ -606,12 +606,12 @@ rgb_scroller_lcd_handler:
 	; --------------------------
 
 	ld	a,$80 ; palette 0 * 8, autoincrement
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	ld	a,l
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	ld	a,h
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 
 	; handle wave ...
 	; ---------------
@@ -630,16 +630,16 @@ rgb_scroller_lcd_handler:
 	sra	a
 	sra	a
 	sra	a
-	ld	[rSCX],a
+	ldh	[rSCX],a
 
 	; prepare next interrupt
 	; ----------------------
 
 	; in this way, if the interrupt lasts more than one line, it will happen the next possible line.
 
-	ld	a,[rLY]
+	ldh	a,[rLY]
 	inc	a
-	ld	[rLYC],a
+	ldh	[rLYC],a
 
 	ret
 
@@ -657,13 +657,13 @@ RGB_Scroller:
 	call	vram_clear_palettes
 
 	ld	a,LCDCF_ON
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	; load data...
 	; ------------
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,29
 	ld	de,256
@@ -676,7 +676,7 @@ RGB_Scroller:
 	call	memset
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*32
 	ld	hl,MAP_TEMP
@@ -684,7 +684,7 @@ RGB_Scroller:
 	call	vram_copy ; clear attribute map
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*32
 	ld	hl,MAP_TEMP
@@ -749,40 +749,40 @@ RGB_Scroller:
 	; Setup scrolls
 
 	ld	a,0
-	ld	[rSCX],a
-	ld	[rSCY],a
-	ld	[rWY],a
+	ldh	[rSCX],a
+	ldh	[rSCY],a
+	ldh	[rWY],a
 	ld	a,7
-	ld	[rWX],a
+	ldh	[rWX],a
 
 	; Set up window...
 
 	call	wait_screen_blank
 
 	ld	a,(7*8) | $80 ; palette 7 * 8, autoincrement
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	xor	a,a
-	ld	[rBCPD],a
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
+	ldh	[rBCPD],a
 
-	ld	[rBCPD],a
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
+	ldh	[rBCPD],a
 
-	ld	[rBCPD],a
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
+	ldh	[rBCPD],a
 
-	ld	[rBCPD],a
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
+	ldh	[rBCPD],a
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 	ld	hl,$9C00
 	ld	bc,32*32
 	ld	d,$07 ; palette 7
 	call	vram_memset
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	; Load palette
 
@@ -796,7 +796,7 @@ RGB_Scroller:
 	; Power on LCD...
 
 	ld	a,LCDCF_BG8800|LCDCF_BG9800|LCDCF_WINON|LCDCF_WIN9C00|LCDCF_ON
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	; Set up interrupts...
 	; --------------------
@@ -811,13 +811,13 @@ RGB_Scroller:
 	call	irq_set_LCD
 
 	ld	a,0
-	ld	[rIF],a
+	ldh	[rIF],a
 
 	ld	a,$03
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	a,STATF_LYC
-	ld	[rSTAT],a
+	ldh	[rSTAT],a
 
 	; Begin ...
 	; ---------

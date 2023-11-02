@@ -62,7 +62,7 @@ wait_frames::
 
 screen_off::
 
-	ld	a,[rLCDC]
+	ldh	a,[rLCDC]
 	and	a,LCDCF_ON
 	jr	z,.lcd_off_
 
@@ -70,7 +70,7 @@ screen_off::
 	call	wait_ly
 
 	xor	a,a
-	ld	[rLCDC],a ;Shutdown LCD
+	ldh	[rLCDC],a ;Shutdown LCD
 
 .lcd_off_:
 
@@ -82,7 +82,7 @@ screen_off::
 
 wait_screen_blank::
 
-	ld	a,[rSTAT]
+	ldh	a,[rSTAT]
 	bit	1,a
 	jr	nz,wait_screen_blank ; Not mode 0 or 1
 
@@ -94,7 +94,7 @@ wait_screen_blank::
 
 vram_copy:: ; hl and de should be incremented at the end of this
 
-	ld	a,[rSTAT]
+	ldh	a,[rSTAT]
 	bit	1,a
 	jr	nz,vram_copy ; Not mode 0 or 1
 
@@ -114,7 +114,7 @@ vram_copy:: ; hl and de should be incremented at the end of this
 
 vram_memset::
 
-	ld	a,[rSTAT]
+	ldh	a,[rSTAT]
 	bit	1,a
 	jr	nz,vram_memset ; Not mode 0 or 1
 
@@ -267,27 +267,27 @@ spr_set_palette::
 	swap	a
 	rra ; multiply palette by 8
 	set	7,a ; auto increment
-	ld	[rOCPS],a
+	ldh	[rOCPS],a
 
 	ld	a,[hl+]
-	ld	[rOCPD],a
+	ldh	[rOCPD],a
 	ld	a,[hl+]
-	ld	[rOCPD],a
+	ldh	[rOCPD],a
 
 	ld	a,[hl+]
-	ld	[rOCPD],a
+	ldh	[rOCPD],a
 	ld	a,[hl+]
-	ld	[rOCPD],a
+	ldh	[rOCPD],a
 
 	ld	a,[hl+]
-	ld	[rOCPD],a
+	ldh	[rOCPD],a
 	ld	a,[hl+]
-	ld	[rOCPD],a
+	ldh	[rOCPD],a
 
 	ld	a,[hl+]
-	ld	[rOCPD],a
+	ldh	[rOCPD],a
 	ld	a,[hl+]
-	ld	[rOCPD],a
+	ldh	[rOCPD],a
 
 	ret
 
@@ -300,20 +300,20 @@ spr_set_palette_black::
 	swap	a
 	rra ; multiply palette by 8
 	set	7,a ; auto increment
-	ld	[rOCPS],a
+	ldh	[rOCPS],a
 
 	xor	a,a
-	ld	[rOCPD],a
-	ld	[rOCPD],a
+	ldh	[rOCPD],a
+	ldh	[rOCPD],a
 
-	ld	[rOCPD],a
-	ld	[rOCPD],a
+	ldh	[rOCPD],a
+	ldh	[rOCPD],a
 
-	ld	[rOCPD],a
-	ld	[rOCPD],a
+	ldh	[rOCPD],a
+	ldh	[rOCPD],a
 
-	ld	[rOCPD],a
-	ld	[rOCPD],a
+	ldh	[rOCPD],a
+	ldh	[rOCPD],a
 
 	ret
 
@@ -332,7 +332,7 @@ init_OAM::
 
 __refresh_OAM:
 
-	ld  [rDMA],a
+	ldh [rDMA],a
 	ld  a,$28      ;delay 200ms
 .delay
 	dec a
@@ -384,27 +384,27 @@ bg_set_palette::
 	rrca      ; /  palette by 8
 
 	set	7,a ; auto increment
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 
 	ret
 
@@ -418,20 +418,20 @@ bg_set_palette_black::
 	rrca      ; /  palette by 8
 
 	set	7,a ; auto increment
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	xor	a,a
-	ld	[rBCPD],a
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
+	ldh	[rBCPD],a
 
-	ld	[rBCPD],a
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
+	ldh	[rBCPD],a
 
-	ld	[rBCPD],a
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
+	ldh	[rBCPD],a
 
-	ld	[rBCPD],a
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
+	ldh	[rBCPD],a
 
 	ret
 

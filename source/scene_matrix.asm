@@ -27,9 +27,9 @@
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 
-MAP_TEMP			EQU	$D200
-ATTR_MAP_TEMP		EQU	$D500 ;($D200 + 32*18) aligned to $100
-COMBINED_MAP_TEMP	EQU	$D800 ;($D500 + 32*18) aligned to $100
+    DEF MAP_TEMP			EQU	$D200
+    DEF ATTR_MAP_TEMP		EQU	$D500 ;($D200 + 32*18) aligned to $100
+    DEF COMBINED_MAP_TEMP	EQU	$D800 ;($D500 + 32*18) aligned to $100
 
 ;-------------------------------------------------------------------------------------------------
 
@@ -512,9 +512,9 @@ matrix_bg_copy_dma_ready:	DS	1
 matrix_event_count:	DS	2
 matrix_current_event:	DS	2 ; pointer to the next event
 
-MATRIX_CHARACTERS_CHANGED_PER_FRAME	EQU	10
+    DEF MATRIX_CHARACTERS_CHANGED_PER_FRAME	EQU	10
 
-MATRIX_NUMBER_OF_RAIN_CODE	EQU	35
+    DEF MATRIX_NUMBER_OF_RAIN_CODE	EQU	35
 matrix_rain_code:	DS	4*MATRIX_NUMBER_OF_RAIN_CODE ; speed,ticks to change,x,y
 
 matrix_current_number_of_rain_code:	DS	1
@@ -672,7 +672,7 @@ matrix_handle_events:
 
 ;-------------------------------------------------------------------------------------
 
-MATRIX_SET_TILE: MACRO ; b = x, c = y
+MACRO MATRIX_SET_TILE ; b = x, c = y
 
 	ld	d,MAP_TEMP >> 8
 	ld	e,b ; de = base + x
@@ -694,7 +694,7 @@ ENDM
 
 ;----------------------------------------------
 
-MATRIX_SET_COMBINED_TILE: MACRO ; b = x, c = y
+MACRO MATRIX_SET_COMBINED_TILE ; b = x, c = y
 
 	ld	d,COMBINED_MAP_TEMP >> 8
 	ld	e,b ; de = base + x
@@ -941,11 +941,11 @@ matrix_map_update_bg_attr:
 	ld	[matrix_bg_copy_dma_ready],a
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 	DMA_COPY	ATTR_MAP_TEMP,$9800,32*18,0 ; src, dst, size, is_hdma
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 	DMA_COPY	MAP_TEMP,$9800,32*18,0 ; src, dst, size, is_hdma
 
 	ret
@@ -964,30 +964,30 @@ matrix_bg_load_palettes_sprites:
 	ld	hl,matrix_palettes
 
 	ld	a,$80 ; auto increment
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	ld	b,8
 .loop:
 
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 
 	dec	b
 	jr	nz,.loop
@@ -1158,7 +1158,7 @@ Matrix:
 	call	matrix_init_variables
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,162
 	ld	hl,matrix_tiles
@@ -1176,7 +1176,7 @@ Matrix:
 	call	vram_copy_tiles
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*32
 	ld	d,7
@@ -1184,7 +1184,7 @@ Matrix:
 	call	vram_memset ; bc = size    d = value    hl = dest address
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*32
 	ld	d,0
@@ -1200,12 +1200,12 @@ Matrix:
 	call	wait_vbl
 
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800|LCDCF_OBJ16|LCDCF_OBJON ; configuration
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	; Load palettes and configure IRQs
 
 	ld	a,$01
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	bc,matrix_vbl_handler
 	call	irq_set_VBL

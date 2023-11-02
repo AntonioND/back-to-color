@@ -71,7 +71,7 @@ Main:
 	; Power on LCD...
 
 	ld	a,LCDCF_ON
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	; Clean video output
 
@@ -384,23 +384,23 @@ demo_config_default:: ; Set up a black screen. No glitching in the process.
 	call	refresh_OAM
 
 	ld	a,LCDCF_ON
-	ld	[rLCDC],a ; disable sprites and window
+	ldh	[rLCDC],a ; disable sprites and window
 
 	call	irq_clear_all_irq_disabled
 	call	vbl_set_handler_default
 
 	ld	a,1
-	ld	[rIF],a ; Prepare VBL flag to trigger IRQ when enabling IRQs
+	ldh	[rIF],a ; Prepare VBL flag to trigger IRQ when enabling IRQs
 	ld	a,1
-	ld	[rIE],a
+	ldh	[rIE],a
 	ld	a,0
-	ld	[rSTAT],a
+	ldh	[rSTAT],a
 
 	ld	a,0
-	ld	[rWX],a
-	ld	[rWY],a
-	ld	[rSCY],a
-	ld	[rSCX],a
+	ldh	[rWX],a
+	ldh	[rWY],a
+	ldh	[rSCY],a
+	ldh	[rSCX],a
 
 	ei ; Handle VBL and return
 
@@ -476,7 +476,7 @@ demo_load_4x4_tiles:: ; Data located in bump map scene bank
 NotColorGB:
 
 	ld	a,1
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	de,Song_Credits_Data
 	ld	b,$06

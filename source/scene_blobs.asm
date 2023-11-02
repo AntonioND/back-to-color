@@ -27,9 +27,9 @@
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 
-MAP_TEMP			EQU	$D000
-ATTR_MAP_TEMP		EQU	$D300 ;($D000 + 32*18) aligned to $100
-COMBINED_MAP_TEMP	EQU	$D600 ;($D300 + 32*18) aligned to $100
+    DEF MAP_TEMP			EQU	$D000
+    DEF ATTR_MAP_TEMP		EQU	$D300 ;($D000 + 32*18) aligned to $100
+    DEF COMBINED_MAP_TEMP	EQU	$D600 ;($D300 + 32*18) aligned to $100
 
 ;-------------------------------------------------------------------------------------------------
 
@@ -416,7 +416,7 @@ blobs_palette_load:
 	ld	h,0 ; hl = palette number
 
 .wait:
-	ld	a,[rLY]
+	ldh	a,[rLY]
 	cp	a,$90
 	jr	c,.wait
 
@@ -431,7 +431,7 @@ blobs_palette_load:
 	add	hl,de  ; hl = blobs_palettes + a * 64
 
 	ld	a,$80 ; auto increment
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	ld	c,(rBCPD&$FF)
 	REPT	4*8
@@ -445,7 +445,7 @@ blobs_palette_load:
 
 ;----------------------------------------------
 
-BLOBS_SET_TILE_COMBINED: MACRO ; b = x, c = y, a = tile
+MACRO BLOBS_SET_TILE_COMBINED ; b = x, c = y, a = tile
 
 	ld	d,COMBINED_MAP_TEMP >> 8
 	ld	e,b ; de = base + x
@@ -559,7 +559,7 @@ blobs_calculate_positions_and_handle:
 
 ;----------------------------------
 
-BLOBS_GET_SUBTILE_TEXTURE_FROM_COORDS: MACRO ; b = x, c = y -> returns a = subtile
+MACRO BLOBS_GET_SUBTILE_TEXTURE_FROM_COORDS ; b = x, c = y -> returns a = subtile
 
 	ld	a,15
 	cp	a,b
@@ -765,11 +765,11 @@ blobs_map_update_bg_attr:
 	ld	[blobs_bg_dma_copy_ready],a
 
 	ld	a,1
-	ld	[rVBK],a ; should be 20*18, but as there is space between rows, use 32
+	ldh	[rVBK],a ; should be 20*18, but as there is space between rows, use 32
 	DMA_COPY	ATTR_MAP_TEMP,$9800,32*18,0 ; src, dst, size, is_hdma
 
 	ld	a,0
-	ld	[rVBK],a ; should be 20*18, but as there is space between rows, use 32
+	ldh	[rVBK],a ; should be 20*18, but as there is space between rows, use 32
 	DMA_COPY	MAP_TEMP,$9800,32*18,0 ; src, dst, size, is_hdma
 
 	ret
@@ -870,7 +870,7 @@ Blobs:
 	call	blobs_init_variables
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,4
 	ld	hl,blobs_tiles
@@ -902,10 +902,10 @@ Blobs:
 	call	irq_set_VBL
 
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800|LCDCF_OBJ16|LCDCF_OBJON ; configuration
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	ld	a,$01
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	; START
 

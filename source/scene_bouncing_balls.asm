@@ -53,7 +53,7 @@ DB $00,$00,$7E,$7E,$FF,$FF,$7E,$7E
 
 ;----------------------------------------------
 
-BOUNCING_BALLS_NUMBER_OF_BALLS	EQU	32
+    DEF BOUNCING_BALLS_NUMBER_OF_BALLS	EQU	32
 
 bouncing_balls_exit_demo:	DS	1 ; set to 1 to exit this effect
 bouncing_balls_event_count:	DS	2
@@ -76,8 +76,8 @@ bouncing_balls_sorted_y_offset:	DS	BOUNCING_BALLS_NUMBER_OF_BALLS
 
 bouncing_balls_dissapear_offset:	DS	1 ; add to balls, shadows and floor when disappearing
 
-BOUNCING_BALLS_Y_BALLS		EQU	64
-BOUNCING_BALLS_Y_SHADOWS	EQU	128
+    DEF BOUNCING_BALLS_Y_BALLS		EQU	64
+    DEF BOUNCING_BALLS_Y_SHADOWS	EQU	128
 
 bouncing_balls_y_offset_function:	DS	2 ; pointer to a function that calculates y offsets
 
@@ -994,13 +994,13 @@ bouncing_balls_setup_sprites:
 
 bouncing_balls_lcd_handler:
 
-	ld	a,[rLY]
+	ldh	a,[rLY]
 	cp	a,$89
 	ret	nc
 
 	inc	a
 	inc	a
-	ld	[rLYC],a
+	ldh	[rLYC],a
 
 	sub	a,92+2 ; 92 + undo the 2 incs
 	ld	hl,bouncing_balls_dissapear_offset
@@ -1014,7 +1014,7 @@ bouncing_balls_lcd_handler:
 	ld	l,0 ; hl = RGB(0,0,a)
 
 	ld	a,$80 ; auto increment
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	ld	b,2
 	ld	c,rSTAT & $FF
@@ -1043,10 +1043,10 @@ bouncing_balls_vbl_handler:
 	jr	c,.no_screen_limit
 	ld	a,144
 .no_screen_limit:
-	ld	[rLYC],a
+	ldh	[rLYC],a
 
 	ld	a,$80 ; auto increment
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	ld	c,rBCPD & $FF
 
@@ -1077,7 +1077,7 @@ bouncing_balls_vbl_handler:
 Bouncing_Balls:
 
 	ld	a,LCDCF_BG8800|LCDCF_BG9800|LCDCF_ON
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	call	bouncing_balls_init_variables
 
@@ -1086,7 +1086,7 @@ Bouncing_Balls:
 	; clear screen...
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,2
 	ld	hl,bouncing_balls_sprite_tiles
@@ -1104,7 +1104,7 @@ Bouncing_Balls:
 	call	vram_memset
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	hl,$9800
 	ld	bc,32*32*2
@@ -1121,7 +1121,7 @@ Bouncing_Balls:
 	call	irq_set_VBL
 
 	ld	a,$01
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	; Setup HBL IRQ and load palettes
 
@@ -1149,16 +1149,16 @@ Bouncing_Balls:
 	call	irq_set_LCD
 
 	ld	a,92
-	ld	[rLYC],a
+	ldh	[rLYC],a
 
 	ld	a,$03
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	a,STATF_LYC
-	ld	[rSTAT],a
+	ldh	[rSTAT],a
 
 	ld	a,LCDCF_BG8800|LCDCF_BG9800|LCDCF_OBJON|LCDCF_OBJ8|LCDCF_ON
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	; Start...
 	; --------

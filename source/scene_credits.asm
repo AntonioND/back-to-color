@@ -643,9 +643,9 @@ DB $C7,$C7,$C1,$C1,$FF,$FF,$FF,$FF
 	; "*" = clear text
 	; "\t" = wait 1 second
 
-WAIT_HALFSEC	EQU	"\t"
-NEWLINE			EQU	"\n"
-CLEAR_SCR		EQU	"*"
+    DEF WAIT_HALFSEC	EQU	"\t"
+    DEF NEWLINE			EQU	"\n"
+    DEF CLEAR_SCR		EQU	"*"
 
 credits_text:
 	DB	"Credits.",WAIT_HALFSEC,".",WAIT_HALFSEC,".",WAIT_HALFSEC
@@ -735,7 +735,7 @@ credits_write_tile_y:			DS	1 ; 12 to 16
 credits_text_next_char_ptr:		DS	2
 credits_text_newchar_countdown:	DS	1 ; frames to wait for a new character
 
-FRAMES_TO_WAIT_FOR_CHARACTER	EQU	2
+    DEF FRAMES_TO_WAIT_FOR_CHARACTER	EQU	2
 
 ;-------------------------------------------------------------------------------------------------
 
@@ -791,23 +791,23 @@ credits_set_bg_tile: ; b = x, c = y, a = tile
 ;----------------------------------------------------------------------------
 
 ; Offsets
-O_SPACE			EQU	181
-O_BAR			EQU	182
-O_AMPERSAND		EQU	183
-O_COMMA			EQU	184
-O_DASH			EQU	186
-O_DOT			EQU	185
-O_COPYRIGHT		EQU	187 ; Mapped to "%"
-O_AT			EQU	188
-O_UNDERSCORE	EQU	189
-O_APOSTROPHE	EQU	190
-O_EXCLAMATION	EQU	192
-O_QUESTION		EQU	191
-O_ZERO			EQU	194
-O_A_UPPERCASE	EQU	204
-O_A_LOWERCASE	EQU	230
-O_NTILDE		EQU	193 ; La eñe, leches XD - Mapped to "~"
-O_NONE			EQU	O_QUESTION
+    DEF O_SPACE			EQU	181
+    DEF O_BAR			EQU	182
+    DEF O_AMPERSAND		EQU	183
+    DEF O_COMMA			EQU	184
+    DEF O_DASH			EQU	186
+    DEF O_DOT			EQU	185
+    DEF O_COPYRIGHT		EQU	187 ; Mapped to "%"
+    DEF O_AT			EQU	188
+    DEF O_UNDERSCORE	EQU	189
+    DEF O_APOSTROPHE	EQU	190
+    DEF O_EXCLAMATION	EQU	192
+    DEF O_QUESTION		EQU	191
+    DEF O_ZERO			EQU	194
+    DEF O_A_UPPERCASE	EQU	204
+    DEF O_A_LOWERCASE	EQU	230
+    DEF O_NTILDE		EQU	193 ; La eñe, leches XD - Mapped to "~"
+    DEF O_NONE			EQU	O_QUESTION
 
 ;-----------------------------------
 
@@ -1000,7 +1000,7 @@ credits_clear_text:
 credits_load_maps:
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	hl,jordi_city_map
 	ld	de,$9800
@@ -1030,7 +1030,7 @@ credits_load_maps:
 	; ----------------
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	hl,jordi_city_attr
 	ld	de,$9800
@@ -1060,7 +1060,7 @@ credits_load_maps:
 	; ----------------
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ret
 
@@ -1083,10 +1083,10 @@ credits_vbl_handler:
 Credits:
 
 	ld	a,LCDCF_ON|LCDCF_BG8000|LCDCF_BG9800 ; configuration
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,256
 	ld	hl,jordi_city_tiles
@@ -1102,7 +1102,7 @@ Credits:
 	call	credits_palette_load
 
 	ld	a,$01
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	bc,credits_vbl_handler
 	call	irq_set_VBL
@@ -1182,13 +1182,13 @@ not_cgb_init_variables:
 Not_CGB:
 
 	ld	a,LCDCF_ON|LCDCF_BG8000|LCDCF_BG9800|LCDCF_BGON ; configuration
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	ld	a,$00
-	ld	[rBGP],a
+	ldh	[rBGP],a
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,256
 	ld	hl,jordi_city_tiles
@@ -1202,10 +1202,10 @@ Not_CGB:
 	call	wait_vbl
 
 	ld	a,$E4
-	ld	[rBGP],a
+	ldh	[rBGP],a
 
 	ld	a,$01
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	bc,credits_vbl_handler
 	call	irq_set_VBL

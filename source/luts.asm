@@ -112,7 +112,7 @@ GetRandom::
 	ld	l,[hl]
 	ld	h,_Random>>8
 
-	ld	a,[rDIV]
+	ldh	a,[rDIV]
 	xor	a,[hl]
 
 	inc	l

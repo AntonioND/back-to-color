@@ -1981,12 +1981,12 @@ fake3d_set_draw_function: ; de = fn
 fake3d_lcd_handler:
 
 	; return if upper 16 lines
-	ld	a,[rLY]
+	ldh	a,[rLY]
 	cp	a,$0F
 	jr	nc,.not_upper_lines
 
 	ld	a,128
-	ld	[rSCY],a
+	ldh	[rSCY],a
 	ret
 
 .not_upper_lines:
@@ -1999,19 +1999,19 @@ fake3d_lcd_handler:
 	add	hl,de
 
 	ld	a,$86 ; auto increment
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	ld	a,[hl+]
 	ld	b,[hl] ; ab = palette
 
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	ld	a,b
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 
 	ld	hl,fake3d_ly_scy
 	add	hl,de
 	ld	a,[hl]
-	ld	[rSCY],a
+	ldh	[rSCY],a
 
 	; tilt right 1
 ;	ld	hl,rLY
@@ -2019,20 +2019,20 @@ fake3d_lcd_handler:
 ;	srl	a
 ;	srl	a
 ;	sub	a,16
-;	ld	[rSCX],a
+;	ldh	[rSCX],a
 
 	; tilt right 2
 ;	ld	hl,rLY
 ;	add	a,[hl]
 ;	srl	a
 ;	sub	a,32
-;	ld	[rSCX],a
+;	ldh	[rSCX],a
 
 	; tilt right 4
 ;	ld	hl,rLY
 ;	add	a,[hl]
 ;	sub	a,64
-;	ld	[rSCX],a
+;	ldh	[rSCX],a
 
 	; tilt left 1
 ;	ld	hl,rLY
@@ -2041,7 +2041,7 @@ fake3d_lcd_handler:
 ;	srl	a
 ;	cpl
 ;	add	a,16+1
-;	ld	[rSCX],a
+;	ldh	[rSCX],a
 
 	; tilt left 2
 ;	ld	hl,rLY
@@ -2049,14 +2049,14 @@ fake3d_lcd_handler:
 ;	srl	a
 ;	cpl
 ;	add	a,32+1
-;	ld	[rSCX],a
+;	ldh	[rSCX],a
 
 	; tilt left 4
 ;	ld	hl,rLY
 ;	add	a,[hl]
 ;	cpl
 ;	add	a,64+1
-;	ld	[rSCX],a
+;	ldh	[rSCX],a
 
 	ret
 
@@ -2188,7 +2188,7 @@ fake3d_setup_sprites:
 fake3d_load_vram:
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,4
 	ld	hl,fake3d_tiles
@@ -2203,7 +2203,7 @@ fake3d_load_vram:
 	; ----------------
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*32
 	ld	d,0
@@ -2216,7 +2216,7 @@ fake3d_load_vram:
 	call	vram_memset ; bc = size    d = value    hl = dest address
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*32
 	ld	d,0
@@ -2231,7 +2231,7 @@ fake3d_load_vram:
 	; ----------------
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	hl,fake3d_map
 	ld	de,$9800
@@ -2261,7 +2261,7 @@ fake3d_load_vram:
 	; ----------------
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ret
 
@@ -2272,7 +2272,7 @@ fake3d_load_vram:
 Fake_3D:
 
 	ld	a,LCDCF_ON
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	call	fake3d_init_variables
 
@@ -2283,7 +2283,7 @@ Fake_3D:
 	call	fake3d_setup_sprites
 
 	ld	a,LCDCF_ON|LCDCF_BG9800|LCDCF_BG8800|LCDCF_OBJ16|LCDCF_OBJON
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	; Set up interrupts...
 	; --------------------
@@ -2298,13 +2298,13 @@ Fake_3D:
 	call	irq_set_LCD
 
 	ld	a,0
-	ld	[rIF],a
+	ldh	[rIF],a
 
 	ld	a,$03
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	a,STATF_MODE00
-	ld	[rSTAT],a
+	ldh	[rSTAT],a
 
 	; Set up first frame and palettes...
 	; ----------------------------------

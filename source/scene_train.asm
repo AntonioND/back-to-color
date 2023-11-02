@@ -27,10 +27,10 @@
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 
-MAP_TEMP			EQU	$D000
-ATTR_MAP_TEMP		EQU	$D400 ;($D000 + 32*32)
+    DEF MAP_TEMP			EQU	$D000
+    DEF ATTR_MAP_TEMP		EQU	$D400 ;($D000 + 32*32)
 
-TRAIN_ENABLE_BIRDS	EQU	1
+    DEF TRAIN_ENABLE_BIRDS	EQU	1
 
 ;-------------------------------------------------------------------------------------------------
 
@@ -953,21 +953,23 @@ train_scroll_scx_water_5:		DS	2
 train_scroll_scx_water_6:		DS	2
 
 ; Speed must be <= 8*256 (= 2048)
-TRAIN_SCROLL_SPEED_CLOUDS		EQU	32
-TRAIN_SCROLL_SPEED_MOUNTAIN		EQU	64
-TRAIN_SCROLL_SPEED_BUILDING		EQU	192
-TRAIN_SCROLL_SPEED_TRAIN:		DS	2 ; This starts as TRAIN_SCROLL_MAX_SPEED
-TRAIN_SCROLL_SPEED_FLOOR		EQU	512
-TRAIN_SCROLL_SPEED_GRASS		EQU	576
-TRAIN_SCROLL_SPEED_WATER_1		EQU	640
-TRAIN_SCROLL_SPEED_WATER_2		EQU	768
-TRAIN_SCROLL_SPEED_WATER_3		EQU	896 ; 896
-TRAIN_SCROLL_SPEED_WATER_4		EQU	1024 ; 1024
-TRAIN_SCROLL_SPEED_WATER_5		EQU	1280 ; 1152
-TRAIN_SCROLL_SPEED_WATER_6		EQU	1536 ; 1280
+    DEF TRAIN_SCROLL_SPEED_CLOUDS		EQU	32
+    DEF TRAIN_SCROLL_SPEED_MOUNTAIN		EQU	64
+    DEF TRAIN_SCROLL_SPEED_BUILDING		EQU	192
 
-TRAIN_SCROLL_MAX_SPEED			EQU	-64
-TRAIN_SCROLL_MIN_SPEED			EQU 64
+TRAIN_SCROLL_SPEED_TRAIN:		DS	2 ; This starts as TRAIN_SCROLL_MAX_SPEED
+
+    DEF TRAIN_SCROLL_SPEED_FLOOR		EQU	512
+    DEF TRAIN_SCROLL_SPEED_GRASS		EQU	576
+    DEF TRAIN_SCROLL_SPEED_WATER_1		EQU	640
+    DEF TRAIN_SCROLL_SPEED_WATER_2		EQU	768
+    DEF TRAIN_SCROLL_SPEED_WATER_3		EQU	896 ; 896
+    DEF TRAIN_SCROLL_SPEED_WATER_4		EQU	1024 ; 1024
+    DEF TRAIN_SCROLL_SPEED_WATER_5		EQU	1280 ; 1152
+    DEF TRAIN_SCROLL_SPEED_WATER_6		EQU	1536 ; 1280
+
+    DEF TRAIN_SCROLL_MAX_SPEED			EQU	-64
+    DEF TRAIN_SCROLL_MIN_SPEED			EQU 64
 ;TRAIN_SCROLL_MIN_SPEED			EQU TRAIN_SCROLL_SPEED_FLOOR ; stopped = same speed as floor
 
 train_acelerate:				DS	1
@@ -1365,7 +1367,7 @@ ENDC
 train_load_maps:
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	hl,jordi_train_map
 	ld	de,MAP_TEMP
@@ -1390,7 +1392,7 @@ train_load_maps:
 	; ----------------
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	hl,jordi_train_attr
 	ld	de,ATTR_MAP_TEMP
@@ -1415,7 +1417,7 @@ train_load_maps:
 	; ----------------
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ret
 
@@ -1963,12 +1965,12 @@ train_handle_aceleration:
 train_map_update_bg_attr:
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	DMA_COPY	ATTR_MAP_TEMP,$9800,32*20,0 ; src, dst, size, is_hdma
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	DMA_COPY	MAP_TEMP,$9800,32*20,0 ; src, dst, size, is_hdma
 
@@ -1980,7 +1982,7 @@ train_map_update_bg_attr:
 
 IF	TRAIN_ENABLE_BIRDS == 1
 
-TRAIN_BIRD_ENABLE: MACRO ; \1 = number, \2 = start x, \3 = start y coordinate
+MACRO TRAIN_BIRD_ENABLE ; \1 = number, \2 = start x, \3 = start y coordinate
 
 	ld	bc,$0000
 	ld	l,((\1)*2)+0
@@ -2048,7 +2050,7 @@ train_birds_configure_3:
 
 ;-------------------------------
 
-TRAIN_BIRD_HANDLE:	MACRO ; \1 = number
+MACRO TRAIN_BIRD_HANDLE ; \1 = number
 
 	ld	a,[train_bird_enabled+(\1)]
 	and	a,a
@@ -2224,7 +2226,7 @@ ENDC
 
 train_lcd_handler:
 
-	ld	a,[rLY]
+	ldh	a,[rLY]
 
 	cp	a,(3*8)-1 ; Mountain?
 	jr	nz,.not_mountain
@@ -2232,9 +2234,9 @@ train_lcd_handler:
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_mountain+1]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	ld	a,(5*8)-1
-	ld	[rLYC],a
+	ldh	[rLYC],a
 	ret
 
 .not_mountain:
@@ -2245,9 +2247,9 @@ train_lcd_handler:
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_buildings+1]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	ld	a,(7*8)-1
-	ld	[rLYC],a
+	ldh	[rLYC],a
 	ret
 
 .not_buildings:
@@ -2258,9 +2260,9 @@ train_lcd_handler:
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_train+1]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	ld	a,(10*8)-1
-	ld	[rLYC],a
+	ldh	[rLYC],a
 	ret
 
 .not_train:
@@ -2271,9 +2273,9 @@ train_lcd_handler:
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_floor+1]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	ld	a,(11*8)-1
-	ld	[rLYC],a
+	ldh	[rLYC],a
 	ret
 
 .not_floor:
@@ -2284,9 +2286,9 @@ train_lcd_handler:
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_grass+1]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	ld	a,(12*8)-1
-	ld	[rLYC],a
+	ldh	[rLYC],a
 	ret
 
 .not_grass:
@@ -2297,9 +2299,9 @@ train_lcd_handler:
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_water_1+1]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	ld	a,(13*8)-1
-	ld	[rLYC],a
+	ldh	[rLYC],a
 	ret
 
 .not_water_1:
@@ -2310,9 +2312,9 @@ train_lcd_handler:
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_water_2+1]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	ld	a,(14*8)-1
-	ld	[rLYC],a
+	ldh	[rLYC],a
 	ret
 
 .not_water_2:
@@ -2323,9 +2325,9 @@ train_lcd_handler:
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_water_3+1]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	ld	a,(15*8)-1
-	ld	[rLYC],a
+	ldh	[rLYC],a
 	ret
 
 .not_water_3:
@@ -2336,9 +2338,9 @@ train_lcd_handler:
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_water_4+1]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	ld	a,(16*8)-1
-	ld	[rLYC],a
+	ldh	[rLYC],a
 	ret
 
 .not_water_4:
@@ -2349,9 +2351,9 @@ train_lcd_handler:
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_water_5+1]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	ld	a,(17*8)-1
-	ld	[rLYC],a
+	ldh	[rLYC],a
 	ret
 
 .not_water_5:
@@ -2361,7 +2363,7 @@ train_lcd_handler:
 	call	wait_screen_blank
 
 	ld	a,[train_scroll_scx_water_6+1]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 
 	ret
 
@@ -2376,9 +2378,9 @@ ENDC
 	call	train_map_update_bg_attr
 
 	ld	a,[train_scroll_scx_clouds+1]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	ld	a,(3*8)-1
-	ld	[rLYC],a ; first IRQ happens at this line
+	ldh	[rLYC],a ; first IRQ happens at this line
 
 	LONG_CALL	gbt_update
 
@@ -2391,10 +2393,10 @@ ENDC
 Train:
 
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800 ; configuration
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,128
 	ld	hl,jordi_train_tiles
@@ -2425,7 +2427,7 @@ ENDC
 
 IF	TRAIN_ENABLE_BIRDS == 1
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800|LCDCF_OBJON|LCDCF_OBJ16 ; configuration
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 ENDC
 
 	ld	bc,train_vbl_handler
@@ -2435,18 +2437,18 @@ ENDC
 	call	irq_set_LCD
 
 	ld	a,[train_scroll_scx_clouds+1]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	ld	a,(3*8)-1
-	ld	[rLYC],a ; first IRQ happens at this line
+	ldh	[rLYC],a ; first IRQ happens at this line
 
 	ld	a,STATF_LYC
-	ld	[rSTAT],a
+	ldh	[rSTAT],a
 
 	ld	a,0
-	ld	[rIF],a
+	ldh	[rIF],a
 
 	ld	a,$03
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	; START
 

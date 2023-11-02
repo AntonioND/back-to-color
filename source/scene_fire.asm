@@ -27,9 +27,9 @@
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 
-MAP_TEMP			EQU	$D200
-ATTR_MAP_TEMP		EQU	$D500 ;($D200 + 32*18) aligned to $100
-COMBINED_MAP_TEMP	EQU	$D800 ;($D500 + 32*18) aligned to $100
+    DEF MAP_TEMP			EQU	$D200
+    DEF ATTR_MAP_TEMP		EQU	$D500 ;($D200 + 32*18) aligned to $100
+    DEF COMBINED_MAP_TEMP	EQU	$D800 ;($D500 + 32*18) aligned to $100
 ; Note -> In this effect, columns are off by one in COMBINED_MAP_TEMP
 
 ;-------------------------------------------------------------------------------------------------
@@ -513,7 +513,7 @@ fire_palette_load: ; a = palette number
 	ld	[fire_current_palette],a
 
 .wait:
-	ld	a,[rLY]
+	ldh	a,[rLY]
 	cp	a,$90
 	jr	c,.wait
 
@@ -532,7 +532,7 @@ fire_palette_load: ; a = palette number
 	add	hl,de  ; hl = fire_palettes + a * 64
 
 	ld	a,$80 ; auto increment
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	ld	c,(rBCPD&$FF)
 	REPT	4*8
@@ -546,7 +546,7 @@ fire_palette_load: ; a = palette number
 
 ;----------------------------------------------
 
-FIRE_GET_TILE_COMBINED_PTR: MACRO ; b = x, c = y, hl = returned tile pointer
+MACRO FIRE_GET_TILE_COMBINED_PTR ; b = x, c = y, hl = returned tile pointer
 
 	inc	b
 
@@ -750,9 +750,9 @@ fire_map_randomize_2_lights_bottom:
 
 ;----------------------------------------------
 
-FIRE_BOTTOM_MIN_X	EQU	2*2
-FIRE_BOTTOM_SIZE	EQU	8
-FIRE_BOTTOM_MAX_X	EQU (20-8-2)*2 ;(20-FIRE_BOTTOM_SIZE-FIRE_BOTTOM_MIN_X)*2
+    DEF FIRE_BOTTOM_MIN_X	EQU	2*2
+    DEF FIRE_BOTTOM_SIZE	EQU	8
+    DEF FIRE_BOTTOM_MAX_X	EQU (20-8-2)*2 ;(20-FIRE_BOTTOM_SIZE-FIRE_BOTTOM_MIN_X)*2
 
 fire_fire_map_randomize_moving_lights_bottom_init:
 
@@ -1007,11 +1007,11 @@ fire_map_update_bg_attr:
 	ld	[fire_bg_copy_dma_ready],a
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 	DMA_COPY	ATTR_MAP_TEMP,$9800,32*18,0 ; src, dst, size, is_hdma
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 	DMA_COPY	MAP_TEMP,$9800,32*18,0 ; src, dst, size, is_hdma
 
 	ret
@@ -1081,7 +1081,7 @@ fire_refresh_oam:
 	ld	hl,fire_sprites_palette
 
 	ld	a,$80 ; auto increment
-	ld	[rOCPS],a
+	ldh	[rOCPS],a
 
 	ld	c,(rOCPD&$FF)
 	REPT	4
@@ -1116,7 +1116,7 @@ Fire:
 	call	fire_init_variables
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,4
 	ld	hl,fire_tiles
@@ -1129,7 +1129,7 @@ Fire:
 	call	vram_copy_tiles
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*32
 	ld	d,7
@@ -1137,7 +1137,7 @@ Fire:
 	call	vram_memset ; bc = size    d = value    hl = dest address
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*32
 	ld	d,0
@@ -1153,12 +1153,12 @@ Fire:
 	call	fire_map_handle
 
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800|LCDCF_OBJ16|LCDCF_OBJON ; configuration
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	; Load palettes and configure IRQs
 
 	ld	a,$01
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	bc,fire_vbl_handler
 	call	irq_set_VBL

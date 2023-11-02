@@ -27,7 +27,7 @@
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 
-HORIZONTAL_BARS_BAR_HEIGHT	EQU	8
+    DEF HORIZONTAL_BARS_BAR_HEIGHT	EQU	8
 
 ;-------------------------------------------------------------------------------------------------
 
@@ -547,24 +547,24 @@ horizontal_bars_palette_load:
 	call	wait_screen_blank
 
 	ld	a,$80 ; auto increment
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	ld	hl,horizontal_bars_palette
 
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	ld	a,[hl]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 
 	ret
 
@@ -658,7 +658,7 @@ horizontal_bars_lcd_handler:
 	ld	[horizontal_bars_next_scroll_index],a
 	;xor	a,a ; next line = 0
 ._not_next_line_vbl:
-	ld	[rLYC],a
+	ldh	[rLYC],a
 	ld	[horizontal_bars_next_ly],a
 
 	ld	hl,horizontal_bars_next_scroll_index
@@ -668,7 +668,7 @@ horizontal_bars_lcd_handler:
 	ld	hl,horizontal_bars_bar_scroll
 	add	hl,de
 	ld	a,[hl]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	push	hl
 	ld	hl,horizontal_bars_scroll_speeds
 	add	hl,de
@@ -725,16 +725,16 @@ horizontal_bars_vbl_handler:
 Horizontal_Bars:
 
 	ld	a,LCDCF_BG8800|LCDCF_BG9800|LCDCF_WINON|LCDCF_WIN9C00|LCDCF_ON
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	; clear screen...
 
 	xor	a,a
-	ld	[rWY],a
-	ld	[rWX],a
+	ldh	[rWY],a
+	ldh	[rWX],a
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	hl,$8000 + (16 * 256) ; clear tile 0
 	ld	bc,16
@@ -747,7 +747,7 @@ Horizontal_Bars:
 	call	vram_memset
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	hl,$9C00
 	ld	bc,32*32
@@ -760,7 +760,7 @@ Horizontal_Bars:
 	call	vram_memset
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*18 ; size
 	ld	hl,horizontal_bars_bg_map ;src
@@ -778,11 +778,11 @@ Horizontal_Bars:
 	call	vram_copy_tiles
 
 	xor	a,a
-	ld	[rSCY],a
-	ld	[rSCX],a
-	ld	[rWY],a
+	ldh	[rSCY],a
+	ldh	[rSCX],a
+	ldh	[rWY],a
 	inc	a ; to avoid the window + bg scroll bug
-	ld	[rWX],a
+	ldh	[rWX],a
 
 	ld	bc,((144/HORIZONTAL_BARS_BAR_HEIGHT) * 3)
 	ld	de,horizontal_bars_pal_speed
@@ -842,13 +842,13 @@ Horizontal_Bars:
 	call	irq_set_LCD
 
 	ld	a,$03
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	a,STATF_LYC
-	ld	[rSTAT],a
+	ldh	[rSTAT],a
 
 	ld	a,LCDCF_BG8800|LCDCF_BG9800|LCDCF_WINON|LCDCF_WIN9C00|LCDCF_ON|LCDCF_OBJ8|LCDCF_OBJON
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	; Start...
 	; --------
@@ -856,9 +856,9 @@ Horizontal_Bars:
 ._show_bars:
 	ld	e,15 ; frames to wait to turn on a bar
 	call	wait_frames
-	ld	a,[rWY]
+	ldh	a,[rWY]
 	add	a,HORIZONTAL_BARS_BAR_HEIGHT
-	ld	[rWY],a
+	ldh	[rWY],a
 	cp	a,144
 	jr	nz,._show_bars
 
@@ -885,8 +885,8 @@ Horizontal_Bars:
 	jr	nz,._next_bar
 
 	xor	a,a
-	ld	[rWY],a
-	ld	[rWX],a
+	ldh	[rWY],a
+	ldh	[rWX],a
 
 	; Exit...
 	; -------

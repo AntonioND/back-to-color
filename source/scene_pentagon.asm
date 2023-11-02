@@ -601,7 +601,7 @@ pentagon_exit_demo:	DS	1
 pentagon_wait_rotation:	DS	1 ; frames left to change rotation
 pentagon_angle:			DS	1 ; 0 to 3
 
-PENTAGON_FRAMES_WAIT	EQU	3
+    DEF PENTAGON_FRAMES_WAIT	EQU	3
 
 pentagon_event_count:	DS	2
 
@@ -735,9 +735,9 @@ _event_set_pentagon_sprite_move_fn_move_left:
 	ret
 
 _event_set_sprite_priority_reverse:
-	ld	a,[rLCDC]
+	ldh	a,[rLCDC]
 	or	a,1
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 	ret
 
 ;-------------------
@@ -887,7 +887,7 @@ pentagon_load_maps:
 	; Clear attributes
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*32 ; map at $9800 uses palette 0
 	ld	d,0
@@ -897,7 +897,7 @@ pentagon_load_maps:
 	; Load tile data
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,64
 	ld	hl,pentagon_tiles
@@ -1091,17 +1091,17 @@ pentagon_vbl_handle_rotation:
 	add	hl,de
 
 	ld	a,h
-	ld	[rHDMA1],a
+	ldh	[rHDMA1],a
 	ld	a,l ; Lower 4 bits ignored
-	ld	[rHDMA2],a
+	ldh	[rHDMA2],a
 
 	ld	a, ( ($8000 + (16 * 0)) >> 8 )& $1F ; Upper 3 bits ignored
-	ld	[rHDMA3],a
+	ldh	[rHDMA3],a
 	ld	a, ($8000 + (16 * 0)) & $F0 ; Lower 4 bits ignored
-	ld	[rHDMA4],a
+	ldh	[rHDMA4],a
 
 	ld	a, ( ( (64*16) >> 4 ) - 1 ) ; ( Size / $10 ) - 1
-	ld	[rHDMA5],a
+	ldh	[rHDMA5],a
 
 	ret
 
@@ -1130,7 +1130,7 @@ pentagon_vbl_handler:
 Pentagon:
 
 	ld	a,LCDCF_ON ; configuration
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	ld	b,$90
 	call	wait_ly
@@ -1144,9 +1144,9 @@ Pentagon:
 	; Load palette and configure IRQs
 
 	ld	a,-(160-128)/2
-	ld	[rSCX],a
+	ldh	[rSCX],a
 	ld	a,-(144-128)/2
-	ld	[rSCY],a
+	ldh	[rSCY],a
 
 	ld	b,$90
 	call	wait_ly
@@ -1154,10 +1154,10 @@ Pentagon:
 	call	pentagon_palette_load
 
 	ld	a,LCDCF_ON|LCDCF_BG8000|LCDCF_BG9800|LCDCF_OBJON|LCDCF_OBJ16 ; configuration
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	ld	a,$01
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	bc,pentagon_vbl_handler
 	call	irq_set_VBL

@@ -27,10 +27,10 @@
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 
-MAP_TEMP			EQU	$D000
-ATTR_MAP_TEMP		EQU	$D400 ;($D000 + 32*32)
+    DEF MAP_TEMP			EQU	$D000
+    DEF ATTR_MAP_TEMP		EQU	$D400 ;($D000 + 32*32)
 
-TEXT_BAR_HEIGHT		EQU	16
+    DEF TEXT_BAR_HEIGHT		EQU	16
 
 ;-------------------------------------------------------------------------------------------------
 
@@ -560,11 +560,11 @@ plasma_lines_update_map_attr_dma:
 	ld	[plasma_lines_ready_dma_copy],a
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 	DMA_COPY MAP_TEMP,$9800,(32*32),0
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 	DMA_COPY ATTR_MAP_TEMP,$9800,(32*32),0
 
 	ret
@@ -599,7 +599,7 @@ plasma_lines_set_map_angle: ; a = angle
 	; Copy them...
 
 ;	ld	a,0
-;	ld	[rVBK],a
+;	ldh	[rVBK],a
 
 ;	ld	bc,32*32
 ;	ld	hl,MAP_TEMP
@@ -607,7 +607,7 @@ plasma_lines_set_map_angle: ; a = angle
 ;	call	vram_copy
 
 ;	ld	a,1
-;	ld	[rVBK],a
+;	ldh	[rVBK],a
 
 ;	ld	bc,32*32
 ;	ld	hl,ATTR_MAP_TEMP
@@ -617,7 +617,7 @@ plasma_lines_set_map_angle: ; a = angle
 ;	call	wait_vbl
 
 ;	ld	a,0
-;	ld	[rVBK],a
+;	ldh	[rVBK],a
 ;	DMA_COPY MAP_TEMP,$9800,(32*32),1
 
 ;	ld	hl,rHDMA5
@@ -626,7 +626,7 @@ plasma_lines_set_map_angle: ; a = angle
 ;	jr	z,._not_finished
 
 ;	ld	a,1
-;	ld	[rVBK],a
+;	ldh	[rVBK],a
 ;	DMA_COPY ATTR_MAP_TEMP,$9800,(32*32),1
 
 	ld	a,1
@@ -944,7 +944,7 @@ plasma_lines_reset_bar:
 	ld	[plasma_lines_text_next_position],a
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,44
 	ld	de,$0000
@@ -962,7 +962,7 @@ plasma_lines_reset_bar:
 	call	vram_copy
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*3
 	ld	d,$07
@@ -970,7 +970,7 @@ plasma_lines_reset_bar:
 	call	vram_memset
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ret
 
@@ -1055,7 +1055,7 @@ plasma_lines_update_bar:
 	add	a,(144-TEXT_BAR_HEIGHT)/2
 	dec	a
 
-	ld	[rLYC],a
+	ldh	[rLYC],a
 
 	; text...
 
@@ -1104,11 +1104,11 @@ plasma_lines_update_bar:
 	ld	hl,$9C00 + (30*32)  ; hl = base + (y*32)
 	add	hl,de ; hl = base + x + (y * 32)
 
-	ld	a,[rVBK]
+	ldh	a,[rVBK]
 	ld	e,a ; push value
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	call	wait_screen_blank
 
@@ -1117,7 +1117,7 @@ plasma_lines_update_bar:
 	ld	[hl],a
 
 	ld	a,e ; pop value
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ret
 
@@ -1125,9 +1125,9 @@ plasma_lines_update_bar:
 
 plasma_lines_lcd_handler:
 
-	ld	a,[rSCX]
+	ldh	a,[rSCX]
 	ld	e,a
-	ld	a,[rSCY]
+	ldh	a,[rSCY]
 	ld	d,a
 	push	de
 
@@ -1135,27 +1135,27 @@ plasma_lines_lcd_handler:
 
 	call	wait_screen_blank
 
-	ld	a,[rLCDC]
+	ldh	a,[rLCDC]
 	or	a,LCDCF_BG9C00|LCDCF_BG8000  ; Change to other map
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	;change scrolls
 
-	ld	a,[rLY]
+	ldh	a,[rLY]
 	inc	a ; get first line affected by change
 
 	cpl ; change sign
 	inc	a
 
 	add	a,256-24+4
-	ld	[rSCY],a
+	ldh	[rSCY],a
 
 	ld	a,[plasma_lines_text_scroll_x]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 
 	;Show bar for a few lines...
 
-	ld	a,[rLY]
+	ldh	a,[rLY]
 	add	a,TEXT_BAR_HEIGHT
 
 	cp	a,$90
@@ -1169,7 +1169,7 @@ plasma_lines_lcd_handler:
 	ld	b,a
 
 ._not_yet:
-	ld	a,[rLY]
+	ldh	a,[rLY]
 	cp	a,b
 	jr	nz,._not_yet
 
@@ -1177,15 +1177,15 @@ plasma_lines_lcd_handler:
 
 	call	wait_screen_blank
 
-	ld	a,[rLCDC]
+	ldh	a,[rLCDC]
 	and	a,$FF&(~(LCDCF_BG9C00|LCDCF_BG8000)) ; Change to 'main' map
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	pop	de
 	ld	a,d
-	ld	[rSCY],a
+	ldh	[rSCY],a
 	ld	a,e
-	ld	[rSCX],a
+	ldh	[rSCX],a
 
 	ret
 
@@ -1246,16 +1246,16 @@ plasma_lines_vbl_handler:
 Plasma_Lines:
 
 	xor	a,a
-	ld	[rWX],a
-	ld	[rWY],a
-	ld	[rSCY],a
-	ld	[rSCX],a
+	ldh	[rWX],a
+	ldh	[rWY],a
+	ldh	[rSCY],a
+	ldh	[rSCX],a
 
 	ld	a,LCDCF_ON|LCDCF_WINON|LCDCF_WIN9C00
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,$1000
 	ld	d,0
@@ -1263,7 +1263,7 @@ Plasma_Lines:
 	call	vram_memset ; bc = size    d = value    hl = dest address
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,$1000
 	ld	d,0
@@ -1295,17 +1295,17 @@ Plasma_Lines:
 	call	bg_set_palette
 
 	ld	a,255
-	ld	[rWY],a
-	ld	[rWX],a
+	ldh	[rWY],a
+	ldh	[rWX],a
 
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	ld	a,0
-	ld	[rIF],a ; clear interrupt flags before enabling them
+	ldh	[rIF],a ; clear interrupt flags before enabling them
 
 	ld	a,STATF_LYC
-	ld	[rSTAT],a
+	ldh	[rSTAT],a
 
 	ld	bc,plasma_lines_vbl_handler
 	call	irq_set_VBL
@@ -1314,7 +1314,7 @@ Plasma_Lines:
 	call	irq_set_LCD
 
 	ld	a,$03
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	; Start loop
 

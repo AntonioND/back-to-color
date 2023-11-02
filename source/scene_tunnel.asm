@@ -27,8 +27,8 @@
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 
-MAP_TEMP			EQU	$D400
-ATTR_MAP_TEMP		EQU	$D800 ;($D400 + 32*32)
+    DEF MAP_TEMP			EQU	$D400
+    DEF ATTR_MAP_TEMP		EQU	$D800 ;($D400 + 32*32)
 
 ;-------------------------------------------------------------------------------------------------
 
@@ -551,8 +551,8 @@ tunnel_init_variables:
 
 	ld	a,0
 	ld	[tunnel_window_increment],a
-	ld	[rWX],a
-	ld	[rWY],a
+	ldh	[rWX],a
+	ldh	[rWY],a
 
 	ld	hl,_event_table_tunnel
 	ld	a,h
@@ -686,7 +686,7 @@ tunnel_palettes_load:
 	ld	hl,tunnel_palettes
 
 	ld	a,$80 ; auto increment
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	ld	c,(rBCPD&$FF)
 	REPT	4*8
@@ -701,7 +701,7 @@ tunnel_palettes_load:
 	ld	hl,tunnel_sprites_palette
 
 	ld	a,$80 ; auto increment
-	ld	[rOCPS],a
+	ldh	[rOCPS],a
 
 	ld	c,(rOCPD&$FF)
 	REPT	4
@@ -715,7 +715,7 @@ tunnel_palettes_load:
 
 ;----------------------------------------------
 
-TUNNEL_SET_TILE: MACRO ; b = x, c = y, a = tile
+MACRO TUNNEL_SET_TILE ; b = x, c = y, a = tile
 
 	ld	d,MAP_TEMP >> 8
 	ld	e,b ; de = base + x
@@ -740,10 +740,10 @@ ENDM
 tunnel_map_update_scroll:
 
 	ld	a,[tunnel_temp_rSCX]
-	ld	[rSCX],a
+	ldh	[rSCX],a
 
 	ld	a,[tunnel_temp_rSCY]
-	ld	[rSCY],a
+	ldh	[rSCY],a
 
 	ret
 
@@ -1069,7 +1069,7 @@ tunnel_update_bg:
 	ld	[tunnel_has_to_update_bgs_dma],a
 
 	ld	a,0
-	ld	[rVBK],a ; should be 20*18, but as there is space between rows, use 32
+	ldh	[rVBK],a ; should be 20*18, but as there is space between rows, use 32
 	DMA_COPY	MAP_TEMP,$9800,32*32,0 ; src, dst, size, is_hdma
 
 	ret
@@ -1165,13 +1165,13 @@ tunnel_vbl_handler:
 	; Window increments
 
 	ld	hl,tunnel_window_increment
-	ld	a,[rWX]
+	ldh	a,[rWX]
 	add	a,[hl]
-	ld	[rWX],a
+	ldh	[rWX],a
 
-	ld	a,[rWY]
+	ldh	a,[rWY]
 	add	a,[hl]
-	ld	[rWY],a
+	ldh	[rWY],a
 
 	; --------------------
 
@@ -1188,18 +1188,18 @@ tunnel_vbl_handler:
 Tunnel:
 
 	xor	a,a ; hide things with window
-	ld	[rWX],a
-	ld	[rWY],a
-	ld	[rSCY],a
-	ld	[rSCX],a
+	ldh	[rWX],a
+	ldh	[rWY],a
+	ldh	[rSCY],a
+	ldh	[rSCX],a
 
 	ld	a,LCDCF_ON|LCDCF_WINON|LCDCF_WIN9C00 ; use window to hide things
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	; ---- set window to palette 7, tile = 0 (all colors are black)
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*32
 	ld	d,7
@@ -1207,7 +1207,7 @@ Tunnel:
 	call	vram_memset ; bc = size    d = value    hl = dest address
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*32
 	ld	d,0
@@ -1219,7 +1219,7 @@ Tunnel:
 	call	tunnel_init_variables
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	LONG_CALL	demo_load_4x4_tiles
 
@@ -1229,7 +1229,7 @@ Tunnel:
 	call	vram_copy_tiles
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*32
 	ld	de,$9800
@@ -1247,12 +1247,12 @@ Tunnel:
 	call	tunnel_map_handle
 
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800|LCDCF_WINON|LCDCF_WIN9C00|LCDCF_OBJ16|LCDCF_OBJON
-	ld	[rLCDC],a ; configuration
+	ldh	[rLCDC],a ; configuration
 
 	ld	a,0
-	ld	[rWY],a ; reset window
+	ldh	[rWY],a ; reset window
 	ld	a,7
-	ld	[rWX],a
+	ldh	[rWX],a
 
 	; Load palettes
 
@@ -1263,7 +1263,7 @@ Tunnel:
 	; Configure IRQs
 
 	ld	a,$01
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	bc,tunnel_vbl_handler
 	call	irq_set_VBL

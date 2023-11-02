@@ -27,8 +27,8 @@
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 
-MAP_TEMP_1			EQU	$D000
-MAP_TEMP_2			EQU	$D400 ; ($D000 + 32*32)
+    DEF MAP_TEMP_1			EQU	$D000
+    DEF MAP_TEMP_2			EQU	$D400 ; ($D000 + 32*32)
 
 ;-------------------------------------------------------------------------------------------------
 
@@ -1237,12 +1237,12 @@ bump_palette_refresh:
 	add	hl,de  ; hl = bump_palettes + a * 8
 
 	ld	a,$80 ; pal 0, auto increment
-	ld	[rBCPS],a
+	ldh	[rBCPS],a
 
 	ld	c,8
 .repeat:
 	ld	a,[hl+]
-	ld	[rBCPD],a
+	ldh	[rBCPD],a
 	dec	c
 	jr	nz,.repeat
 
@@ -1491,7 +1491,7 @@ bump_map_update_bgs:
 	ld	a,0
 	ld	[bump_has_to_update_bgs_dma],a
 
-	ld	[rVBK],a
+	ldh	[rVBK],a
 	DMA_COPY	MAP_TEMP_1,$9800,32*20,0 ; src, dst, size, is_hdma
 
 	DMA_COPY	MAP_TEMP_2,$9C00,32*20,0 ; src, dst, size, is_hdma
@@ -1504,9 +1504,9 @@ bump_map_update_bgs:
 
 bump_vbl_handler:
 
-	ld	a,[rLCDC]
+	ldh	a,[rLCDC]
 	xor	a,LCDCF_BG9C00
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	call	bump_palette_refresh
 
@@ -1525,7 +1525,7 @@ Bump:
 	; ----
 
 	ld	a,1
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,32*32*2 ; the 2 maps
 	ld	d,0
@@ -1537,7 +1537,7 @@ Bump:
 	call	bump_init_variables
 
 	ld	a,0
-	ld	[rVBK],a
+	ldh	[rVBK],a
 
 	ld	bc,128
 	ld	hl,bump_tiles
@@ -1554,12 +1554,12 @@ Bump:
 	call	bump_map_update_bgs
 
 	ld	a,LCDCF_ON|LCDCF_BG8800|LCDCF_BG9800 ; configuration
-	ld	[rLCDC],a
+	ldh	[rLCDC],a
 
 	; Configure IRQs
 
 	ld	a,$01
-	ld	[rIE],a
+	ldh	[rIE],a
 
 	ld	bc,bump_vbl_handler
 	call	irq_set_VBL
