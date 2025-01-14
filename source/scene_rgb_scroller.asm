@@ -539,7 +539,7 @@ rgb_scroller_lcd_handler:
 	; if black, we have to wait until we can change the palette...
 	ld	c,rSTAT & $FF
 ._not_yet:
-	ld	a,[$FF00+c]
+	ldh	a,[$FF00+c]
 	and	a,$02
 	jr	nz,._not_yet
 	jp	._load_palette

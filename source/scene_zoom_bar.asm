@@ -240,9 +240,9 @@ lcd_handler:
 	ld	c,rBCPD & $FF
 
 	ld	a,e
-	ld	[$FF00+c],a
+	ldh	[$FF00+c],a
 	ld	a,d
-	ld	[$FF00+c],a
+	ldh	[$FF00+c],a
 
 	ret
 

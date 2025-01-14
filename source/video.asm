@@ -38,7 +38,7 @@ wait_ly::
 	ld	c,rLY & $FF
 
 .no_same_ly:
-	ld	a,[$FF00+c]
+	ldh	a,[$FF00+c]
 	cp	a,b
 	jr	nz,.no_same_ly
 

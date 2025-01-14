@@ -537,9 +537,9 @@ fire_palette_load: ; a = palette number
 	ld	c,(rBCPD&$FF)
 	REPT	4*8
 	ld	a,[hl+]
-	ld	[$FF00+c],a
+	ldh	[$FF00+c],a
 	ld	a,[hl+]
-	ld	[$FF00+c],a
+	ldh	[$FF00+c],a
 	ENDR
 
 	ret
@@ -1086,9 +1086,9 @@ fire_refresh_oam:
 	ld	c,(rOCPD&$FF)
 	REPT	4
 	ld	a,[hl+]
-	ld	[$FF00+c],a
+	ldh	[$FF00+c],a
 	ld	a,[hl+]
-	ld	[$FF00+c],a
+	ldh	[$FF00+c],a
 	ENDR
 
 	ret

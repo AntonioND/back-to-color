@@ -1019,16 +1019,16 @@ bouncing_balls_lcd_handler:
 	ld	b,2
 	ld	c,rSTAT & $FF
 .wait_screen_blank:
-	ld	a,[$FF00+c]
+	ldh	a,[$FF00+c]
 	and	a,b
 	jr	nz,.wait_screen_blank ; Not mode 0 or 1
 
 	ld	c,rBCPD & $FF
 
 	ld	a,l
-	ld	[$FF00+c],a
+	ldh	[$FF00+c],a
 	ld	a,h
-	ld	[$FF00+c],a
+	ldh	[$FF00+c],a
 
 	ret
 
@@ -1051,8 +1051,8 @@ bouncing_balls_vbl_handler:
 	ld	c,rBCPD & $FF
 
 	xor	a,a
-	ld	[$FF00+c],a
-	ld	[$FF00+c],a
+	ldh	[$FF00+c],a
+	ldh	[$FF00+c],a
 
 	; ----------------------
 

@@ -691,9 +691,9 @@ tunnel_palettes_load:
 	ld	c,(rBCPD&$FF)
 	REPT	4*8
 	ld	a,[hl+]
-	ld	[$FF00+c],a
+	ldh	[$FF00+c],a
 	ld	a,[hl+]
-	ld	[$FF00+c],a
+	ldh	[$FF00+c],a
 	ENDR
 
 	; -------
@@ -706,9 +706,9 @@ tunnel_palettes_load:
 	ld	c,(rOCPD&$FF)
 	REPT	4
 	ld	a,[hl+]
-	ld	[$FF00+c],a
+	ldh	[$FF00+c],a
 	ld	a,[hl+]
-	ld	[$FF00+c],a
+	ldh	[$FF00+c],a
 	ENDR
 
 	ret
